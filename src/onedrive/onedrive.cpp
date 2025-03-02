@@ -120,31 +120,6 @@ std::string onedrive::refreshAccessToken() {
     return "";
 }
 
-// Constructor: Fetches access token automatically
-onedrive::onedrive() {
-    if (_config.getRefreshToken().empty()) {
-        std::string deviceCode, userCode;
-        int interval;
-        std::string deviceCodeStr = getDeviceCode(userCode, interval);
-        if (deviceCodeStr.empty()) {
-            std::cerr << "Error: Failed to get device code" << std::endl;
-            return;
-        }
-
-        auto accessToken = getAccessToken(deviceCodeStr, interval);
-        if (accessToken.empty()) {
-            std::cerr << "Error: Failed to get access token" << std::endl;
-            return;
-        }
-    } else {
-        auto accessToken = refreshAccessToken();
-        if (accessToken.empty()) {
-            std::cerr << "Error: Failed to refresh access token" << std::endl;
-            return;
-        }
-    }
-}
-
 // Upload file to onedrive
 void onedrive::uploadFile(const std::string& localPath, const std::string& oneDrivePath) {
     std::ifstream file(localPath, std::ios::binary);

@@ -10,8 +10,10 @@ class model {
 public:
     model() = default;
 
-    virtual json to_json() = 0;
+    virtual json to_json() const = 0;
     virtual void from_json(const json& j) = 0;
+
+    virtual std::string to_str() = 0;
 };
 
 #endif // MODEL_H

@@ -9,6 +9,35 @@
 
 class onedrive {
 private:
+    onedrive(){
+        if (_config.getRefreshToken().empty()) {
+            std::string deviceCode, userCode;
+            int interval;
+            std::string deviceCodeStr = getDeviceCode(userCode, interval);
+            if (deviceCodeStr.empty()) {
+                std::cerr << "Error: Failed to get device code" << std::endl;
+                return;
+            }
+    
+            auto accessToken = getAccessToken(deviceCodeStr, interval);
+            if (accessToken.empty()) {
+                std::cerr << "Error: Failed to get access token" << std::endl;
+                return;
+            }
+        } else {
+            auto accessToken = refreshAccessToken();
+            if (accessToken.empty()) {
+                std::cerr << "Error: Failed to refresh access token" << std::endl;
+                return;
+            }
+        }
+        sync_down();
+    }
+
+    ~onedrive(){
+        sync_up();
+    }
+
     app_config& _config = app_config::getInstance();
 
     // Helper functions
@@ -22,7 +51,14 @@ private:
     void downloadFile(const std::string& oneDrivePath, const std::string& localPath);
 
 public:
-    onedrive();
+    onedrive(const onedrive&) = delete;
+    onedrive& operator=(const onedrive&) = delete;
+
+    static onedrive& getInstance() {
+        static onedrive instance;
+        return instance;
+    }
+
     void sync_up();
     void sync_down();
 };

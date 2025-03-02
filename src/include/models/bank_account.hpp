@@ -6,7 +6,7 @@
 
 class bank_account : public account {
 public:
-    bank_account();
+    bank_account() = default;
     bank_account(const std::string& account_number, const std::string& bank_name, const std::string& branch, const std::string& ifsc, double balance) : account("", bank_name, balance) {
         _account_number = account_number;
         _bank_name = bank_name;
@@ -35,11 +35,11 @@ public:
     json to_json() const override {
         json j = {
             {"id", _id},
-            {"account_number", _account_number},
             {"bank_name", _bank_name},
+            {"balance", _balance},
+            {"account_number", _account_number},
             {"branch", _branch},
-            {"ifsc", _ifsc},
-            {"balance", _balance}
+            {"ifsc", _ifsc}
         };
 
         return j;
@@ -47,11 +47,16 @@ public:
 
     void from_json(const json& j) override {
         _id = j.at("id").get<std::string>();
+        _name = j.at("bank_name").get<std::string>();
+        _balance = j.at("balance").get<double>();
         _account_number = j.at("account_number").get<std::string>();
         _bank_name = j.at("bank_name").get<std::string>();
         _branch = j.at("branch").get<std::string>();
         _ifsc = j.at("ifsc").get<std::string>();
-        _balance = j.at("balance").get<double>();
+    }
+
+    std::string to_str() override {
+        return "ID: " + _id + ", Bank Name: " + _bank_name + ", Account Number: " + _account_number + ", Branch: " + _branch + ", IFSC: " + _ifsc + ", Balance: " + std::to_string(_balance);
     }
 
 private:
