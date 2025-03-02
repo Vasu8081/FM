@@ -66,11 +66,10 @@ void transaction::from_json(const json& j) {
 }
 
 std::string transaction::to_str() {
-    std::string from_account_id = _from_account_id ? _from_account_id->generateID() : "";
-    std::string to_account_id = _to_account_id ? _to_account_id->generateID() : "";
-    std::string category_id = _category_id ? _category_id->generateID() : "";
-    std::string moved_from_account_id = _moved_from_account_id ? _moved_from_account_id->generateID() : "";
-    return "Transaction: " + from_account_id + " -> " + to_account_id + " ($" + std::to_string(_amount) + ")";
+    std::string from_account_id = _from_account_id ? _from_account_id->generateID() : "External";
+    std::string to_account_id = _to_account_id ? _to_account_id->generateID() : "External";
+    std::string category_id = _category_id ? _category_id->generateID() : "Unknown";
+    return "Transaction: " + from_account_id + " -> " + to_account_id + " (Rupees:" + std::to_string(_amount) + ")" + " [ Category: " + category_id + "]";
 }
 
 // Getters

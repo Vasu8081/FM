@@ -12,8 +12,6 @@ public:
         SetIcon(wxICON(IDI_APPICON));
 #else
 #endif
-        SetMinSize(wxSize(800, 600));
-        SetMaxSize(wxSize(800, 600));
         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
         wxStaticText* title = new wxStaticText(this, wxID_ANY, "Home", wxPoint(10, 10), wxSize(100, 20));
         sizer->Add(title, 0, wxEXPAND | wxALL, 10);
