@@ -20,9 +20,7 @@ public:
         
         task_bar_icon* task_bar_icon_ = new task_bar_icon();
 
-        if(!wxTaskBarIcon::IsAvailable()) {
-            task_bar_icon_->show();
-        }
+        task_bar_icon_->show();
         
         return true;
     }
