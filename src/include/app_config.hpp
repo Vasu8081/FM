@@ -34,6 +34,7 @@ public:
     }
 
     // Getters
+    std::string getUserName() const { return _user_name.ToStdString(); }
     std::string getAccessToken() const { return _access_token; }
     std::string getRefreshToken() const { return _refresh_token; }
     std::string getClientId() const { return _client_id; }
@@ -78,12 +79,25 @@ private:
     std::string _tenant_id;
     wxFileName _account_defns_file_path;
     wxFileName _transactions_file_path;
+    wxString _user_name;
 
     void init() {
         _access_token = "";
         _refresh_token = "";
-        std::cout<<"Enter client id: ";
-        std::cin>>_client_id;
+
+        wxDialog dialog(NULL, wxID_ANY, "Enter client id", wxDefaultPosition, wxSize(300, 150));
+        wxTextCtrl* textCtrl = new wxTextCtrl(&dialog, wxID_ANY, _client_id, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+        wxButton* okButton = new wxButton(&dialog, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize);
+        wxButton* cancelButton = new wxButton(&dialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+        sizer->Add(textCtrl, 0, wxALL | wxEXPAND, 5);
+        sizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 5);
+        sizer->Add(cancelButton, 0, wxALL | wxALIGN_CENTER, 5);
+        dialog.SetSizer(sizer);
+        dialog.Fit();
+        dialog.ShowModal();
+        _client_id = textCtrl->GetValue().ToStdString();
+
         _tenant_id = "consumers";
         _account_defns_file_path = wxFileName();
         _transactions_file_path = wxFileName();
@@ -96,7 +110,7 @@ private:
             init();
             return;
         }
-    
+
         wxFile file(_file_path.GetFullPath(), wxFile::read);
         if (!file.IsOpened()) {
             std::cerr << "Error: Failed to open config file: " << _file_path.GetFullPath() << std::endl;
@@ -113,6 +127,19 @@ private:
         } catch (const std::exception& e) {
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         }
+
+        wxDialog dialog(NULL, wxID_ANY, "Enter Username", wxDefaultPosition, wxSize(300, 150));
+        wxTextCtrl* textCtrl = new wxTextCtrl(&dialog, wxID_ANY, _user_name, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+        wxButton* okButton = new wxButton(&dialog, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize);
+        wxButton* cancelButton = new wxButton(&dialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
+        wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+        sizer->Add(textCtrl, 0, wxALL | wxEXPAND, 5);
+        sizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 5);
+        sizer->Add(cancelButton, 0, wxALL | wxALIGN_CENTER, 5);
+        dialog.SetSizer(sizer);
+        dialog.Fit();
+        dialog.ShowModal();
+        _user_name = textCtrl->GetValue();
     }
 
     // Private constructor ensures only one instance

@@ -69,7 +69,7 @@ std::string transaction::to_str() {
     std::string from_account_id = _from_account_id ? _from_account_id->generateID() : "External";
     std::string to_account_id = _to_account_id ? _to_account_id->generateID() : "External";
     std::string category_id = _category_id ? _category_id->generateID() : "Unknown";
-    return "Transaction: " + from_account_id + " -> " + to_account_id + " (Rupees:" + std::to_string(_amount) + ")" + " [ Category: " + category_id + "]";
+    return from_account_id + " -> " + to_account_id + " (Rupees:" + std::to_string(_amount) + ")" + " [ Category: " + category_id + "]";
 }
 
 // Getters
