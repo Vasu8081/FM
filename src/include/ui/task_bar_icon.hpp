@@ -12,7 +12,7 @@ public:
 #ifdef WIN32
         SetIcon(wxICON(IDI_APPICON));
 #else
-        SetIcon(wxICON(sample));
+        SetIcon();
 #endif
         _home = wxSharedPtr<home>(new home());
         Bind(wxEVT_TASKBAR_RIGHT_UP, &task_bar_icon::on_right_click, this);

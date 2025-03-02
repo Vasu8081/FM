@@ -27,7 +27,7 @@ public:
         return j;
     }
 
-    virtual void from_json(const nlohmann::json& j) {
+    virtual void from_json(const nlohmann::json& j) override {
         _id = j.at("id").get<std::string>();
         _name = j.at("name").get<std::string>();
         _balance = j.at("balance").get<double>();

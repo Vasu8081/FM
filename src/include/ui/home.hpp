@@ -11,7 +11,7 @@ public:
 #ifdef WIN32
         SetIcon(wxICON(IDI_APPICON));
 #else
-        SetIcon(wxICON(sample));
+        SetIcon();
 #endif
         SetMinSize(wxSize(800, 600));
         SetMaxSize(wxSize(800, 600));
