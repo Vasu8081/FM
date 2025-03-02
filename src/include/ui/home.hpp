@@ -16,11 +16,11 @@ public:
 #endif
         wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
-        // notebook = new wxNotebook(this, wxID_ANY);
-        // addAccountPanel = new AddAccountPanel(notebook);
-        // notebook->AddPage(addAccountPanel, "Add Account");
+        notebook = new wxNotebook(this, wxID_ANY);
+        addAccountPanel = new AddAccountPanel(notebook);
+        notebook->AddPage(addAccountPanel, "Add Account");
         
-        // sizer->Add(notebook, 1, wxEXPAND | wxALL, 5);
+        sizer->Add(notebook, 1, wxEXPAND | wxALL, 5);
 
         wxStaticText* title = new wxStaticText(this, wxID_ANY, "Accounts", wxPoint(10, 10), wxSize(100, 20));
         sizer->Add(title, 0, wxEXPAND | wxALL, 10);

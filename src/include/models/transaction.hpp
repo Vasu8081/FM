@@ -24,6 +24,8 @@ public:
     void from_json(const json& j) override;
     std::string to_str() override;
 
+    std::unordered_map<std::string, std::string> fieldTypes() const override;
+
     // Getters
     std::shared_ptr<account> getFromAccount() const;
     std::shared_ptr<account> getToAccount() const;

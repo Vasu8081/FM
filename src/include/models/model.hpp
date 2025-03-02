@@ -13,6 +13,8 @@ public:
     virtual json to_json() const = 0;
     virtual void from_json(const json& j) = 0;
 
+    virtual std::unordered_map<std::string, std::string> fieldTypes() const = 0;
+
     virtual std::string to_str() = 0;
 };
 

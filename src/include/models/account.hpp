@@ -37,6 +37,13 @@ public:
         return "ID: " + _id + ", Name: " + _name + ", Balance: " + std::to_string(_balance);
     }
 
+    virtual std::unordered_map<std::string, std::string> fieldTypes() const override {
+        return {
+            {"Name", "string"},
+            {"Balance", "double"}
+        };
+    }   
+
     //Getters
     std::string getID() const;
     std::string getName() const;

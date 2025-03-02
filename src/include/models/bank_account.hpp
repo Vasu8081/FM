@@ -59,6 +59,16 @@ public:
         return "ID: " + _id + ", Bank Name: " + _bank_name + ", Account Number: " + _account_number + ", Branch: " + _branch + ", IFSC: " + _ifsc + ", Balance: " + std::to_string(_balance);
     }
 
+    std::unordered_map<std::string, std::string> fieldTypes() const override {
+        return {
+            {"Bank Name", "string"},
+            {"Account Number", "string"},
+            {"Branch", "string"},
+            {"IFSC", "string"},
+            {"Balance", "double"}
+        };
+    }
+
 private:
     std::string _account_number;
     std::string _bank_name;

@@ -26,6 +26,26 @@ public:
         return _transactions;
     }
 
+    void addAccount(std::shared_ptr<account> account_) {
+        _accounts[account_->generateID()] = account_;
+        saveAccounts();
+    }
+
+    void addTransaction(std::shared_ptr<transaction> transaction_) {
+        _transactions.push_back(transaction_);
+        saveTransactions();
+    }
+
+    void removeAccount(std::shared_ptr<account> account_) {
+        _accounts.erase(account_->generateID());
+        saveAccounts();
+    }
+
+    void removeTransaction(std::shared_ptr<transaction> transaction_) {
+        _transactions.erase(std::remove(_transactions.begin(), _transactions.end(), transaction_), _transactions.end());
+        saveTransactions();
+    }
+
     void loadAccounts() {
         _accounts = std::map<std::string, std::shared_ptr<account>>();
         wxString account_file_path = _config.getAccountDefnsFilePath();
@@ -45,7 +65,7 @@ public:
             for (auto& account_json : j) {
                 std::string account_id = account_json["id"].get<std::string>();
                 
-                std::shared_ptr<account> acc = account_factory::create_account(account_id);
+                std::shared_ptr<account> acc = account_factory::createAccount(account_id);
                 if (acc) {
                     acc->from_json(account_json);
                     _accounts[acc->generateID()] = acc;
@@ -56,6 +76,23 @@ public:
         } catch (const std::exception& e) {
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         }
+    }
+
+    void saveAccounts() {
+        json j = json::array();
+        for (auto& account : _accounts) {
+            j.push_back(account.second->to_json());
+        }
+
+        wxString accounts_file_path = _config.getAccountDefnsFilePath();
+        wxFile accounts_file(accounts_file_path, wxFile::write);
+        if (!accounts_file.IsOpened()) {
+            std::cerr << "Error: Failed to open config file: " << accounts_file_path << std::endl;
+            return;
+        }
+
+        accounts_file.Write(j.dump());
+        accounts_file.Close();
     }
 
     void loadTransactions() {
@@ -89,6 +126,23 @@ public:
         catch (const std::exception& e) {
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         }
+    }
+
+    void saveTransactions() {
+        json j = json::array();
+        for (auto& transaction : _transactions) {
+            j.push_back(transaction->to_json());
+        }
+
+        wxString transactions_file_path = _config.getTransactionsFilePath();
+        wxFile transactions_file(transactions_file_path, wxFile::write);
+        if (!transactions_file.IsOpened()) {
+            std::cerr << "Error: Failed to open config file: " << transactions_file_path << std::endl;
+            return;
+        }
+
+        transactions_file.Write(j.dump());
+        transactions_file.Close();
     }
 
 private:

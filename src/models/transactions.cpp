@@ -72,6 +72,18 @@ std::string transaction::to_str() {
     return from_account_id + " -> " + to_account_id + " (Rupees:" + std::to_string(_amount) + ")" + " [ Category: " + category_id + "]";
 }
 
+std::unordered_map<std::string, std::string> transaction::fieldTypes() const {
+    return {
+        {"From Account", "string"},
+        {"To Account", "string"},
+        {"Category", "string"},
+        {"Description", "string"},
+        {"Moved From Account", "string"},
+        {"Date", "date"},
+        {"Amount", "double"}
+    };
+}
+
 // Getters
 std::shared_ptr<account> transaction::getFromAccount() const { return _from_account_id; }
 std::shared_ptr<account> transaction::getToAccount() const { return _to_account_id; }
