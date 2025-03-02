@@ -9,7 +9,11 @@ class task_bar_icon : public wxTaskBarIcon
 {
 public:
     task_bar_icon() {
+#ifdef WIN32
         SetIcon(wxICON(IDI_APPICON));
+#else
+        SetIcon(wxICON(sample));
+#endif
         _home = wxSharedPtr<home>(new home());
         Bind(wxEVT_TASKBAR_RIGHT_UP, &task_bar_icon::on_right_click, this);
         Bind(wxEVT_TASKBAR_LEFT_UP, &task_bar_icon::on_left_click, this);

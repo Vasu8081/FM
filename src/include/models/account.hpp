@@ -33,7 +33,7 @@ public:
         _balance = j.at("balance").get<double>();
     }
 
-    virtual std::string to_str() {
+    virtual std::string to_str() override {
         return "ID: " + _id + ", Name: " + _name + ", Balance: " + std::to_string(_balance);
     }
 

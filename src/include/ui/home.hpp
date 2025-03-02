@@ -8,7 +8,11 @@ class home : public wxFrame
 {
 public:
     home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600)) {
+#ifdef WIN32
         SetIcon(wxICON(IDI_APPICON));
+#else
+        SetIcon(wxICON(sample));
+#endif
         SetMinSize(wxSize(800, 600));
         SetMaxSize(wxSize(800, 600));
         Centre();
