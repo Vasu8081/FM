@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <models/account.hpp>
-#include <models/account_factory.hpp>
+#include <models/model_factory.hpp>
 #include <models/transaction.hpp>
 #include <app_config.hpp>
 
@@ -26,23 +26,24 @@ public:
         return _transactions;
     }
 
-    void addAccount(std::shared_ptr<account> account_) {
-        _accounts[account_->generateID()] = account_;
+    void add(std::shared_ptr<model> model_) {
+        std::shared_ptr<account> account_ = std::dynamic_pointer_cast<account>(model_);
+        if (account_) {
+            _accounts[account_->generateID()] = account_;
+        }
+
+        std::shared_ptr<transaction> transaction_ = std::dynamic_pointer_cast<transaction>(model_);
+        if (transaction_) {
+            _transactions.push_back(transaction_);
+            if(transaction_->getFromAccount()) {
+                _accounts[transaction_->getFromAccount()->generateID()]->addFromTransaction(transaction_);
+            }
+            if(transaction_->getToAccount()) {
+                _accounts[transaction_->getToAccount()->generateID()]->addToTransaction(transaction_);
+            }
+        }
+
         saveAccounts();
-    }
-
-    void addTransaction(std::shared_ptr<transaction> transaction_) {
-        _transactions.push_back(transaction_);
-        saveTransactions();
-    }
-
-    void removeAccount(std::shared_ptr<account> account_) {
-        _accounts.erase(account_->generateID());
-        saveAccounts();
-    }
-
-    void removeTransaction(std::shared_ptr<transaction> transaction_) {
-        _transactions.erase(std::remove(_transactions.begin(), _transactions.end(), transaction_), _transactions.end());
         saveTransactions();
     }
 
@@ -63,11 +64,11 @@ public:
         try {
             json j = json::parse(std::string(accounts.mb_str()));
             for (auto& account_json : j) {
-                std::string account_id = account_json["id"].get<std::string>();
-                
-                std::shared_ptr<account> acc = account_factory::createAccount(account_id);
+                std::string account_id = account_json["Id"].get<std::string>();
+                std::shared_ptr<account> acc = std::dynamic_pointer_cast<account>(model_factory::create(account_id));
                 if (acc) {
-                    acc->from_json(account_json);
+                    acc->fromJson(account_json);
+                    acc->setBalance(0);
                     _accounts[acc->generateID()] = acc;
                 } else {
                     std::cerr << "Error: Unknown account type for ID: " << account_id << std::endl;
@@ -81,7 +82,7 @@ public:
     void saveAccounts() {
         json j = json::array();
         for (auto& account : _accounts) {
-            j.push_back(account.second->to_json());
+            j.push_back(account.second->toJson());
         }
 
         wxString accounts_file_path = _config.getAccountDefnsFilePath();
@@ -91,7 +92,7 @@ public:
             return;
         }
 
-        accounts_file.Write(j.dump());
+        accounts_file.Write(j.dump(4));
         accounts_file.Close();
     }
 
@@ -112,8 +113,8 @@ public:
         try {
             json j = json::parse(std::string(transactions.mb_str()));
             for (auto& transaction_json : j) {
-                std::shared_ptr<transaction> transaction_ = std::make_shared<transaction>();
-                transaction_->from_json(transaction_json);
+                std::shared_ptr<transaction> transaction_ = std::dynamic_pointer_cast<transaction>(model_factory::create("Transaction"));
+                transaction_->fromJson(transaction_json);
                 if(transaction_->getFromAccount()) {
                     _accounts[transaction_->getFromAccount()->generateID()]->addFromTransaction(transaction_);
                 }
@@ -131,7 +132,7 @@ public:
     void saveTransactions() {
         json j = json::array();
         for (auto& transaction : _transactions) {
-            j.push_back(transaction->to_json());
+            j.push_back(transaction->toJson());
         }
 
         wxString transactions_file_path = _config.getTransactionsFilePath();
@@ -141,7 +142,7 @@ public:
             return;
         }
 
-        transactions_file.Write(j.dump());
+        transactions_file.Write(j.dump(4));
         transactions_file.Close();
     }
 

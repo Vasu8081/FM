@@ -7,13 +7,6 @@
 class bank_account : public account {
 public:
     bank_account() = default;
-    bank_account(const std::string& account_number, const std::string& bank_name, const std::string& branch, const std::string& ifsc, double balance) : account("", bank_name, balance) {
-        _account_number = account_number;
-        _bank_name = bank_name;
-        _branch = branch;
-        _ifsc = ifsc;
-        _id = generateID();
-    }
 
     std::string generateID() const override {
         return "BA."+_bank_name+"."+_account_number;
@@ -32,30 +25,32 @@ public:
     void setIfsc(const std::string& ifsc) { _ifsc = ifsc; }
 
     //Inherited functions
-    json to_json() const override {
+    json toJson() const override {
         json j = {
-            {"id", _id},
-            {"bank_name", _bank_name},
-            {"balance", _balance},
-            {"account_number", _account_number},
-            {"branch", _branch},
-            {"ifsc", _ifsc}
+            {"Id", _id},
+            {"Bank Name", _bank_name},
+            {"Balance", _balance},
+            {"Account Number", _account_number},
+            {"Branch", _branch},
+            {"IFSC", _ifsc}
         };
 
         return j;
     }
 
-    void from_json(const json& j) override {
-        _id = j.at("id").get<std::string>();
-        _name = j.at("bank_name").get<std::string>();
-        _balance = j.at("balance").get<double>();
-        _account_number = j.at("account_number").get<std::string>();
-        _bank_name = j.at("bank_name").get<std::string>();
-        _branch = j.at("branch").get<std::string>();
-        _ifsc = j.at("ifsc").get<std::string>();
+    void fromJson(const json& j) override {
+        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
+        if(j.contains("Bank Name")) _bank_name = j.at("Bank Name").get<std::string>(), _name = j.at("Bank Name").get<std::string>();
+        if(j.contains("Balance")){
+            _balance = j.at("Balance").get<double>();
+        } 
+        if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
+        if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
+        if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();
+        if(_id.empty()) _id = generateID();
     }
 
-    std::string to_str() override {
+    std::string toStr() override {
         return "ID: " + _id + ", Bank Name: " + _bank_name + ", Account Number: " + _account_number + ", Branch: " + _branch + ", IFSC: " + _ifsc + ", Balance: " + std::to_string(_balance);
     }
 
@@ -67,6 +62,14 @@ public:
             {"IFSC", "string"},
             {"Balance", "double"}
         };
+    }
+
+    void amountIn(double amount) override {
+        _balance = _balance + amount;
+    }
+
+    void amountOut(double amount) override {
+        _balance = _balance - amount;
     }
 
 private:

@@ -10,12 +10,12 @@ class model {
 public:
     model() = default;
 
-    virtual json to_json() const = 0;
-    virtual void from_json(const json& j) = 0;
+    virtual json toJson() const = 0;
+    virtual void fromJson(const json& j) = 0;
 
     virtual std::unordered_map<std::string, std::string> fieldTypes() const = 0;
 
-    virtual std::string to_str() = 0;
+    virtual std::string toStr() = 0;
 };
 
 #endif // MODEL_H

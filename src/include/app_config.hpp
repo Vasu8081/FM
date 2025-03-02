@@ -27,7 +27,7 @@ public:
         wxFile file(_file_path.GetFullPath(), wxFile::write);
         if (!file.IsOpened()) return;
         json j;
-        to_json(j);
+        toJson(j);
         wxString content = wxString::FromUTF8(j.dump(4).c_str());
         file.Write(content);
         file.Close();
@@ -51,7 +51,7 @@ public:
     void setTransactionsFilePath(const wxString& path) { _transactions_file_path = wxFileName(path); }
 
     // JSON serialization
-    void from_json(const json& j) {
+    void fromJson(const json& j) {
         j.at("access_token").get_to(_access_token);
         j.at("refresh_token").get_to(_refresh_token);
         j.at("client_id").get_to(_client_id);
@@ -60,7 +60,7 @@ public:
         _transactions_file_path = wxString(j.value("transactions_file_path", "").c_str(), wxConvUTF8);
     }
 
-    void to_json(json& j) const {
+    void toJson(json& j) const {
         j = json{
             {"access_token", _access_token},
             {"refresh_token", _refresh_token},
@@ -123,7 +123,7 @@ private:
     
         try {
             json j = json::parse(std::string(content.mb_str()));
-            from_json(j);
+            fromJson(j);
         } catch (const std::exception& e) {
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         }

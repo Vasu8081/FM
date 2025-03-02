@@ -1,7 +1,5 @@
 add_library(ui STATIC 
-                account/add_account.cpp
-                account/modify_account.cpp
-                account/view_account.cpp
+                add_model.cpp
 )
 
 target_link_libraries(ui ${wxWidgets_LIBRARIES} CURL::libcurl)

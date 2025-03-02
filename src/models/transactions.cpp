@@ -17,55 +17,64 @@ transaction::transaction(std::shared_ptr<account> from_account_id,
       _date(date), 
       _amount(amount) {}
 
-json transaction::to_json() const {
+json transaction::toJson() const {
     json j;
-    j["from_account_id"] = _from_account_id ? _from_account_id->generateID() : "";
-    j["to_account_id"] = _to_account_id ? _to_account_id->generateID() : "";
-    j["category_id"] = _category_id ? _category_id->generateID() : "";
-    j["description"] = _description;
-    j["moved_from_account_id"] = _moved_from_account_id ? _moved_from_account_id->generateID() : "";
-    j["date"] = _date.FormatISODate();
-    j["amount"] = _amount;
+    j["From Account"] = _from_account_id ? _from_account_id->generateID() : "";
+    j["To Account"] = _to_account_id ? _to_account_id->generateID() : "";
+    j["Category"] = _category_id ? _category_id->generateID() : "";
+    j["Description"] = _description;
+    j["Moved From Account"] = _moved_from_account_id ? _moved_from_account_id->generateID() : "";
+    j["Date"] = _date.FormatISODate();
+    j["Amount"] = _amount;
     return j;
 }
 
-void transaction::from_json(const json& j) {
+void transaction::fromJson(const json& j) {
     model_manager& model_manager_ = model_manager::getInstance();
-    auto id = j["from_account_id"].get<std::string>();
-    if(id != "") {
-        _from_account_id = model_manager_.getAccounts()[id];
-    }
-    
-    id = j["to_account_id"].get<std::string>();
-    if(id != "") {
-        _to_account_id = model_manager_.getAccounts()[id];
-    }
-    
-    id = j["category_id"].get<std::string>();
-    if(id != "") {
-        _category_id = model_manager_.getAccounts()[id];
-    }
-    
-    _description = j["description"].get<std::string>();
 
-    id = j["moved_from_account_id"].get<std::string>();
-    if(id != "") {
-        _moved_from_account_id = model_manager_.getAccounts()[id];
-    }
-    
-    _date = wxDateTime();
-    if (j.contains("date")) {
-        wxString date_str = j["date"].get<std::string>();
-        if (!_date.ParseISODate(date_str)) {
-            std::cerr << "Error: Invalid date format -> " << std::string(date_str.mb_str()) << std::endl;
+    if(j.contains("From Account")){
+        auto id = j["From Account"].get<std::string>();
+        if(id != "") {
+            _from_account_id = model_manager_.getAccounts()[id];
         }
-    } else {
-        std::cerr << "Error: Missing 'date' field in transaction JSON." << std::endl;
     }
-    _amount = j["amount"].get<double>();
+
+    if(j.contains("To Account")){
+        auto id = j["To Account"].get<std::string>();
+        if(id != "") {
+            _to_account_id = model_manager_.getAccounts()[id];
+        }
+    }
+
+    if(j.contains("Category")){
+        auto id = j["Category"].get<std::string>();
+        if(id != "") {
+            _category_id = model_manager_.getAccounts()[id];
+        }
+    }
+
+    if(j.contains("Description")){
+        _description = j["Description"].get<std::string>();
+    }
+
+    if(j.contains("Moved From Account")){
+        auto id = j["Moved From Account"].get<std::string>();
+        if(id != "") {
+            _moved_from_account_id = model_manager_.getAccounts()[id];
+        }
+    }
+
+    if (j.contains("Date")) {
+        wxString date_str = j["Date"].get<std::string>();
+        _date.ParseISODate(date_str);
+    }
+
+    if(j.contains("Amount")){
+        _amount = j["Amount"].get<double>();
+    }  
 }
 
-std::string transaction::to_str() {
+std::string transaction::toStr() {
     std::string from_account_id = _from_account_id ? _from_account_id->generateID() : "External";
     std::string to_account_id = _to_account_id ? _to_account_id->generateID() : "External";
     std::string category_id = _category_id ? _category_id->generateID() : "Unknown";
@@ -74,11 +83,10 @@ std::string transaction::to_str() {
 
 std::unordered_map<std::string, std::string> transaction::fieldTypes() const {
     return {
-        {"From Account", "string"},
-        {"To Account", "string"},
-        {"Category", "string"},
+        {"From Account", "account"},
+        {"To Account", "account"},
+        {"Category", "account"},
         {"Description", "string"},
-        {"Moved From Account", "string"},
         {"Date", "date"},
         {"Amount", "double"}
     };

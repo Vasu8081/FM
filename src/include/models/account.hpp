@@ -17,23 +17,24 @@ public:
 
     virtual std::string generateID() const = 0;
 
-    virtual nlohmann::json to_json() const override{
+    virtual nlohmann::json toJson() const override{
         nlohmann::json j = {
-            {"id", _id},
-            {"name", _name},
-            {"balance", _balance}
+            {"Id", _id},
+            {"Name", _name},
+            {"Balance", _balance}
         };
 
         return j;
     }
 
-    virtual void from_json(const nlohmann::json& j) override {
-        _id = j.at("id").get<std::string>();
-        _name = j.at("name").get<std::string>();
-        _balance = j.at("balance").get<double>();
+    virtual void fromJson(const nlohmann::json& j) override {
+        _id = j.at("Id").get<std::string>();
+        if(j.contains("Name")) _name = j.at("Name").get<std::string>();
+        if(j.contains("Balance")) _balance = j.at("Balance").get<double>();
+        if(_id.empty()) _id = generateID();
     }
 
-    virtual std::string to_str() override {
+    virtual std::string toStr() override {
         return "ID: " + _id + ", Name: " + _name + ", Balance: " + std::to_string(_balance);
     }
 
@@ -42,17 +43,22 @@ public:
             {"Name", "string"},
             {"Balance", "double"}
         };
-    }   
+    }
+
+    //Behavior if this account is a to account during a transaction
+    virtual void amountIn(double amount) = 0;
+    //Behavior if this account is a from account during a transaction
+    virtual void amountOut(double amount) = 0;
 
     //Getters
-    std::string getID() const;
-    std::string getName() const;
-    double getBalance() const;
+    std::string getID() const { return _id; }
+    std::string getName() const { return _name; }
+    double getBalance() const { return _balance; }
 
     //Setters
     void setBalance(double balance) { _balance = balance; }
-    void addFromTransaction(std::shared_ptr<transaction> t) { _from_transactions.push_back(t); }
-    void addToTransaction(std::shared_ptr<transaction> t) { _to_transactions.push_back(t); }
+    void addFromTransaction(std::shared_ptr<transaction> t) { _from_transactions.push_back(t); amountOut(t->getAmount()); }
+    void addToTransaction(std::shared_ptr<transaction> t) { _to_transactions.push_back(t); amountIn(t->getAmount()); }
 
 protected:
     std::string _id;

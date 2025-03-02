@@ -20,9 +20,9 @@ public:
                 wxDateTime date, 
                 double amount);
 
-    json to_json() const override;
-    void from_json(const json& j) override;
-    std::string to_str() override;
+    json toJson() const override;
+    void fromJson(const json& j) override;
+    std::string toStr() override;
 
     std::unordered_map<std::string, std::string> fieldTypes() const override;
 
