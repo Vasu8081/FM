@@ -17,12 +17,7 @@ public:
     std::string getBankName() const { return _bank_name; }
     std::string getBranch() const { return _branch; }
     std::string getIfsc() const { return _ifsc; }
-
-    //Setters
-    void setAccountNumber(const std::string& account_number) { _account_number = account_number; }
-    void setBankName(const std::string& bank_name) { _bank_name = bank_name; }
-    void setBranch(const std::string& branch) { _branch = branch; }
-    void setIfsc(const std::string& ifsc) { _ifsc = ifsc; }
+    double getBalance() const { return _balance; }
 
     //Inherited functions
     json toJson() const override {
@@ -41,7 +36,6 @@ public:
     void fromJson(const json& j) override {
         if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Bank Name")) _bank_name = j.at("Bank Name").get<std::string>(), _name = j.at("Bank Name").get<std::string>();
-        if(j.contains("Balance")) _balance = j.at("Balance").get<double>();
         if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
         if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
         if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();
@@ -57,17 +51,18 @@ public:
             {"Bank Name", "string"},
             {"Account Number", "string"},
             {"Branch", "string"},
-            {"IFSC", "string"},
-            {"Balance", "double"}
+            {"IFSC", "string"}
         };
     }
 
     void amountIn(double amount) override {
         _balance = _balance + amount;
+        notifyObservers();
     }
 
     void amountOut(double amount) override {
         _balance = _balance - amount;
+        notifyObservers();
     }
 
 private:
@@ -75,6 +70,7 @@ private:
     std::string _bank_name;
     std::string _branch;
     std::string _ifsc;
+    double _balance = 0.0;
 };
 
 #endif // BANK_ACCOUINT_H

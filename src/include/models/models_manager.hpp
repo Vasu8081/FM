@@ -82,7 +82,6 @@ public:
                 std::shared_ptr<account> acc = std::dynamic_pointer_cast<account>(model_factory::create(account_id));
                 if (acc) {
                     acc->fromJson(account_json);
-                    acc->setBalance(0);
                     _accounts[acc->generateID()] = acc;
                 } else {
                     std::cerr << "Error: Unknown account type for ID: " << account_id << std::endl;

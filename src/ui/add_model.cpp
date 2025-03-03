@@ -14,7 +14,8 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
     }
 
     fieldTypes = _model->fieldTypes();
-    wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+    wxFlexGridSizer* sizer = new wxFlexGridSizer(2, 10, 10);
+    sizer->AddGrowableCol(1);
 
     for (auto& [key, fieldType] : fieldTypes) {
         wxStaticText* label = new wxStaticText(this, wxID_ANY, key + ":");
@@ -22,73 +23,65 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
         std::string defaultValue = "";
 
         if (fieldType == "string") {
-            input = new wxTextCtrl(this, wxID_ANY, defaultValue);
+            input = new wxTextCtrl(this, wxID_ANY, defaultValue, wxDefaultPosition, wxSize(200, -1));
         } else if (fieldType == "int") {
             int value = 0;
-            input = new wxSpinCtrl(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100, value);
+            input = new wxSpinCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1), wxSP_ARROW_KEYS, 0, 100, value);
         } else if (fieldType == "double") {
-            input = new wxTextCtrl(this, wxID_ANY, std::to_string(0.0));
+            input = new wxTextCtrl(this, wxID_ANY, std::to_string(0.0), wxDefaultPosition, wxSize(200, -1));
         } else if (fieldType == "date") {
             wxDatePickerCtrl* datePicker = new wxDatePickerCtrl(this, wxID_ANY);
             input = datePicker;
         } else if (fieldType == "bool") {
-            bool value = false;
             wxCheckBox* checkBox = new wxCheckBox(this, wxID_ANY, "");
-            checkBox->SetValue(value);
             input = checkBox;
         } else if (fieldType == "account") {
             model_manager& model_manager_ = model_manager::getInstance();
             auto accounts = model_manager_.getAccounts();
             wxArrayString accountChoices;
             int index = 0;
-            
             for (auto& act : accounts) {
-                std::string act_id = act.first;
-                std::shared_ptr<account> ac = act.second;
-                accountChoices.Add(ac->getName());
-                accountMapping[index++] = act_id;
+                accountChoices.Add(act.second->getName());
+                accountMapping[index++] = act.first;
             }
-            
-            wxChoice* accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountChoices);
+            wxChoice* accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(200, -1), accountChoices);
             input = accountChoice;
-            inputFields[key] = input;
         } else if (fieldType == "category") {
             model_manager& model_manager_ = model_manager::getInstance();
             auto categories = model_manager_.getCategories();
             wxArrayString categoryChoices;
             int index = 0;
-            
             for (auto& cat : categories) {
-                std::string cat_id = cat.first;
-                std::shared_ptr<category> ca = cat.second;
-                categoryChoices.Add(ca->getName());
-                categoryMapping[index++] = cat_id;
+                categoryChoices.Add(cat.second->getName());
+                categoryMapping[index++] = cat.first;
             }
-            
-            wxChoice* categoryChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, categoryChoices);
+            wxChoice* categoryChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(200, -1), categoryChoices);
             input = categoryChoice;
-            inputFields[key] = input;
         }
 
         if (input) {
             inputFields[key] = input;
-            sizer->Add(label, 0, wxALL, 5);
-            sizer->Add(input, 0, wxEXPAND | wxALL, 5);
+            sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+            sizer->Add(input, 1, wxEXPAND | wxALL, 5);
         } else {
             wxMessageBox("Invalid field type: " + fieldType);
         }
     }
 
-    addButton = new wxButton(this, wxID_ANY, "Add");
+    wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+    addButton = new wxButton(this, wxID_ANY, "Add", wxDefaultPosition, wxSize(80, 30));
     addButton->Bind(wxEVT_BUTTON, &AddModelForm::OnAdd, this);
-    cancelButton = new wxButton(this, wxID_ANY, "Cancel");
+    cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxSize(80, 30));
     cancelButton->Bind(wxEVT_BUTTON, &AddModelForm::OnCancel, this);
+    buttonSizer->AddStretchSpacer();
+    buttonSizer->Add(cancelButton, 0, wxRIGHT, 10);
+    buttonSizer->Add(addButton, 0);
 
-    mainSizer->Add(sizer, 0, wxEXPAND | wxALL, 5);
-    mainSizer->Add(addButton, 0, wxALIGN_CENTER | wxALL, 5);
-    mainSizer->Add(cancelButton, 0, wxALIGN_CENTER | wxALL, 5);
+    mainSizer->Add(sizer, 1, wxEXPAND | wxALL, 10);
+    mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER | wxALL, 10);
     
-    SetSizer(mainSizer);
+    SetSizerAndFit(mainSizer);
+    Layout();
 }
 
 bool AddModelForm::ValidateInputs() {
@@ -97,7 +90,6 @@ bool AddModelForm::ValidateInputs() {
 
 void AddModelForm::OnAdd(wxCommandEvent& event) {
     if (!_model) return;
-    
     if (!ValidateInputs()) {
         wxLogError("Validation failed. Please check the inputs.");
         return;
@@ -120,12 +112,10 @@ void AddModelForm::OnAdd(wxCommandEvent& event) {
         } else if (wxCheckBox* checkBox = dynamic_cast<wxCheckBox*>(inputField)) {
             inputJson[key] = static_cast<bool>(checkBox->GetValue());
         } else if (wxChoice* choice = dynamic_cast<wxChoice*>(inputField)) {
-            if ( fieldTypes[key] == "category" ) {
-                int selection = choice->GetSelection();
+            int selection = choice->GetSelection();
+            if (fieldTypes[key] == "category") {
                 inputJson[key] = categoryMapping[selection];
-            }
-            else if ( fieldTypes[key] == "account" ) {
-                int selection = choice->GetSelection();
+            } else if (fieldTypes[key] == "account") {
                 inputJson[key] = accountMapping[selection];
             }
         }

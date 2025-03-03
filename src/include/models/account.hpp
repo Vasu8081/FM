@@ -9,7 +9,7 @@
 class account : public virtual model {
 public:
     account() = default;
-    account(std::string id, std::string name, double balance) : _id(id), _name(name), _balance(balance) {
+    account(std::string id, std::string name) : _id(id), _name(name) {
         _from_transactions = std::vector<std::shared_ptr<transaction>>();
         _to_transactions = std::vector<std::shared_ptr<transaction>>();
     }
@@ -20,8 +20,7 @@ public:
     virtual nlohmann::json toJson() const override{
         nlohmann::json j = {
             {"Id", _id},
-            {"Name", _name},
-            {"Balance", _balance}
+            {"Name", _name}
         };
 
         return j;
@@ -30,12 +29,11 @@ public:
     virtual void fromJson(const nlohmann::json& j) override {
         _id = j.at("Id").get<std::string>();
         if(j.contains("Name")) _name = j.at("Name").get<std::string>();
-        if(j.contains("Balance")) _balance = j.at("Balance").get<double>();
         if(_id.empty()) _id = generateID();
     }
 
     virtual std::string toStr() override {
-        return "ID: " + _id + ", Name: " + _name + ", Balance: " + std::to_string(_balance);
+        return "ID: " + _id + ", Name: " + _name;
     }
 
     virtual std::unordered_map<std::string, std::string> fieldTypes() const override {
@@ -53,17 +51,17 @@ public:
     //Getters
     std::string getID() const { return _id; }
     std::string getName() const { return _name; }
-    double getBalance() const { return _balance; }
 
     //Setters
-    void setBalance(double balance) { _balance = balance; }
     void addFromTransaction(std::shared_ptr<transaction> t) { _from_transactions.push_back(t); amountOut(t->getAmount()); }
     void addToTransaction(std::shared_ptr<transaction> t) { _to_transactions.push_back(t); amountIn(t->getAmount()); }
+
+    std::vector<std::shared_ptr<transaction>> getFromTransactions() const { return _from_transactions; }
+    std::vector<std::shared_ptr<transaction>> getToTransactions() const { return _to_transactions; }
 
 protected:
     std::string _id;
     std::string _name;
-    double _balance;
     std::vector<std::shared_ptr<transaction>> _from_transactions;
     std::vector<std::shared_ptr<transaction>> _to_transactions;
 };

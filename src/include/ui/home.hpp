@@ -5,6 +5,7 @@
 #include <wx/notebook.h>
 #include <models/models_manager.hpp>
 #include <ui/add_model.hpp>
+#include <ui/model_view_panels/bank_account_view.hpp>
 
 class home : public wxFrame
 {
@@ -88,8 +89,8 @@ public:
         sizer->Add(accountTitle, 0, wxEXPAND | wxALL, 10);
 
         for (auto account : _models.getAccounts()) {
-            wxStaticText* accountText = new wxStaticText(this, wxID_ANY, account.second->toStr());
-            sizer->Add(accountText, 0, wxEXPAND | wxALL, 10);
+            auto accountView = new BankAccountView(this, std::dynamic_pointer_cast<bank_account>(account.second));
+            sizer->Add(accountView, 0, wxEXPAND | wxALL, 10);
         }
 
         // Transaction Listings
