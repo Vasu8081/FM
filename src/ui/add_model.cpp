@@ -133,9 +133,9 @@ void AddModelForm::OnAdd(wxCommandEvent& event) {
     
     _model->fromJson(inputJson);
     model_manager::getInstance().add(_model);
+    this->GetParent()->Close();
 }
 
 void AddModelForm::OnCancel(wxCommandEvent& event) {
-    wxLogMessage("Cancel button clicked");
     this->GetParent()->Close();
 }
