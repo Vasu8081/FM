@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <models/bank_account.hpp>
+#include <models/borrow_account.hpp>
 #include <models/transaction.hpp>
 #include <models/category.hpp>
 
@@ -13,6 +14,9 @@ public:
     static std::shared_ptr<model> create(const std::string& id) {
         if (id.find("BA.") == 0 || id.find("Bank Account")==0) {
             return std::make_shared<bank_account>();
+        }
+        if (id.find("BG.") == 0 || id.find("Borrow Account")==0) {
+            return std::make_shared<borrow_account>();
         }
         else if(id.find("Transaction")==0){
             return std::make_shared<transaction>();

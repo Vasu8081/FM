@@ -15,46 +15,31 @@ home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600))
         SetIcon(wxICON(IDI_APPICON));
     #else
     #endif
-        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
-    
+        _mainSizer = new wxBoxSizer(wxVERTICAL);
+        
         // Accounts Section
-        mainSizer->Add(new wxStaticText(this, wxID_ANY, "Accounts"), 0, wxEXPAND | wxALL, 10);
-        wxScrolledWindow* accountScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 300), wxVSCROLL);
-        accountScrollWindow->SetScrollRate(5, 5);
-        wxBoxSizer* accountSizer = new wxBoxSizer(wxVERTICAL);
-        wxGridSizer* accountGrid = new wxGridSizer(4, 10, 10);
+        _mainSizer->Add(new wxStaticText(this, wxID_ANY, "Accounts"), 0, wxEXPAND | wxALL, 10);
+        _accountScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+        _accountScrollWindow->SetScrollRate(5, 5);
+        _accountSizer = new wxBoxSizer(wxVERTICAL);
+        _accountGrid = new wxGridSizer(4, 10, 10);
+        _accountSizer->Add(_accountGrid, 1, wxEXPAND | wxALL, 10);
+        _accountScrollWindow->SetSizer(_accountSizer);
+        _mainSizer->Add(_accountScrollWindow, 1, wxEXPAND | wxALL, 10);
         
-        int accountCount = 0;
-        for (auto account : _models.getAccounts()) {
-            auto accountView = model_view_factory::create(accountScrollWindow, account.second);
-            accountGrid->Add(accountView, 0, wxEXPAND | wxALL, 10);
-            accountCount++;
-        }
-        
-        accountScrollWindow->SetSizer(accountGrid);
-        accountScrollWindow->FitInside();
-        accountSizer->Add(accountScrollWindow, 1, wxEXPAND | wxALL, 10);
-        mainSizer->Add(accountSizer, 0, wxEXPAND | wxALL, 10);
-    
         // Categories Section
-        mainSizer->Add(new wxStaticText(this, wxID_ANY, "Categories"), 0, wxEXPAND | wxALL, 10);
-        wxScrolledWindow* categoryScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 250), wxVSCROLL);
-        categoryScrollWindow->SetScrollRate(5, 5);
-        wxBoxSizer* categorySizer = new wxBoxSizer(wxVERTICAL);
-        wxGridSizer* categoryGrid = new wxGridSizer(4, 10, 10);
-        
-        int categoryCount = 0;
-        for (auto category : _models.getCategories()) {
-            auto categoryView = model_view_factory::create(categoryScrollWindow, category.second);
-            categoryGrid->Add(categoryView, 0, wxEXPAND | wxALL, 10);
-            categoryCount++;
-        }
-        
-        categoryScrollWindow->SetSizer(categoryGrid);
-        categoryScrollWindow->FitInside();
-        categorySizer->Add(categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
-        mainSizer->Add(categorySizer, 0, wxEXPAND | wxALL, 10);
-    
+        _mainSizer->Add(new wxStaticText(this, wxID_ANY, "Categories"), 0, wxEXPAND | wxALL, 10);
+        _categoryScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+        _categoryScrollWindow->SetScrollRate(5, 5);
+        _categorySizer = new wxBoxSizer(wxVERTICAL);
+        _categoryGrid = new wxGridSizer(4, 10, 10);
+        _categorySizer->Add(_categoryGrid, 1, wxEXPAND | wxALL, 10);
+        _categoryScrollWindow->SetSizer(_categorySizer);
+        _mainSizer->Add(_categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
+
+        updateAccounts();
+        updateCategories();
+
         // Buttons (Always Visible)
         wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
         wxButton* addAccountButton = new wxButton(this, wxID_ANY, "Add Account");
@@ -69,14 +54,47 @@ home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600))
         buttonSizer->Add(addCategoryButton, 1, wxEXPAND | wxALL, 10);
         addCategoryButton->Bind(wxEVT_BUTTON, &home::onAddCategoryButtonClicked, this);
     
-        mainSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 10);
-    
-        SetSizer(mainSizer);
+        _mainSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 10);
+        SetSizerAndFit(_mainSizer);
         Centre();
     }
 
 private:
+    wxBoxSizer* _mainSizer;
+    wxScrolledWindow* _accountScrollWindow;
+    wxScrolledWindow* _categoryScrollWindow;
+    wxBoxSizer* _accountSizer;
+    wxBoxSizer* _categorySizer;
+    wxGridSizer* _accountGrid;
+    wxGridSizer* _categoryGrid;
+    std::unordered_map<std::string, wxWindow*> _accountViews;
+    std::unordered_map<std::string, wxWindow*> _categoryViews;    
+    
     model_manager& _models = model_manager::getInstance();
+
+    void updateAccounts() {
+        for (auto account : _models.getAccounts()) {
+            if (!_accountViews.count(account.first)) {
+                auto accountView = model_view_factory::create(_accountScrollWindow, account.second);
+                _accountGrid->Add(accountView, 0, wxEXPAND | wxALL, 10);
+                _accountViews[account.first] = accountView;
+            }
+        }
+        _accountScrollWindow->FitInside();
+        _accountScrollWindow->Layout();
+    }
+
+    void updateCategories() {
+        for (auto category : _models.getCategories()) {
+            if (!_categoryViews.count(category.first)) {
+                auto categoryView = model_view_factory::create(_categoryScrollWindow, category.second);
+                _categoryGrid->Add(categoryView, 0, wxEXPAND | wxALL, 10);
+                _categoryViews[category.first] = categoryView;
+            }
+        }
+        _categoryScrollWindow->FitInside();
+        _categoryScrollWindow->Layout();
+    }
 
     void onAddAccountButtonClicked(wxCommandEvent& event) {
         wxDialog* dialog = new wxDialog(this, wxID_ANY, "Select Account Type", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
@@ -84,6 +102,7 @@ private:
 
         wxArrayString accountTypes;
         accountTypes.Add("Bank Account");
+        accountTypes.Add("Borrow Account");
 
         wxChoice* choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
         choice->SetSelection(0);
@@ -107,6 +126,7 @@ private:
             accountDialog->Centre();
             accountDialog->ShowModal();
         }
+        updateAccounts();
     }
 
     void onAddTransactionButtonClicked(wxCommandEvent& event) {
@@ -131,8 +151,8 @@ private:
         categoryDialog->SetSizer(categorySizer);
         categoryDialog->Centre();
         categoryDialog->ShowModal();
+        updateCategories();
     }
-
 };
 
 #endif // HOME_HPP
