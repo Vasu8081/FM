@@ -61,17 +61,6 @@ public:
         if(_id.empty()) _id = generateID();
     }
 
-    std::string toStr() override {
-        std::string result = "ID: " + _id + ", Borrower: " + _name + ", UPI ID: " + _upi_id + ", Borrowed Amount: " + std::to_string(_borrowed_amount);
-        if (_borrowed_date.IsValid()) {
-            result += ", Borrowed Date: " + _borrowed_date.FormatISODate();
-        }
-        if (_due_date.IsValid()) {
-            result += ", Due Date: " + _due_date.FormatISODate();
-        }
-        return result;
-    }
-
     std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
             {"Borrower", "string"},

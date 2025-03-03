@@ -58,17 +58,6 @@ public:
         if(_id.empty()) _id = generateID();
     }
 
-    std::string toStr() override {
-        std::string result = "ID: " + _id + ", Given to: " + _name + ", Given Amount: " + std::to_string(_given_amount);
-        if (_given_date.IsValid()) {
-            result += ", Given Date: " + _given_date.FormatISODate();
-        }
-        if (_due_date.IsValid()) {
-            result += ", Due Date: " + _due_date.FormatISODate();
-        }
-        return result;
-    }
-
     std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
             {"Given To", "string"},

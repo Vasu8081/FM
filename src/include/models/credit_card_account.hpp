@@ -77,11 +77,6 @@ public:
         _id = generateID();
     }
 
-    std::string toStr() override {
-        std::string result = "ID: " + _id + ", Card Number: " + _card_number + ", CVV: " + _cvv + ", Expiry Date: " + _expiry_date.FormatISODate() + ", Billing Date: " + _billing_date.FormatISODate() + ", Payment Due Date: " + _payment_due_date.FormatISODate() + ", Credit Limit: " + std::to_string(_credit_limit) + ", Limit Left: " + std::to_string(_limit_left);
-        return result;
-    }
-
     std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
             {"Card Name", "string"},

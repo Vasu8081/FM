@@ -65,13 +65,6 @@ void transaction::fromJson(const json& j) {
     }  
 }
 
-std::string transaction::toStr() {
-    std::string from_account_id = _from_account_id ? _from_account_id->generateID() : "External";
-    std::string to_account_id = _to_account_id ? _to_account_id->generateID() : "External";
-    std::string category_id = _category_id ? _category_id->generateID() : "Unknown";
-    return from_account_id + " -> " + to_account_id + " (Rupees:" + std::to_string(_amount) + ")" + " [ Category: " + category_id + "]";
-}
-
 std::unordered_map<std::string, std::string> transaction::fieldTypes() const {
     return {
         {"From Account", "account"},

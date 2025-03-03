@@ -32,10 +32,6 @@ public:
         if(_id.empty()) _id = generateID();
     }
 
-    virtual std::string toStr() override {
-        return "ID: " + _id + ", Name: " + _name;
-    }
-
     virtual std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
             {"Name", "string"},

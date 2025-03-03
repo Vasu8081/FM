@@ -42,10 +42,6 @@ public:
         if(_id.empty()) _id = generateID();
     }
 
-    std::string toStr() override {
-        return "ID: " + _id + ", Bank Name: " + _bank_name + ", Account Number: " + _account_number + ", Branch: " + _branch + ", IFSC: " + _ifsc + ", Balance: " + std::to_string(_balance);
-    }
-
     std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
             {"Bank Name", "string"},
