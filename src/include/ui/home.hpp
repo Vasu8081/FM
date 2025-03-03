@@ -103,6 +103,7 @@ private:
         wxArrayString accountTypes;
         accountTypes.Add("Bank Account");
         accountTypes.Add("Borrow Account");
+        accountTypes.Add("Give Account");
 
         wxChoice* choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
         choice->SetSelection(0);

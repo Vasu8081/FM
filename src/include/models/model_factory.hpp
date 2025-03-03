@@ -6,6 +6,7 @@
 #include <string>
 #include <models/bank_account.hpp>
 #include <models/borrow_account.hpp>
+#include <models/give_account.hpp>
 #include <models/transaction.hpp>
 #include <models/category.hpp>
 
@@ -18,10 +19,13 @@ public:
         if (id.find("BG.") == 0 || id.find("Borrow Account")==0) {
             return std::make_shared<borrow_account>();
         }
-        else if(id.find("Transaction")==0){
+        if (id.find("GV.") == 0 || id.find("Give Account")==0) {
+            return std::make_shared<give_account>();
+        }
+        if(id.find("Transaction")==0){
             return std::make_shared<transaction>();
         }
-        else if(id.find("CAT.")==0 || id.find("Category")==0){
+        if(id.find("CAT.")==0 || id.find("Category")==0){
             return std::make_shared<category>();
         }
         return nullptr;
