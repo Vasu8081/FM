@@ -38,7 +38,6 @@ public:
         if(j.contains("Name")) _name = j.at("Name").get<std::string>();
         if(j.contains("Description")) _description = j.at("Description").get<std::string>();
         if(j.contains("Monthly Budget")) _monthly_budget = j.at("Monthly Budget").get<double>();
-        if(j.contains("Spends")) spends = j.at("Spends").get<std::vector<double>>();
         if(_id.empty()) _id = generateID();
     }
 
@@ -59,11 +58,10 @@ public:
     std::string getName() const { return _name; }
     std::string getDescription() const { return _description; }
     double getMonthlyBudget() const { return _monthly_budget; }
-    double getSpentThisMonth() const { return spends[getCurrentMonthIndex()]; }
-    double getSpentLastMonth() const { return spends[getPreviousMonthIndex()]; }
+    double getSpentThisMonth() const { return spends[0]; }
+    double getSpentLastMonth() const { return spends[1]; }
     double getAverageThreeMonths() const { return calculateAverage(3); }
-    double getAverageSixMonths() const { return calculateAverage(6); }
-    double getAverageThisYear() const { return calculateAverage(12); }
+    std::vector<std::shared_ptr<transaction>> getTransactions() const { return _transactions; }
     
     // Setters
     void setMonthlyBudget(double monthly_budget) { _monthly_budget = monthly_budget; }
@@ -72,10 +70,10 @@ public:
         _transactions.push_back(transaction);
         double amount = transaction->getAmount();
         wxDateTime transaction_date = transaction->getDate();
-        int monthIndex = getMonthIndex(transaction_date);
+        int monthOffset = getMonthOffsetFromDate(transaction_date);
         
-        if (monthIndex >= 0 && monthIndex < 12) {
-            spends[monthIndex] += amount;
+        if (monthOffset >= 0 && monthOffset < 12) {
+            spends[monthOffset] += amount;
         }
     }
 
@@ -87,24 +85,25 @@ private:
     std::vector<double> spends;
     std::vector<std::shared_ptr<transaction>> _transactions;
 
-    int getCurrentMonthIndex() const {
-        return wxDateTime::Now().GetMonth();
+    int getMonthOffset(int offset) const {
+        wxDateTime now = wxDateTime::Now();
+        int month = now.GetMonth() - offset;
+        int yearOffset = (month < 0) ? 1 : 0;
+        month = (month + 12) % 12;
+        return month;
     }
 
-    int getPreviousMonthIndex() const {
-        int current = getCurrentMonthIndex();
-        return (current == 0) ? 11 : current - 1;
-    }
-
-    int getMonthIndex(const wxDateTime& date) const {
-        return date.GetMonth();
+    int getMonthOffsetFromDate(const wxDateTime& date) const {
+        wxDateTime now = wxDateTime::Now();
+        int diffMonths = (now.GetYear() - date.GetYear()) * 12 + (now.GetMonth() - date.GetMonth());
+        return (diffMonths >= 0 && diffMonths < 12) ? diffMonths : -1;
     }
 
     double calculateAverage(int months) const {
         double sum = 0.0;
         int count = std::min(months, 12);
         for (int i = 0; i < count; ++i) {
-            sum += spends[getCurrentMonthIndex() - i];
+            sum += spends[getMonthOffset(i)];
         }
         return count > 0 ? sum / count : 0.0;
     }

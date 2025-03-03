@@ -19,7 +19,7 @@ home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600))
     
         // Accounts Section
         mainSizer->Add(new wxStaticText(this, wxID_ANY, "Accounts"), 0, wxEXPAND | wxALL, 10);
-        wxScrolledWindow* accountScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 200), wxVSCROLL);
+        wxScrolledWindow* accountScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 300), wxVSCROLL);
         accountScrollWindow->SetScrollRate(5, 5);
         wxBoxSizer* accountSizer = new wxBoxSizer(wxVERTICAL);
         wxGridSizer* accountGrid = new wxGridSizer(4, 10, 10);
@@ -38,16 +38,16 @@ home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600))
     
         // Categories Section
         mainSizer->Add(new wxStaticText(this, wxID_ANY, "Categories"), 0, wxEXPAND | wxALL, 10);
-        wxScrolledWindow* categoryScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 150), wxVSCROLL);
+        wxScrolledWindow* categoryScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxSize(-1, 250), wxVSCROLL);
         categoryScrollWindow->SetScrollRate(5, 5);
         wxBoxSizer* categorySizer = new wxBoxSizer(wxVERTICAL);
         wxGridSizer* categoryGrid = new wxGridSizer(4, 10, 10);
         
         int categoryCount = 0;
         for (auto category : _models.getCategories()) {
-            // auto categoryView = model_view_factory::create(categoryScrollWindow, category.second);
-            // categoryGrid->Add(categoryView, 0, wxEXPAND | wxALL, 10);
-            // categoryCount++;
+            auto categoryView = model_view_factory::create(categoryScrollWindow, category.second);
+            categoryGrid->Add(categoryView, 0, wxEXPAND | wxALL, 10);
+            categoryCount++;
         }
         
         categoryScrollWindow->SetSizer(categoryGrid);

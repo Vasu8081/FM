@@ -4,7 +4,7 @@ project(FinanceManager)
 set(CMAKE_CXX_STANDARD 17)
 
 # Find wxWidgets
-find_package(wxWidgets REQUIRED COMPONENTS core base adv aui richtext regex)
+find_package(wxWidgets REQUIRED COMPONENTS core base aui)
 find_package(ZLIB REQUIRED)
 find_package(CURL REQUIRED)
 if (NOT wxWidgets_FOUND)

@@ -17,20 +17,32 @@ public:
     BankAccountView(wxWindow *parent, std::shared_ptr<bank_account> model) : ModelView(parent, model)
     {
         auto sizer = new wxBoxSizer(wxVERTICAL);
-        _account_name = new wxStaticText(this, wxID_ANY, model->getBankName());
-        _account_number = new wxStaticText(this, wxID_ANY, model->getAccountNumber());
-        _account_balance = new wxStaticText(this, wxID_ANY, std::to_string(model->getBalance()));
-        _ifsc = new wxStaticText(this, wxID_ANY, model->getIfsc());
-        _branch = new wxStaticText(this, wxID_ANY, model->getBranch());
-        sizer->Add(_account_name, 0, wxEXPAND | wxALL, 5);
-        sizer->Add(_account_number, 0, wxEXPAND | wxALL, 5);
-        sizer->Add(_account_balance, 0, wxEXPAND | wxALL, 5);
-        sizer->Add(_ifsc, 0, wxEXPAND | wxALL, 5);
-        sizer->Add(_branch, 0, wxEXPAND | wxALL, 5);
+        
+        wxStaticBox* staticBox = new wxStaticBox(this, wxID_ANY, "Bank Account Details");
+        wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
+        
+        _account_name = new wxStaticText(this, wxID_ANY, "Bank Name: " + model->getBankName());
+        _account_balance = new wxStaticText(this, wxID_ANY, "Balance: " + std::to_string(model->getBalance()));
+        _account_number = new wxStaticText(this, wxID_ANY, "Account Number: " + model->getAccountNumber());
+        _ifsc = new wxStaticText(this, wxID_ANY, "IFSC: " + model->getIfsc());
+        _branch = new wxStaticText(this, wxID_ANY, "Branch: " + model->getBranch());
+        _account_name->SetFont(_account_name->GetFont().Bold());
+        _account_balance->SetFont(_account_balance->GetFont().Bold());
+        
+        staticBoxSizer->Add(_account_name, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(_account_number, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(_account_balance, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(_ifsc, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(_branch, 0, wxEXPAND | wxALL, 5);
+        
         auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
-        sizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
         Bind(wxEVT_BUTTON, &BankAccountView::viewTransactions, this, view_transactions->GetId());
+        
+        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
+        
         SetSizer(sizer);
+        SetBackgroundColour(wxColour(240, 248, 255));
     }
 
     void viewTransactions(wxCommandEvent& event){
