@@ -16,6 +16,7 @@ public:
 
         model_manager& model_manager_ = model_manager::getInstance();
         model_manager_.loadAccounts();
+        model_manager_.loadCategories();
         model_manager_.loadTransactions();
         
         task_bar_icon* task_bar_icon_ = new task_bar_icon();

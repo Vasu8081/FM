@@ -41,9 +41,7 @@ public:
     void fromJson(const json& j) override {
         if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Bank Name")) _bank_name = j.at("Bank Name").get<std::string>(), _name = j.at("Bank Name").get<std::string>();
-        if(j.contains("Balance")){
-            _balance = j.at("Balance").get<double>();
-        } 
+        if(j.contains("Balance")) _balance = j.at("Balance").get<double>();
         if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
         if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
         if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();

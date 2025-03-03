@@ -52,6 +52,22 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
             wxChoice* accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountChoices);
             input = accountChoice;
             inputFields[key] = input;
+        } else if (fieldType == "category") {
+            model_manager& model_manager_ = model_manager::getInstance();
+            auto categories = model_manager_.getCategories();
+            wxArrayString categoryChoices;
+            int index = 0;
+            
+            for (auto& cat : categories) {
+                std::string cat_id = cat.first;
+                std::shared_ptr<category> ca = cat.second;
+                categoryChoices.Add(ca->getName());
+                categoryMapping[index++] = cat_id;
+            }
+            
+            wxChoice* categoryChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, categoryChoices);
+            input = categoryChoice;
+            inputFields[key] = input;
         }
 
         if (input) {
@@ -104,11 +120,17 @@ void AddModelForm::OnAdd(wxCommandEvent& event) {
         } else if (wxCheckBox* checkBox = dynamic_cast<wxCheckBox*>(inputField)) {
             inputJson[key] = static_cast<bool>(checkBox->GetValue());
         } else if (wxChoice* choice = dynamic_cast<wxChoice*>(inputField)) {
-            int selection = choice->GetSelection();
-            inputJson[key] = accountMapping[selection];
+            if ( fieldTypes[key] == "category" ) {
+                int selection = choice->GetSelection();
+                inputJson[key] = categoryMapping[selection];
+            }
+            else if ( fieldTypes[key] == "account" ) {
+                int selection = choice->GetSelection();
+                inputJson[key] = accountMapping[selection];
+            }
         }
     }
-
+    
     _model->fromJson(inputJson);
     model_manager::getInstance().add(_model);
 }

@@ -26,8 +26,6 @@ public:
 
             wxArrayString accountTypes;
             accountTypes.Add("Bank Account");
-            accountTypes.Add("Loan Account");
-            accountTypes.Add("Investment Account");
 
             wxChoice* choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
             choice->SetSelection(0);
@@ -69,6 +67,22 @@ public:
             transactionDialog->ShowModal();
         });
 
+        //Add Category Button
+        wxButton* addCategoryButton = new wxButton(this, wxID_ANY, "Add Category");
+        sizer->Add(addCategoryButton, 0, wxEXPAND | wxALL, 10);
+
+        addCategoryButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent& event) {
+            wxDialog* categoryDialog = new wxDialog(this, wxID_ANY, "Add Category", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+            wxBoxSizer* categorySizer = new wxBoxSizer(wxVERTICAL);
+
+            auto categoryForm = new AddModelForm(categoryDialog, "Category");
+            categorySizer->Add(categoryForm, 1, wxEXPAND | wxALL, 5);
+
+            categoryDialog->SetSizer(categorySizer);
+            categoryDialog->Centre();
+            categoryDialog->ShowModal();
+        });
+
         // Account Listings
         wxStaticText* accountTitle = new wxStaticText(this, wxID_ANY, "Accounts");
         sizer->Add(accountTitle, 0, wxEXPAND | wxALL, 10);
@@ -85,6 +99,15 @@ public:
         for (auto transaction : _models.getTransactions()) {
             wxStaticText* transactionText = new wxStaticText(this, wxID_ANY, transaction->toStr());
             sizer->Add(transactionText, 0, wxEXPAND | wxALL, 10);
+        }
+
+        // Category Listings
+        wxStaticText* categoryTitle = new wxStaticText(this, wxID_ANY, "Categories");
+        sizer->Add(categoryTitle, 0, wxEXPAND | wxALL, 10);
+
+        for (auto cat : _models.getCategories()) {
+            wxStaticText* categoryText = new wxStaticText(this, wxID_ANY, cat.second->toStr());
+            sizer->Add(categoryText, 0, wxEXPAND | wxALL, 10);
         }
 
         SetSizer(sizer);

@@ -6,6 +6,7 @@
 #include <string>
 #include <models/bank_account.hpp>
 #include <models/transaction.hpp>
+#include <models/category.hpp>
 
 class model_factory {
 public:
@@ -15,6 +16,9 @@ public:
         }
         else if(id.find("Transaction")==0){
             return std::make_shared<transaction>();
+        }
+        else if(id.find("CAT.")==0 || id.find("Category")==0){
+            return std::make_shared<category>();
         }
         return nullptr;
     }

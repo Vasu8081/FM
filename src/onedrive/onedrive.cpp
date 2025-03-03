@@ -215,9 +215,11 @@ void onedrive::downloadFile(const std::string& oneDrivePath, const std::string& 
 void onedrive::sync_up() {
     uploadFile(_config.getTransactionsFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/transactions.json");
     uploadFile(_config.getAccountDefnsFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/account_defns.json");
+    uploadFile(_config.getCategoriesFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/categories.json");
 }
 
 void onedrive::sync_down() {
     downloadFile("FinanceManager/"+_config.getUserName()+"/transactions.json", _config.getTransactionsFilePath().ToStdString());
     downloadFile("FinanceManager/"+_config.getUserName()+"/account_defns.json", _config.getAccountDefnsFilePath().ToStdString());
+    downloadFile("FinanceManager/"+_config.getUserName()+"/categories.json", _config.getCategoriesFilePath().ToStdString());
 }

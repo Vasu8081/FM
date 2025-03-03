@@ -41,6 +41,7 @@ public:
     std::string getTenantId() const { return _tenant_id; }
     wxString getAccountDefnsFilePath() const { return _account_defns_file_path.GetFullPath(); }
     wxString getTransactionsFilePath() const { return _transactions_file_path.GetFullPath(); }
+    wxString getCategoriesFilePath() const { return _categories_file_path.GetFullPath(); }
 
     // Setters
     void setAccessToken(const std::string& access_token) { _access_token = access_token; }
@@ -49,6 +50,7 @@ public:
     void setTenantId(const std::string& tenant_id) { _tenant_id = tenant_id; }
     void setAccountDefnsFilePath(const wxString& path) { _account_defns_file_path = wxFileName(path); }
     void setTransactionsFilePath(const wxString& path) { _transactions_file_path = wxFileName(path); }
+    void setCategoriesFilePath(const wxString& path) { _categories_file_path = wxFileName(path); }
 
     // JSON serialization
     void fromJson(const json& j) {
@@ -58,6 +60,7 @@ public:
         j.at("tenant_id").get_to(_tenant_id);
         _account_defns_file_path = wxString(j.value("account_defns_file_path", "").c_str(), wxConvUTF8);
         _transactions_file_path = wxString(j.value("transactions_file_path", "").c_str(), wxConvUTF8);
+        _categories_file_path = wxString(j.value("categories_file_path", "").c_str(), wxConvUTF8);
     }
 
     void toJson(json& j) const {
@@ -67,7 +70,8 @@ public:
             {"client_id", _client_id},
             {"tenant_id", _tenant_id},
             {"account_defns_file_path", std::string(_account_defns_file_path.GetFullPath().mb_str())},
-            {"transactions_file_path", std::string(_transactions_file_path.GetFullPath().mb_str())}
+            {"transactions_file_path", std::string(_transactions_file_path.GetFullPath().mb_str())},
+            {"categories_file_path", std::string(_categories_file_path.GetFullPath().mb_str())}
         };
     }
 
@@ -79,6 +83,7 @@ private:
     std::string _tenant_id;
     wxFileName _account_defns_file_path;
     wxFileName _transactions_file_path;
+    wxFileName _categories_file_path;
     wxString _user_name;
 
     void init() {
@@ -101,6 +106,7 @@ private:
         _tenant_id = "consumers";
         _account_defns_file_path = wxFileName();
         _transactions_file_path = wxFileName();
+        _categories_file_path = wxFileName();
         _file_path.Mkdir(0777, wxPATH_MKDIR_FULL);
         save();
     }
@@ -151,6 +157,8 @@ private:
             _account_defns_file_path = wxFileName(stdPaths.GetUserDataDir(), "account_defns.json");
         if(_transactions_file_path.GetFullPath().empty())
             _transactions_file_path = wxFileName(stdPaths.GetUserDataDir(), "transactions.json");
+        if(_categories_file_path.GetFullPath().empty())
+            _categories_file_path = wxFileName(stdPaths.GetUserDataDir(), "categories.json");
     }
 
     ~app_config() {

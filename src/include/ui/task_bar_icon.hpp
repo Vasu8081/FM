@@ -38,6 +38,7 @@ public:
     }
 
     void on_exit(wxCommandEvent& event) {
+        model_manager::getInstance().save();
         int answer = wxMessageBox("Are you sure you want to exit?", "Confirm Exit", wxYES_NO | wxICON_QUESTION);
         if (answer == wxYES) {
             wxTheApp->ExitMainLoop();  // Proper way to exit wxWidgets app

@@ -18,12 +18,22 @@ public:
         return instance;
     }
 
+    void save() {
+        saveAccounts();
+        saveTransactions();
+        saveCategories();
+    }
+
     std::map<std::string, std::shared_ptr<account>> getAccounts() const {
         return _accounts;
     }
 
     std::vector<std::shared_ptr<transaction>> getTransactions() const {
         return _transactions;
+    }
+
+    std::map<std::string, std::shared_ptr<category>> getCategories() const {
+        return _categories;
     }
 
     void add(std::shared_ptr<model> model_) {
@@ -43,8 +53,12 @@ public:
             }
         }
 
-        saveAccounts();
-        saveTransactions();
+        std::shared_ptr<category> category_ = std::dynamic_pointer_cast<category>(model_);
+        if (category_) {
+            _categories[category_->generateID()] = category_;
+        }
+
+        save();
     }
 
     void loadAccounts() {
@@ -96,6 +110,47 @@ public:
         accounts_file.Close();
     }
 
+    void loadCategories() {
+        wxString categories_file_path = _config.getCategoriesFilePath();
+        wxFile categories_file(categories_file_path, wxFile::read);
+        if (!categories_file.IsOpened()) {
+            std::cerr << "Error: Failed to open config file: " << categories_file_path << std::endl;
+            return;
+        }
+
+        wxString categories;
+        categories_file.ReadAll(&categories);
+        categories_file.Close();
+
+        try {
+            json j = json::parse(std::string(categories.mb_str()));
+            for (auto& category_json : j) {
+                std::shared_ptr<category> category_ = std::dynamic_pointer_cast<category>(model_factory::create("Category"));
+                category_->fromJson(category_json);
+                _categories[category_->generateID()] = category_;
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing JSON: " << e.what() << std::endl;
+        }
+    }
+
+    void saveCategories() {
+        json j = json::array();
+        for (auto& category : _categories) {
+            j.push_back(category.second->toJson());
+        }
+
+        wxString categories_file_path = _config.getCategoriesFilePath();
+        wxFile categories_file(categories_file_path, wxFile::write);
+        if (!categories_file.IsOpened()) {
+            std::cerr << "Error: Failed to open config file: " << categories_file_path << std::endl;
+            return;
+        }
+
+        categories_file.Write(j.dump(4));
+        categories_file.Close();
+    }
+
     void loadTransactions() {
         _transactions = std::vector<std::shared_ptr<transaction>>();
         wxString transactions_file_path = _config.getTransactionsFilePath();
@@ -120,6 +175,9 @@ public:
                 }
                 if(transaction_->getToAccount()) {
                     _accounts[transaction_->getToAccount()->generateID()]->addToTransaction(transaction_);
+                }
+                if(transaction_->getCategory()) {
+                    _categories[transaction_->getCategory()->generateID()]->addTransaction(transaction_);
                 }
                 _transactions.push_back(transaction_);
             }
@@ -151,6 +209,7 @@ private:
     model_manager() = default;
     ~model_manager() = default;
     std::map<std::string, std::shared_ptr<account>> _accounts;
+    std::map<std::string, std::shared_ptr<category>> _categories;
     std::vector<std::shared_ptr<transaction>> _transactions;
 };
 

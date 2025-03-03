@@ -16,6 +16,7 @@ private:
     wxButton* addButton;
     wxButton* cancelButton;
     std::map<int, std::string> accountMapping;
+    std::map<int, std::string> categoryMapping;
     std::unordered_map<std::string, wxControl*> inputFields;
     std::unordered_map<std::string, std::string> fieldTypes;
     
