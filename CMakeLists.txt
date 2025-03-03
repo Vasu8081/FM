@@ -4,7 +4,7 @@ project(FinanceManager)
 set(CMAKE_CXX_STANDARD 17)
 
 # Find wxWidgets
-find_package(wxWidgets REQUIRED COMPONENTS core base)
+find_package(wxWidgets REQUIRED COMPONENTS core base adv aui richtext regex)
 find_package(ZLIB REQUIRED)
 find_package(CURL REQUIRED)
 if (NOT wxWidgets_FOUND)
@@ -36,4 +36,4 @@ endif()
 message(STATUS "Curl include dirs: ${CURL_INCLUDE_DIR}")
 message(STATUS "CUrl libraries: ${CURL_LIBRARY}")
 
-target_link_libraries(FinanceManager ${wxWidgets_LIBRARIES} CURL::libcurl onedrive models ui)
+target_link_libraries(FinanceManager ${wxWidgets_LIBRARIES} CURL::libcurl onedrive icons models ui)

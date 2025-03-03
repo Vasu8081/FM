@@ -3,6 +3,7 @@
 
 #include <wx/wx.h>
 #include <models/model.hpp>
+#include <icons.hpp>
 
 class ModelView : public wxPanel
 {
@@ -16,6 +17,7 @@ public:
 
 protected:
     std::shared_ptr<model> _model;
+    Icons& _icon = Icons::getInstance();
 };
 
 #endif // MODEL_VIEW_HPP
