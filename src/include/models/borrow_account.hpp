@@ -5,9 +5,9 @@
 #include <models/account.hpp>
 #include <wx/datetime.h>
 
-class borrow_account : public account {
+class BorrowAccount : public Account {
 public:
-    borrow_account() : _borrowed_date(), _due_date() {}
+    BorrowAccount() : _borrowed_date(), _due_date() {}
 
     std::string generateID() const override {
         return "BG." + _name;

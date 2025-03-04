@@ -3,20 +3,7 @@
 #include <models/account.hpp>
 #include <models/category.hpp>
 
-transaction::transaction(std::shared_ptr<account> from_account_id, 
-                         std::shared_ptr<account> to_account_id, 
-                         std::shared_ptr<category> category_id, 
-                         std::string description,
-                         wxDateTime date, 
-                         double amount)
-    : _from_account_id(from_account_id), 
-      _to_account_id(to_account_id), 
-      _category_id(category_id), 
-      _description(description), 
-      _date(date), 
-      _amount(amount) {}
-
-json transaction::toJson() const {
+json Transaction::toJson() const {
     json j;
     j["From Account"] = _from_account_id ? _from_account_id->generateID() : "";
     j["To Account"] = _to_account_id ? _to_account_id->generateID() : "";
@@ -27,7 +14,7 @@ json transaction::toJson() const {
     return j;
 }
 
-void transaction::fromJson(const json& j) {
+void Transaction::fromJson(const json& j) {
     model_manager& model_manager_ = model_manager::getInstance();
 
     if(j.contains("From Account")){
@@ -65,11 +52,11 @@ void transaction::fromJson(const json& j) {
     }  
 }
 
-std::unordered_map<std::string, std::string> transaction::fieldTypes() const {
+std::unordered_map<std::string, std::string> Transaction::fieldTypes() const {
     return {
-        {"From Account", "account"},
-        {"To Account", "account"},
-        {"Category", "category"},
+        {"From Account", "Account"},
+        {"To Account", "Account"},
+        {"Category", "Category"},
         {"Description", "string"},
         {"Date", "date"},
         {"Amount", "double"}
@@ -77,17 +64,17 @@ std::unordered_map<std::string, std::string> transaction::fieldTypes() const {
 }
 
 // Getters
-std::shared_ptr<account> transaction::getFromAccount() const { return _from_account_id; }
-std::shared_ptr<account> transaction::getToAccount() const { return _to_account_id; }
-std::shared_ptr<category> transaction::getCategory() const { return _category_id; }
-std::string transaction::getDescription() const { return _description; }
-wxDateTime transaction::getDate() const { return _date; }
-double transaction::getAmount() const { return _amount; }
+std::shared_ptr<Account> Transaction::getFromAccount() const { return _from_account_id; }
+std::shared_ptr<Account> Transaction::getToAccount() const { return _to_account_id; }
+std::shared_ptr<Category> Transaction::getCategory() const { return _category_id; }
+std::string Transaction::getDescription() const { return _description; }
+wxDateTime Transaction::getDate() const { return _date; }
+double Transaction::getAmount() const { return _amount; }
 
 // Setters
-void transaction::setFromAccount(std::shared_ptr<account> from_account_id) { _from_account_id = from_account_id; }
-void transaction::setToAccount(std::shared_ptr<account> to_account_id) { _to_account_id = to_account_id; }
-void transaction::setCategory(std::shared_ptr<category> category_id) { _category_id = category_id; }
-void transaction::setDescription(std::string description) { _description = description; }
-void transaction::setDate(wxDateTime date) { _date = date; }
-void transaction::setAmount(double amount) { _amount = amount; }
+void Transaction::setFromAccount(std::shared_ptr<Account> from_account_id) { _from_account_id = from_account_id; }
+void Transaction::setToAccount(std::shared_ptr<Account> to_account_id) { _to_account_id = to_account_id; }
+void Transaction::setCategory(std::shared_ptr<Category> category_id) { _category_id = category_id; }
+void Transaction::setDescription(std::string description) { _description = description; }
+void Transaction::setDate(wxDateTime date) { _date = date; }
+void Transaction::setAmount(double amount) { _amount = amount; }

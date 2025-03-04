@@ -14,7 +14,7 @@
 class BankAccountView : public AccountView
 {
 public:
-    BankAccountView(wxWindow *parent, std::shared_ptr<bank_account> model) : AccountView(parent, model)
+    BankAccountView(wxWindow *parent, std::shared_ptr<BankAccount> model) : AccountView(parent, model)
     {
         auto sizer = new wxBoxSizer(wxVERTICAL);
         
@@ -47,7 +47,7 @@ public:
 
     void update() override
     {
-        auto model = std::dynamic_pointer_cast<bank_account>(_model);
+        auto model = std::dynamic_pointer_cast<BankAccount>(_model);
         _account_balance->SetLabelText(std::to_string(model->getBalance()));
     }
     

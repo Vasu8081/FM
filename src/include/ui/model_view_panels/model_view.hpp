@@ -8,7 +8,7 @@
 class ModelView : public wxPanel
 {
 public:
-    ModelView(wxWindow *parent, std::shared_ptr<model> model) : wxPanel(parent), _model(model)
+    ModelView(wxWindow *parent, std::shared_ptr<Model> model) : wxPanel(parent), _model(model)
     {
         model->registerObserver([this]() { update(); });
     }
@@ -16,7 +16,7 @@ public:
     virtual void update() = 0;
 
 protected:
-    std::shared_ptr<model> _model;
+    std::shared_ptr<Model> _model;
     Icons& _icon = Icons::getInstance();
 };
 

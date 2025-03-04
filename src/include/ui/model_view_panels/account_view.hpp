@@ -14,18 +14,18 @@
 class AccountView : public ModelView
 {
 public:
-    AccountView(wxWindow *parent, std::shared_ptr<account> model) : ModelView(parent, model) {}
+    AccountView(wxWindow *parent, std::shared_ptr<Account> model) : ModelView(parent, model) {}
 
 protected:
 
     void viewTransactions(wxCommandEvent& event){
-        auto model = std::dynamic_pointer_cast<account>(_model);
+        auto model = std::dynamic_pointer_cast<Account>(_model);
         auto from_transactions = model->getFromTransactions();
         auto to_transactions = model->getToTransactions();
         auto transactions = from_transactions;
         transactions.insert(transactions.end(), to_transactions.begin(), to_transactions.end());
         
-        std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<transaction> a, std::shared_ptr<transaction> b){
+        std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<Transaction> a, std::shared_ptr<Transaction> b){
             return a->getDate() > b->getDate();
         });
         

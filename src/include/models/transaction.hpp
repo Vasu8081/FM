@@ -6,19 +6,12 @@
 #include <wx/datetime.h>
 
 class model_manager;
-class account;
-class category;
+class Account;
+class Category;
 
-class transaction : public model {
+class Transaction : public Model {
 public:
-    transaction() = default;
-
-    transaction(std::shared_ptr<account> from_account_id, 
-                std::shared_ptr<account> to_account_id, 
-                std::shared_ptr<category> category_id, 
-                std::string description,
-                wxDateTime date, 
-                double amount);
+    Transaction() = default;
 
     json toJson() const override;
     void fromJson(const json& j) override;
@@ -26,25 +19,25 @@ public:
     std::unordered_map<std::string, std::string> fieldTypes() const override;
 
     // Getters
-    std::shared_ptr<account> getFromAccount() const;
-    std::shared_ptr<account> getToAccount() const;
-    std::shared_ptr<category> getCategory() const;
+    std::shared_ptr<Account> getFromAccount() const;
+    std::shared_ptr<Account> getToAccount() const;
+    std::shared_ptr<Category> getCategory() const;
     std::string getDescription() const;
     wxDateTime getDate() const;
     double getAmount() const;
 
     // Setters
-    void setFromAccount(std::shared_ptr<account> from_account_id);
-    void setToAccount(std::shared_ptr<account> to_account_id);
-    void setCategory(std::shared_ptr<category> category_id);
+    void setFromAccount(std::shared_ptr<Account> from_account_id);
+    void setToAccount(std::shared_ptr<Account> to_account_id);
+    void setCategory(std::shared_ptr<Category> category_id);
     void setDescription(std::string description);
     void setDate(wxDateTime date);
     void setAmount(double amount);
 
 protected:
-    std::shared_ptr<account> _from_account_id;
-    std::shared_ptr<account> _to_account_id;
-    std::shared_ptr<category> _category_id;
+    std::shared_ptr<Account> _from_account_id;
+    std::shared_ptr<Account> _to_account_id;
+    std::shared_ptr<Category> _category_id;
     std::string _description;
     wxDateTime _date;
     double _amount;

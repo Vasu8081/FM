@@ -13,24 +13,24 @@
 
 class model_factory {
 public:
-    static std::shared_ptr<model> create(const std::string& id) {
+    static std::shared_ptr<Model> create(const std::string& id) {
         if (id.find("BA.") == 0 || id.find("Bank Account")==0) {
-            return std::make_shared<bank_account>();
+            return std::make_shared<BankAccount>();
         }
         if (id.find("BG.") == 0 || id.find("Borrow Account")==0) {
-            return std::make_shared<borrow_account>();
+            return std::make_shared<BorrowAccount>();
         }
         if (id.find("GV.") == 0 || id.find("Give Account")==0) {
-            return std::make_shared<give_account>();
+            return std::make_shared<GiveAccount>();
         }
         if (id.find("CC.") == 0 || id.find("Credit Card")==0) {
-            return std::make_shared<credit_card_account>();
+            return std::make_shared<CreditCardAccount>();
         }
         if(id.find("Transaction")==0){
-            return std::make_shared<transaction>();
+            return std::make_shared<Transaction>();
         }
         if(id.find("CAT.")==0 || id.find("Category")==0){
-            return std::make_shared<category>();
+            return std::make_shared<Category>();
         }
         return nullptr;
     }

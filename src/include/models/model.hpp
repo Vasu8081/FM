@@ -7,10 +7,10 @@
 
 using json = nlohmann::json;
 
-class model : public std::enable_shared_from_this<model>
+class Model : public std::enable_shared_from_this<Model>
 {
 public:
-    model() = default;
+    Model() = default;
 
     virtual json toJson() const = 0;
     virtual void fromJson(const json& j) = 0;

@@ -6,9 +6,9 @@
 #include <wx/datetime.h>
 #include <wx/msgdlg.h>
 
-class credit_card_account : public account {
+class CreditCardAccount : public Account {
 public:
-    credit_card_account() = default;
+    CreditCardAccount() = default;
 
     std::string generateID() const override {
         return "CC." + _card_number;

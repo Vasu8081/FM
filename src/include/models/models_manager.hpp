@@ -24,25 +24,25 @@ public:
         saveCategories();
     }
 
-    std::map<std::string, std::shared_ptr<account>> getAccounts() const {
+    std::map<std::string, std::shared_ptr<Account>> getAccounts() const {
         return _accounts;
     }
 
-    std::vector<std::shared_ptr<transaction>> getTransactions() const {
+    std::vector<std::shared_ptr<Transaction>> getTransactions() const {
         return _transactions;
     }
 
-    std::map<std::string, std::shared_ptr<category>> getCategories() const {
+    std::map<std::string, std::shared_ptr<Category>> getCategories() const {
         return _categories;
     }
 
-    void add(std::shared_ptr<model> model_) {
-        std::shared_ptr<account> account_ = std::dynamic_pointer_cast<account>(model_);
+    void add(std::shared_ptr<Model> model_) {
+        std::shared_ptr<Account> account_ = std::dynamic_pointer_cast<Account>(model_);
         if (account_) {
             _accounts[account_->generateID()] = account_;
         }
 
-        std::shared_ptr<transaction> transaction_ = std::dynamic_pointer_cast<transaction>(model_);
+        std::shared_ptr<Transaction> transaction_ = std::dynamic_pointer_cast<Transaction>(model_);
         if (transaction_) {
             _transactions.push_back(transaction_);
             if(transaction_->getFromAccount()) {
@@ -53,7 +53,7 @@ public:
             }
         }
 
-        std::shared_ptr<category> category_ = std::dynamic_pointer_cast<category>(model_);
+        std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_);
         if (category_) {
             _categories[category_->generateID()] = category_;
         }
@@ -62,7 +62,7 @@ public:
     }
 
     void loadAccounts() {
-        _accounts = std::map<std::string, std::shared_ptr<account>>();
+        _accounts = std::map<std::string, std::shared_ptr<Account>>();
         wxString account_file_path = _config.getAccountDefnsFilePath();
 
         wxFile accounts_file(account_file_path, wxFile::read);
@@ -79,12 +79,12 @@ public:
             json j = json::parse(std::string(accounts.mb_str()));
             for (auto& account_json : j) {
                 std::string account_id = account_json["Id"].get<std::string>();
-                std::shared_ptr<account> acc = std::dynamic_pointer_cast<account>(model_factory::create(account_id));
+                std::shared_ptr<Account> acc = std::dynamic_pointer_cast<Account>(model_factory::create(account_id));
                 if (acc) {
                     acc->fromJson(account_json);
                     _accounts[acc->generateID()] = acc;
                 } else {
-                    std::cerr << "Error: Unknown account type for ID: " << account_id << std::endl;
+                    std::cerr << "Error: Unknown Account type for ID: " << account_id << std::endl;
                 }
             }
         } catch (const std::exception& e) {
@@ -124,7 +124,7 @@ public:
         try {
             json j = json::parse(std::string(categories.mb_str()));
             for (auto& category_json : j) {
-                std::shared_ptr<category> category_ = std::dynamic_pointer_cast<category>(model_factory::create("Category"));
+                std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_factory::create("Category"));
                 category_->fromJson(category_json);
                 _categories[category_->generateID()] = category_;
             }
@@ -151,7 +151,7 @@ public:
     }
 
     void loadTransactions() {
-        _transactions = std::vector<std::shared_ptr<transaction>>();
+        _transactions = std::vector<std::shared_ptr<Transaction>>();
         wxString transactions_file_path = _config.getTransactionsFilePath();
 
         wxFile transactions_file(transactions_file_path, wxFile::read);
@@ -167,7 +167,7 @@ public:
         try {
             json j = json::parse(std::string(transactions.mb_str()));
             for (auto& transaction_json : j) {
-                std::shared_ptr<transaction> transaction_ = std::dynamic_pointer_cast<transaction>(model_factory::create("Transaction"));
+                std::shared_ptr<Transaction> transaction_ = std::dynamic_pointer_cast<Transaction>(model_factory::create("Transaction"));
                 transaction_->fromJson(transaction_json);
                 if(transaction_->getFromAccount()) {
                     _accounts[transaction_->getFromAccount()->generateID()]->addFromTransaction(transaction_);
@@ -207,9 +207,9 @@ private:
     app_config& _config = app_config::getInstance();
     model_manager() = default;
     ~model_manager() = default;
-    std::map<std::string, std::shared_ptr<account>> _accounts;
-    std::map<std::string, std::shared_ptr<category>> _categories;
-    std::vector<std::shared_ptr<transaction>> _transactions;
+    std::map<std::string, std::shared_ptr<Account>> _accounts;
+    std::map<std::string, std::shared_ptr<Category>> _categories;
+    std::vector<std::shared_ptr<Transaction>> _transactions;
 };
 
 #endif // MODEL_MANAGER_HPP

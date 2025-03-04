@@ -4,9 +4,9 @@
 #include <string>
 #include <models/account.hpp>
 
-class bank_account : public account {
+class BankAccount : public Account {
 public:
-    bank_account() = default;
+    BankAccount() = default;
 
     std::string generateID() const override {
         return "BA."+_bank_name+"."+_account_number;

@@ -11,20 +11,20 @@
 
 class model_view_factory {
 public:
-    static ModelView* create(wxWindow *parent, std::shared_ptr<model> model) {
-        if(auto mdl = std::dynamic_pointer_cast<bank_account>(model)) {
+    static ModelView* create(wxWindow *parent, std::shared_ptr<Model> model) {
+        if(auto mdl = std::dynamic_pointer_cast<BankAccount>(model)) {
             return new BankAccountView(parent, mdl);
         }
-        if(auto mdl = std::dynamic_pointer_cast<borrow_account>(model)) {
+        if(auto mdl = std::dynamic_pointer_cast<BorrowAccount>(model)) {
             return new BorrowAccountView(parent, mdl);
         }
-        if(auto mdl = std::dynamic_pointer_cast<give_account>(model)) {
+        if(auto mdl = std::dynamic_pointer_cast<GiveAccount>(model)) {
             return new GiveAccountView(parent, mdl);
         }
-        if(auto mdl = std::dynamic_pointer_cast<credit_card_account>(model)) {
+        if(auto mdl = std::dynamic_pointer_cast<CreditCardAccount>(model)) {
             return new CreditCardAccountView(parent, mdl);
         }
-        if(auto mdl = std::dynamic_pointer_cast<category>(model)) {
+        if(auto mdl = std::dynamic_pointer_cast<Category>(model)) {
             return new CategoryView(parent, mdl);
         }
         return nullptr;

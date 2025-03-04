@@ -14,7 +14,7 @@
 class CreditCardAccountView : public AccountView
 {
 public:
-    CreditCardAccountView(wxWindow *parent, std::shared_ptr<credit_card_account> model) : AccountView(parent, model){
+    CreditCardAccountView(wxWindow *parent, std::shared_ptr<CreditCardAccount> model) : AccountView(parent, model){
         auto sizer = new wxBoxSizer(wxVERTICAL);
 
         wxStaticBox* staticBox = new wxStaticBox(this, wxID_ANY, "Credit Card Details");
@@ -53,7 +53,7 @@ public:
 
     void update() override
     {
-        auto model = std::dynamic_pointer_cast<credit_card_account>(_model);
+        auto model = std::dynamic_pointer_cast<CreditCardAccount>(_model);
         _limit_left->SetLabelText("Limit Left: " + std::to_string(model->getLimitLeft()));
     }
     

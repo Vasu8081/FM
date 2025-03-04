@@ -12,7 +12,7 @@
 class BorrowAccountView : public AccountView
 {
 public:
-BorrowAccountView(wxWindow *parent, std::shared_ptr<borrow_account> model) : AccountView(parent, model)
+BorrowAccountView(wxWindow *parent, std::shared_ptr<BorrowAccount> model) : AccountView(parent, model)
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
     
@@ -44,7 +44,7 @@ BorrowAccountView(wxWindow *parent, std::shared_ptr<borrow_account> model) : Acc
 
 void update() override
 {
-    auto model = std::dynamic_pointer_cast<borrow_account>(_model);
+    auto model = std::dynamic_pointer_cast<BorrowAccount>(_model);
     _borrowedAmount->SetLabelText("Remaining Borrowed Amount: " + std::to_string(model->getBorrowedAmount()));
 }
 

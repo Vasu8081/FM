@@ -8,17 +8,13 @@
 #include <unordered_map>
 #include <json.hpp>
 
-class category : public model {
+class Category : public Model {
 public:
-    category() {
+    Category() {
         spends.assign(12, 0.0);
     }
 
-    category(std::string id, std::string name, std::string description, double monthly_budget) 
-        : _id(id), _name(name), _description(description), _monthly_budget(monthly_budget) {
-        spends.assign(12, 0.0);
-    }
-    virtual ~category() = default;
+    virtual ~Category() = default;
 
     std::string generateID() const { return "CAT." + _name; };
 
@@ -57,12 +53,12 @@ public:
     double getSpentThisMonth() const { return spends[0]; }
     double getSpentLastMonth() const { return spends[1]; }
     double getAverageThreeMonths() const { return calculateAverage(3); }
-    std::vector<std::shared_ptr<transaction>> getTransactions() const { return _transactions; }
+    std::vector<std::shared_ptr<Transaction>> getTransactions() const { return _transactions; }
     
     // Setters
     void setMonthlyBudget(double monthly_budget) { _monthly_budget = monthly_budget; }
 
-    void addTransaction(std::shared_ptr<transaction> transaction) { 
+    void addTransaction(std::shared_ptr<Transaction> transaction) { 
         _transactions.push_back(transaction);
         double amount = transaction->getAmount();
         wxDateTime transaction_date = transaction->getDate();
@@ -79,7 +75,7 @@ private:
     std::string _description;
     double _monthly_budget = 0.0;
     std::vector<double> spends;
-    std::vector<std::shared_ptr<transaction>> _transactions;
+    std::vector<std::shared_ptr<Transaction>> _transactions;
 
     int getMonthOffset(int offset) const {
         wxDateTime now = wxDateTime::Now();

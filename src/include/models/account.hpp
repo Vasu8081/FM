@@ -6,14 +6,14 @@
 #include <unordered_map>
 #include <models/transaction.hpp>
 
-class account : public virtual model {
+class Account : public virtual Model {
 public:
-    account() = default;
-    account(std::string id, std::string name) : _id(id), _name(name) {
-        _from_transactions = std::vector<std::shared_ptr<transaction>>();
-        _to_transactions = std::vector<std::shared_ptr<transaction>>();
+    Account() = default;
+    Account(std::string id, std::string name) : _id(id), _name(name) {
+        _from_transactions = std::vector<std::shared_ptr<Transaction>>();
+        _to_transactions = std::vector<std::shared_ptr<Transaction>>();
     }
-    virtual ~account() = default;
+    virtual ~Account() = default;
 
     virtual std::string generateID() const = 0;
 
@@ -39,9 +39,9 @@ public:
         };
     }
 
-    //Behavior if this account is a to account during a transaction
+    //Behavior if this Account is a to Account during a Transaction
     virtual void amountIn(double amount) = 0;
-    //Behavior if this account is a from account during a transaction
+    //Behavior if this Account is a from Account during a Transaction
     virtual void amountOut(double amount) = 0;
 
     //Getters
@@ -49,17 +49,17 @@ public:
     std::string getName() const { return _name; }
 
     //Setters
-    void addFromTransaction(std::shared_ptr<transaction> t) { _from_transactions.push_back(t); amountOut(t->getAmount()); }
-    void addToTransaction(std::shared_ptr<transaction> t) { _to_transactions.push_back(t); amountIn(t->getAmount()); }
+    void addFromTransaction(std::shared_ptr<Transaction> t) { _from_transactions.push_back(t); amountOut(t->getAmount()); }
+    void addToTransaction(std::shared_ptr<Transaction> t) { _to_transactions.push_back(t); amountIn(t->getAmount()); }
 
-    std::vector<std::shared_ptr<transaction>> getFromTransactions() const { return _from_transactions; }
-    std::vector<std::shared_ptr<transaction>> getToTransactions() const { return _to_transactions; }
+    std::vector<std::shared_ptr<Transaction>> getFromTransactions() const { return _from_transactions; }
+    std::vector<std::shared_ptr<Transaction>> getToTransactions() const { return _to_transactions; }
 
 protected:
     std::string _id;
     std::string _name;
-    std::vector<std::shared_ptr<transaction>> _from_transactions;
-    std::vector<std::shared_ptr<transaction>> _to_transactions;
+    std::vector<std::shared_ptr<Transaction>> _from_transactions;
+    std::vector<std::shared_ptr<Transaction>> _to_transactions;
 };
 
 #endif // ACCOUNT_HPP

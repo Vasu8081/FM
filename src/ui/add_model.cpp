@@ -7,7 +7,7 @@
 AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(parent) {
     wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
     inputFields.clear();
-    _model = std::dynamic_pointer_cast<model>(model_factory::create(type));
+    _model = std::dynamic_pointer_cast<Model>(model_factory::create(type));
     if (!_model) {
         wxMessageBox("Invalid model type: " + type);
         return;
@@ -35,7 +35,7 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
         } else if (fieldType == "bool") {
             wxCheckBox* checkBox = new wxCheckBox(this, wxID_ANY, "");
             input = checkBox;
-        } else if (fieldType == "account") {
+        } else if (fieldType == "Account") {
             model_manager& model_manager_ = model_manager::getInstance();
             auto accounts = model_manager_.getAccounts();
             wxArrayString accountChoices;
@@ -46,7 +46,7 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
             }
             wxChoice* accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(200, -1), accountChoices);
             input = accountChoice;
-        } else if (fieldType == "category") {
+        } else if (fieldType == "Category") {
             model_manager& model_manager_ = model_manager::getInstance();
             auto categories = model_manager_.getCategories();
             wxArrayString categoryChoices;
@@ -113,9 +113,9 @@ void AddModelForm::OnAdd(wxCommandEvent& event) {
             inputJson[key] = static_cast<bool>(checkBox->GetValue());
         } else if (wxChoice* choice = dynamic_cast<wxChoice*>(inputField)) {
             int selection = choice->GetSelection();
-            if (fieldTypes[key] == "category") {
+            if (fieldTypes[key] == "Category") {
                 inputJson[key] = categoryMapping[selection];
-            } else if (fieldTypes[key] == "account") {
+            } else if (fieldTypes[key] == "Account") {
                 inputJson[key] = accountMapping[selection];
             }
         }

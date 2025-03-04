@@ -16,7 +16,7 @@
 class CategoryView : public ModelView
 {
 public:
-    CategoryView(wxWindow *parent, std::shared_ptr<category> model) : ModelView(parent, model)
+    CategoryView(wxWindow *parent, std::shared_ptr<Category> model) : ModelView(parent, model)
     {
         auto sizer = new wxBoxSizer(wxVERTICAL);
         
@@ -48,10 +48,10 @@ public:
     }
 
     void viewTransactions(wxCommandEvent& event){
-        auto model = std::dynamic_pointer_cast<category>(_model);
+        auto model = std::dynamic_pointer_cast<Category>(_model);
         auto transactions = model->getTransactions();
 
-        std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<transaction> a, std::shared_ptr<transaction> b){
+        std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<Transaction> a, std::shared_ptr<Transaction> b){
             return a->getDate() > b->getDate();
         });
         
@@ -95,7 +95,7 @@ public:
 
     void update() override
     {
-        auto model = std::dynamic_pointer_cast<category>(_model);
+        auto model = std::dynamic_pointer_cast<Category>(_model);
         _category_name->SetLabel("Name: " + model->getName());
         _category_description->SetLabel("Description: " + model->getDescription());
         _category_monthly_budget->SetLabel("Monthly Budget: " + std::to_string(model->getMonthlyBudget()));

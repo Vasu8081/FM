@@ -12,7 +12,7 @@
 class AddModelForm : public wxPanel {
 private:
     std::string _model_type;
-    std::shared_ptr<model> _model;
+    std::shared_ptr<Model> _model;
     wxButton* addButton;
     wxButton* cancelButton;
     std::map<int, std::string> accountMapping;

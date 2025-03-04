@@ -12,7 +12,7 @@
 class GiveAccountView : public AccountView
 {
 public:
-GiveAccountView(wxWindow *parent, std::shared_ptr<give_account> model) : AccountView(parent, model)
+GiveAccountView(wxWindow *parent, std::shared_ptr<GiveAccount> model) : AccountView(parent, model)
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
     
@@ -44,7 +44,7 @@ GiveAccountView(wxWindow *parent, std::shared_ptr<give_account> model) : Account
 
 void update() override
 {
-    auto model = std::dynamic_pointer_cast<give_account>(_model);
+    auto model = std::dynamic_pointer_cast<GiveAccount>(_model);
     _givenAmount->SetLabelText("Remaining Given Amount: " + std::to_string(model->getGivenAmount()));
 }
 
