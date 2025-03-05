@@ -6,6 +6,8 @@
 #include <ui/model_view_panels/borrow_account_view.hpp>
 #include <ui/model_view_panels/give_account_view.hpp>
 #include <ui/model_view_panels/credit_card_account_view.hpp>
+#include <ui/model_view_panels/rd_account_view.hpp>
+#include <ui/model_view_panels/chit_account_view.hpp>
 #include <ui/model_view_panels/category_view.hpp>
 #include <memory>
 
@@ -23,6 +25,12 @@ public:
         }
         if(auto mdl = std::dynamic_pointer_cast<CreditCardAccount>(model)) {
             return new CreditCardAccountView(parent, mdl);
+        }
+        if(auto mdl = std::dynamic_pointer_cast<RdAccount>(model)) {
+            return new RdAccountView(parent, mdl);
+        }
+        if(auto mdl = std::dynamic_pointer_cast<ChitAccount>(model)) {
+            return new ChitAccountView(parent, mdl);
         }
         if(auto mdl = std::dynamic_pointer_cast<Category>(model)) {
             return new CategoryView(parent, mdl);

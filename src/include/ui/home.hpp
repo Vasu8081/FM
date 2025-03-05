@@ -105,6 +105,8 @@ private:
         accountTypes.Add("Borrow Account");
         accountTypes.Add("Give Account");
         accountTypes.Add("Credit Card");
+        accountTypes.Add("Rd Account");
+        accountTypes.Add("Chit Account");
 
         wxChoice* choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
         choice->SetSelection(0);

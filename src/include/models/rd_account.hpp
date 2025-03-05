@@ -1,16 +1,16 @@
-#ifndef CHIT_ACCOUNT_HPP
-#define CHIT_ACCOUNT_HPP
+#ifndef RD_ACCOUNT_HPP
+#define RD_ACCOUNT_HPP
 
 #include <string>
 #include <models/account.hpp>
 #include <wx/datetime.h>
 
-class ChitAccount : public Account {
+class RdAccount : public Account {
 public:
-    ChitAccount() = default;
+    RdAccount() = default;
 
     std::string generateID() const override {
-        return "CHIT."+_name;
+        return "RD."+_name;
     }
 
     //Getters
@@ -25,7 +25,7 @@ public:
     json toJson() const override {
         json j = {
             {"Id", _id},
-            {"Chit Name", _name},
+            {"RD Name", _name},
             {"Monthly Payment", _monthly_payment},
             {"Paid Amount", _paid_amount},
             {"Maturity Amount", _maturity_amount},
@@ -39,7 +39,7 @@ public:
 
     void fromJson(const json& j) override {
         if(j.contains("Id")) _id = j.at("Id").get<std::string>();
-        if(j.contains("Chit Name")) _name = j.at("Chit Name").get<std::string>();
+        if(j.contains("RD Name")) _name = j.at("RD Name").get<std::string>();
         if(j.contains("Monthly Payment")) _monthly_payment = j.at("Monthly Payment").get<double>();
         if(j.contains("Maturity Amount")) _maturity_amount = j.at("Maturity Amount").get<double>();
         if(j.contains("Start Date")) _start_date.ParseISODate(j.at("Start Date").get<std::string>());
@@ -50,7 +50,7 @@ public:
 
     std::unordered_map<std::string, std::string> fieldTypes() const override {
         return {
-            {"Chit Name", "string"},
+            {"RD Name", "string"},
             {"Monthly Payment", "double"},
             {"Maturity Amount", "double"},
             {"Start Date", "date"},
