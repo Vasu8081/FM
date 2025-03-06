@@ -1,0 +1,53 @@
+{
+    "BankAccount" : {
+        "displayName" : "Bank Account",
+        "fields" : {
+            "accountNumber" : {
+                "displayName" : "Account Number",
+                "type" : "string",
+                "show_in_add_model" : true,
+                "show_in_view_model" : true,
+                "is_bolded" : false,
+                "is_amount" : false
+            },
+            "bankName" : {
+                "displayName" : "Bank Name",
+                "type" : "string",
+                "show_in_add_model" : true,
+                "show_in_view_model" : true,
+                "is_bolded" : false,
+                "is_amount" : false
+            },
+            "branchName" : {
+                "displayName" : "Branch Name",
+                "type" : "string",
+                "show_in_add_model" : true,
+                "show_in_view_model" : true,
+                "is_bolded" : false,
+                "is_amount" : false
+            },
+            "ifscCode" : {
+                "displayName" : "IFSC Code",
+                "type" : "string",
+                "show_in_add_model" : true,
+                "show_in_view_model" : true,
+                "is_bolded" : false,
+                "is_amount" : false
+            },
+            "balance" : {
+                "displayName" : "Account Balance",
+                "type" : "double",
+                "show_in_add_model" : false,
+                "show_in_view_model" : true,
+                "is_bolded" : true,
+                "is_amount" : true
+            },
+            "amountIn": {
+                "balance" : "balance+amount"
+            },
+            "amountOut": {
+                "balance" : "balance-amount"
+            }
+        }
+    }
+}

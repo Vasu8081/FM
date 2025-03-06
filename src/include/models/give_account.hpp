@@ -9,20 +9,21 @@ class GiveAccount : public Account {
 public:
     GiveAccount() : _given_date(), _due_date() {}
 
-    std::string generateID() const override {
+    std::string getID() const override {
         return "GV." + _name;
     }
 
     // Getters
     std::string getGivenTo() const { return _name; }
     double getGivenAmount() const { return _given_amount; }
+    double portfolioValue() const override { return _given_amount; }
     wxDateTime getGivenDate() const { return _given_date; }
     wxDateTime getDueDate() const { return _due_date; }
 
     // Inherited functions
     json toJson() const override {
         json j = {
-            {"Id", _id},
+            {"ID", getID()},
             {"Given To", _name},
             {"Given Amount", _given_amount}
         };
@@ -36,7 +37,6 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Given To")) _name = j.at("Given To").get<std::string>();
         
         if(j.contains("Given Date")) {
@@ -55,10 +55,9 @@ public:
             }
         }
         
-        if(_id.empty()) _id = generateID();
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Given To", "string"},
             {"Given Date", "date"},

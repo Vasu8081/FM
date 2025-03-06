@@ -16,7 +16,7 @@ public:
     json toJson() const override;
     void fromJson(const json& j) override;
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override;
+    std::unordered_map<std::string, std::string> inputFormFields() const override;
 
     // Getters
     std::shared_ptr<Account> getFromAccount() const;

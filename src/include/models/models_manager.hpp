@@ -39,23 +39,23 @@ public:
     void add(std::shared_ptr<Model> model_) {
         std::shared_ptr<Account> account_ = std::dynamic_pointer_cast<Account>(model_);
         if (account_) {
-            _accounts[account_->generateID()] = account_;
+            _accounts[account_->getID()] = account_;
         }
 
         std::shared_ptr<Transaction> transaction_ = std::dynamic_pointer_cast<Transaction>(model_);
         if (transaction_) {
             _transactions.push_back(transaction_);
             if(transaction_->getFromAccount()) {
-                _accounts[transaction_->getFromAccount()->generateID()]->addFromTransaction(transaction_);
+                _accounts[transaction_->getFromAccount()->getID()]->addFromTransaction(transaction_);
             }
             if(transaction_->getToAccount()) {
-                _accounts[transaction_->getToAccount()->generateID()]->addToTransaction(transaction_);
+                _accounts[transaction_->getToAccount()->getID()]->addToTransaction(transaction_);
             }
         }
 
         std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_);
         if (category_) {
-            _categories[category_->generateID()] = category_;
+            _categories[category_->getID()] = category_;
         }
 
         save();
@@ -82,7 +82,7 @@ public:
                 std::shared_ptr<Account> acc = std::dynamic_pointer_cast<Account>(model_factory::create(account_id));
                 if (acc) {
                     acc->fromJson(account_json);
-                    _accounts[acc->generateID()] = acc;
+                    _accounts[acc->getID()] = acc;
                 } else {
                     std::cerr << "Error: Unknown Account type for ID: " << account_id << std::endl;
                 }
@@ -126,7 +126,7 @@ public:
             for (auto& category_json : j) {
                 std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_factory::create("Category"));
                 category_->fromJson(category_json);
-                _categories[category_->generateID()] = category_;
+                _categories[category_->getID()] = category_;
             }
         } catch (const std::exception& e) {
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
@@ -170,13 +170,13 @@ public:
                 std::shared_ptr<Transaction> transaction_ = std::dynamic_pointer_cast<Transaction>(model_factory::create("Transaction"));
                 transaction_->fromJson(transaction_json);
                 if(transaction_->getFromAccount()) {
-                    _accounts[transaction_->getFromAccount()->generateID()]->addFromTransaction(transaction_);
+                    _accounts[transaction_->getFromAccount()->getID()]->addFromTransaction(transaction_);
                 }
                 if(transaction_->getToAccount()) {
-                    _accounts[transaction_->getToAccount()->generateID()]->addToTransaction(transaction_);
+                    _accounts[transaction_->getToAccount()->getID()]->addToTransaction(transaction_);
                 }
                 if(transaction_->getCategory()) {
-                    _categories[transaction_->getCategory()->generateID()]->addTransaction(transaction_);
+                    _categories[transaction_->getCategory()->getID()]->addTransaction(transaction_);
                 }
                 _transactions.push_back(transaction_);
             }

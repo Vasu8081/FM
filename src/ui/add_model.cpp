@@ -13,7 +13,7 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
         return;
     }
 
-    fieldTypes = _model->fieldTypes();
+    fieldTypes = _model->inputFormFields();
     wxFlexGridSizer* sizer = new wxFlexGridSizer(2, 10, 10);
     sizer->AddGrowableCol(1);
 

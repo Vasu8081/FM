@@ -16,11 +16,10 @@ public:
 
     virtual ~Category() = default;
 
-    std::string generateID() const { return "CAT." + _name; };
+    std::string getID() const { return "CAT." + _name; };
 
     nlohmann::json toJson() const override {
         nlohmann::json j = {
-            {"Id", _id},
             {"Name", _name},
             {"Description", _description},
             {"Monthly Budget", _monthly_budget},
@@ -30,14 +29,12 @@ public:
     }
 
     void fromJson(const nlohmann::json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Name")) _name = j.at("Name").get<std::string>();
         if(j.contains("Description")) _description = j.at("Description").get<std::string>();
         if(j.contains("Monthly Budget")) _monthly_budget = j.at("Monthly Budget").get<double>();
-        if(_id.empty()) _id = generateID();
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Name", "string"},
             {"Description", "string"},
@@ -46,7 +43,6 @@ public:
     }
 
     // Getters
-    std::string getID() const { return _id; }
     std::string getName() const { return _name; }
     std::string getDescription() const { return _description; }
     double getMonthlyBudget() const { return _monthly_budget; }

@@ -14,24 +14,35 @@
 class BankAccountView : public AccountView
 {
 public:
+
+    wxStaticText* createStaticText(wxWindow* parent, const wxString& label)
+    {
+        auto staticText = new wxStaticText(parent, wxID_ANY, label);
+        staticText->SetForegroundColour(wxColour(221, 221, 221));
+        return staticText;
+    }
+
     BankAccountView(wxWindow *parent, std::shared_ptr<BankAccount> model) : AccountView(parent, model)
     {
         auto sizer = new wxBoxSizer(wxVERTICAL);
+        auto foreGroundColour = wxColour(221, 221, 221);
+        auto backGroundColour = wxColour(34, 40, 49);
         
-        wxStaticBox* staticBox = new wxStaticBox(this, wxID_ANY, "Bank Account Details");
+        auto staticBox = new wxStaticBox(this, wxID_ANY, "Bank Account");
+        staticBox->SetForegroundColour(foreGroundColour);
         wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
         
-        _account_name = new wxStaticText(this, wxID_ANY, "Bank Name: " + model->getBankName());
-        _account_balance = new wxStaticText(this, wxID_ANY, "Balance: " + std::to_string(model->getBalance()));
+        _header = createStaticText(this, model->getHeader());
+        _header->SetFont(_header->GetFont().Bold());
         _account_number = new wxStaticText(this, wxID_ANY, "Account Number: " + model->getAccountNumber());
+        _account_number->SetForegroundColour(wxColour(221, 221, 221));
         _ifsc = new wxStaticText(this, wxID_ANY, "IFSC: " + model->getIfsc());
+        _ifsc->SetForegroundColour(wxColour(221, 221, 221));
         _branch = new wxStaticText(this, wxID_ANY, "Branch: " + model->getBranch());
-        _account_name->SetFont(_account_name->GetFont().Bold());
-        _account_balance->SetFont(_account_balance->GetFont().Bold());
+        _branch->SetForegroundColour(wxColour(221, 221, 221));
         
-        staticBoxSizer->Add(_account_name, 0, wxEXPAND | wxALL, 5);
+        staticBoxSizer->Add(_header, 0, wxEXPAND | wxALL, 5);
         staticBoxSizer->Add(_account_number, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_account_balance, 0, wxEXPAND | wxALL, 5);
         staticBoxSizer->Add(_ifsc, 0, wxEXPAND | wxALL, 5);
         staticBoxSizer->Add(_branch, 0, wxEXPAND | wxALL, 5);
         
@@ -42,19 +53,18 @@ public:
         sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
         
         SetSizer(sizer);
-        SetBackgroundColour(wxColour(240, 248, 255));
+        SetBackgroundColour(wxColour(34, 40, 49));
     }
 
     void update() override
     {
         auto model = std::dynamic_pointer_cast<BankAccount>(_model);
-        _account_balance->SetLabelText(std::to_string(model->getBalance()));
+        _header->SetLabelText(model->getHeader());
     }
     
 private:
-    wxStaticText* _account_name;
+    wxStaticText* _header;
     wxStaticText* _account_number;
-    wxStaticText* _account_balance;
     wxStaticText* _ifsc;
     wxStaticText* _branch;
     wxStaticText* _balance;

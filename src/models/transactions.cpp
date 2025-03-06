@@ -5,9 +5,9 @@
 
 json Transaction::toJson() const {
     json j;
-    j["From Account"] = _from_account_id ? _from_account_id->generateID() : "";
-    j["To Account"] = _to_account_id ? _to_account_id->generateID() : "";
-    j["Category"] = _category_id ? _category_id->generateID() : "";
+    j["From Account"] = _from_account_id ? _from_account_id->getID() : "";
+    j["To Account"] = _to_account_id ? _to_account_id->getID() : "";
+    j["Category"] = _category_id ? _category_id->getID() : "";
     j["Description"] = _description;
     j["Date"] = _date.FormatISODate();
     j["Amount"] = _amount;
@@ -52,7 +52,7 @@ void Transaction::fromJson(const json& j) {
     }  
 }
 
-std::unordered_map<std::string, std::string> Transaction::fieldTypes() const {
+std::unordered_map<std::string, std::string> Transaction::inputFormFields() const {
     return {
         {"From Account", "Account"},
         {"To Account", "Account"},

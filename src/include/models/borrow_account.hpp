@@ -9,7 +9,7 @@ class BorrowAccount : public Account {
 public:
     BorrowAccount() : _borrowed_date(), _due_date() {}
 
-    std::string generateID() const override {
+    std::string getID() const override {
         return "BG." + _name;
     }
 
@@ -17,13 +17,14 @@ public:
     std::string getBorrower() const { return _name; }
     std::string getUpiId() const { return _upi_id; }
     double getBorrowedAmount() const { return _borrowed_amount; }
+    double portfolioValue() const override { return -_borrowed_amount; }
     wxDateTime getBorrowedDate() const { return _borrowed_date; }
     wxDateTime getDueDate() const { return _due_date; }
 
     // Inherited functions
     json toJson() const override {
         json j = {
-            {"Id", _id},
+            {"ID", getID()},
             {"Borrower", _name},
             {"UPI ID", _upi_id},
             {"Borrowed Amount", _borrowed_amount}
@@ -38,7 +39,6 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Borrower")) _name = j.at("Borrower").get<std::string>();
         if(j.contains("UPI ID")) _upi_id = j.at("UPI ID").get<std::string>();
         
@@ -57,11 +57,9 @@ public:
                 _due_date = temp;
             }
         }
-        
-        if(_id.empty()) _id = generateID();
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Borrower", "string"},
             {"UPI ID", "string"},

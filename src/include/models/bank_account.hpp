@@ -8,21 +8,24 @@ class BankAccount : public Account {
 public:
     BankAccount() = default;
 
-    std::string generateID() const override {
+    //Getters
+    std::string getHeader() const { return _bank_name+": "+std::to_string(_balance); }
+    std::string getBankName() const { return _bank_name; }
+    double getBalance() const { return _balance; }
+    double portfolioValue() const override { return _balance; }
+    std::string getAccountNumber() const { return _account_number; }
+    std::string getBranch() const { return _branch; }
+    std::string getIfsc() const { return _ifsc; }
+    
+
+    //Inherited functions
+    std::string getID() const override {
         return "BA."+_bank_name+"."+_account_number;
     }
 
-    //Getters
-    std::string getAccountNumber() const { return _account_number; }
-    std::string getBankName() const { return _bank_name; }
-    std::string getBranch() const { return _branch; }
-    std::string getIfsc() const { return _ifsc; }
-    double getBalance() const { return _balance; }
-
-    //Inherited functions
     json toJson() const override {
         json j = {
-            {"Id", _id},
+            {"ID", getID()},
             {"Bank Name", _bank_name},
             {"Balance", _balance},
             {"Account Number", _account_number},
@@ -34,15 +37,13 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Bank Name")) _bank_name = j.at("Bank Name").get<std::string>(), _name = j.at("Bank Name").get<std::string>();
         if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
         if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
         if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();
-        if(_id.empty()) _id = generateID();
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Bank Name", "string"},
             {"Account Number", "string"},

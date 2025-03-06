@@ -9,43 +9,24 @@
 class Account : public virtual Model {
 public:
     Account() = default;
-    Account(std::string id, std::string name) : _id(id), _name(name) {
-        _from_transactions = std::vector<std::shared_ptr<Transaction>>();
-        _to_transactions = std::vector<std::shared_ptr<Transaction>>();
-    }
     virtual ~Account() = default;
 
-    virtual std::string generateID() const = 0;
+    virtual std::string getID() const = 0;
 
-    virtual nlohmann::json toJson() const override{
-        nlohmann::json j = {
-            {"Id", _id},
-            {"Name", _name}
-        };
+    virtual nlohmann::json toJson() const override = 0;
 
-        return j;
-    }
+    virtual void fromJson(const nlohmann::json& j) override = 0;
 
-    virtual void fromJson(const nlohmann::json& j) override {
-        _id = j.at("Id").get<std::string>();
-        if(j.contains("Name")) _name = j.at("Name").get<std::string>();
-        if(_id.empty()) _id = generateID();
-    }
-
-    virtual std::unordered_map<std::string, std::string> fieldTypes() const override {
-        return {
-            {"Name", "string"},
-            {"Balance", "double"}
-        };
-    }
+    virtual std::unordered_map<std::string, std::string> inputFormFields() const override = 0;
 
     //Behavior if this Account is a to Account during a Transaction
     virtual void amountIn(double amount) = 0;
     //Behavior if this Account is a from Account during a Transaction
     virtual void amountOut(double amount) = 0;
+    // Get the value of the portfolio can be positive or negative based on how it contributes to overall portfolio value
+    virtual double portfolioValue() const = 0;
 
     //Getters
-    std::string getID() const { return _id; }
     std::string getName() const { return _name; }
 
     //Setters
@@ -56,7 +37,6 @@ public:
     std::vector<std::shared_ptr<Transaction>> getToTransactions() const { return _to_transactions; }
 
 protected:
-    std::string _id;
     std::string _name;
     std::vector<std::shared_ptr<Transaction>> _from_transactions;
     std::vector<std::shared_ptr<Transaction>> _to_transactions;

@@ -9,7 +9,7 @@ class ChitAccount : public Account {
 public:
     ChitAccount() = default;
 
-    std::string generateID() const override {
+    std::string getID() const override {
         return "CHIT."+_name;
     }
 
@@ -17,6 +17,7 @@ public:
     double getMonthlyPayment() const { return _monthly_payment; }
     double getPaidAmount() const { return _paid_amount; }
     double getMaturityAmount() const { return _maturity_amount; }
+    double portfolioValue() const override { return _paid_amount; }
     wxDateTime getStartDate() const { return _start_date; }
     wxDateTime getMonthlyPaymentDate() const { return _monthly_payment_date; }
     wxDateTime getMaturityDate() const { return _maturity_date; }
@@ -24,7 +25,7 @@ public:
     //Inherited functions
     json toJson() const override {
         json j = {
-            {"Id", _id},
+            {"Id", getID()},
             {"Chit Name", _name},
             {"Monthly Payment", _monthly_payment},
             {"Paid Amount", _paid_amount},
@@ -38,17 +39,15 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Chit Name")) _name = j.at("Chit Name").get<std::string>();
         if(j.contains("Monthly Payment")) _monthly_payment = j.at("Monthly Payment").get<double>();
         if(j.contains("Maturity Amount")) _maturity_amount = j.at("Maturity Amount").get<double>();
         if(j.contains("Start Date")) _start_date.ParseISODate(j.at("Start Date").get<std::string>());
         if(j.contains("Monthly Payment Date")) _monthly_payment_date.ParseISODate(j.at("Monthly Payment Date").get<std::string>());
-        if(j.contains("Maturity Date")) _maturity_date.ParseISODate(j.at("Maturity Date").get<std::string>());
-        if(_id.empty()) _id = generateID();
+        if(j.contains("Maturity Date")) _maturity_date.ParseISODate(j.at("Maturity Date").get<std::string>());                        
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Chit Name", "string"},
             {"Monthly Payment", "double"},

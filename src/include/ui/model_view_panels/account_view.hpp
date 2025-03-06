@@ -35,7 +35,7 @@ protected:
         for(auto& t : transactions){
             wxBoxSizer* transactionSizer = new wxBoxSizer(wxHORIZONTAL);
 
-            bool isOutgoing = (t->getFromAccount() && t->getFromAccount()->generateID() == model->generateID());
+            bool isOutgoing = (t->getFromAccount() && t->getFromAccount()->getID() == model->getID());
             wxBitmap transactionIcon = isOutgoing ? _icon.get(wxART_CALL_MADE) : _icon.get(wxART_CALL_RECEIVED);
             
             wxBitmap forwardIcon = _icon.get(wxART_ARROW_FORWARD);

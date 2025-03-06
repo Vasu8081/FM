@@ -10,7 +10,7 @@ class CreditCardAccount : public Account {
 public:
     CreditCardAccount() = default;
 
-    std::string generateID() const override {
+    std::string getID() const override {
         return "CC." + _card_number;
     }
 
@@ -20,6 +20,7 @@ public:
     wxDateTime getExpiryDate() const { return _expiry_date; }
     wxDateTime getBillingDate() const { return _billing_date; }
     wxDateTime getPaymentDueDate() const { return _payment_due_date; }
+    double portfolioValue() const override { return _limit_left-_credit_limit; }
     double getCreditLimit() const { return _credit_limit; }
     double getLimitLeft() const { return _limit_left; }
     
@@ -27,7 +28,7 @@ public:
     // Inherited functions
     json toJson() const override {
         json j = {
-            {"Id", _id},
+            {"ID", getID()},
             {"Card Name", _name},
             {"Card Number", _card_number},
             {"CVV", _cvv},
@@ -41,7 +42,6 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Id")) _id = j.at("Id").get<std::string>();
         if(j.contains("Card Name")) _name = j.at("Card Name").get<std::string>();
         if(j.contains("Card Number")) _card_number = j.at("Card Number").get<std::string>();
         if(j.contains("CVV")) _cvv = j.at("CVV").get<std::string>();
@@ -74,10 +74,9 @@ public:
             _credit_limit = j.at("Credit Limit").get<double>();
             _limit_left = _credit_limit;
         }
-        _id = generateID();
     }
 
-    std::unordered_map<std::string, std::string> fieldTypes() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override {
         return {
             {"Card Name", "string"},
             {"Card Number", "string"},
