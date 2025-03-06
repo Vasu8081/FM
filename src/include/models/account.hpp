@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <models/transaction.hpp>
+#include <wx/colour.h>
 
 class Account : public virtual Model {
 public:
@@ -13,11 +14,18 @@ public:
 
     virtual std::string getID() const = 0;
 
+    virtual std::string getType() const = 0;
+
     virtual nlohmann::json toJson() const override = 0;
 
     virtual void fromJson(const nlohmann::json& j) override = 0;
 
     virtual std::unordered_map<std::string, std::string> inputFormFields() const override = 0;
+
+    virtual std::unordered_map<std::string, std::string> displayFormFields() const = 0;
+
+    wxColour getForegroundColor() const { return _foreground_color; }
+    wxColour getBackgroundColor() const { return _background_color; }
 
     //Behavior if this Account is a to Account during a Transaction
     virtual void amountIn(double amount) = 0;
@@ -38,6 +46,8 @@ public:
 
 protected:
     std::string _name;
+    wxColour _foreground_color;
+    wxColour _background_color;
     std::vector<std::shared_ptr<Transaction>> _from_transactions;
     std::vector<std::shared_ptr<Transaction>> _to_transactions;
 };

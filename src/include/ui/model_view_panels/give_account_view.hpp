@@ -16,21 +16,17 @@ GiveAccountView(wxWindow *parent, std::shared_ptr<GiveAccount> model) : AccountV
 {
     auto sizer = new wxBoxSizer(wxVERTICAL);
     
-    wxStaticBox* staticBox = new wxStaticBox(this, wxID_ANY, "Borrow Details");
+    auto staticBox = new wxStaticBox(this, wxID_ANY, "Given Account");
+    staticBox->SetForegroundColour(_foregroundColour);
     wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
     
-    _given_to = new wxStaticText(this, wxID_ANY, "Given To: " + model->getGivenTo());
-    _givenAmount = new wxStaticText(this, wxID_ANY, "Remaining Given Amount: " + std::to_string(model->getGivenAmount()));
-    _givenDate = new wxStaticText(this, wxID_ANY, "Given Date: " + model->getGivenDate().FormatISODate());
-    _dueDate = new wxStaticText(this, wxID_ANY, "Due Date: " + model->getDueDate().FormatISODate());
-    _given_to->SetFont(_given_to->GetFont().Bold());
-    _givenAmount->SetFont(_givenAmount->GetFont().Bold());
-    
-    staticBoxSizer->Add(_given_to, 0, wxEXPAND | wxALL, 5);
-    staticBoxSizer->Add(_givenAmount, 0, wxEXPAND | wxALL, 5);
-    staticBoxSizer->Add(_givenDate, 0, wxEXPAND | wxALL, 5);
-    staticBoxSizer->Add(_dueDate, 0, wxEXPAND | wxALL, 5);
-
+    auto displayFields = model->displayFormFields();
+    for (auto& [key, value] : displayFields)
+    {
+        auto staticText = createStaticText(this, key + ": " + value);
+        _staticTextFields[key] = staticText;
+        staticBoxSizer->Add(staticText, 0, wxEXPAND | wxALL, 5);
+    }
     
     auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
     staticBoxSizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
@@ -39,20 +35,21 @@ GiveAccountView(wxWindow *parent, std::shared_ptr<GiveAccount> model) : AccountV
     sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
     
     SetSizer(sizer);
-    SetBackgroundColour(wxColour(206, 250, 208));
+    SetBackgroundColour(_backgroundColour);
 }
 
 void update() override
 {
     auto model = std::dynamic_pointer_cast<GiveAccount>(_model);
-    _givenAmount->SetLabelText("Remaining Given Amount: " + std::to_string(model->getGivenAmount()));
+    auto displayFields = model->displayFormFields();
+    for (auto& [key, value] : displayFields)
+    {
+        _staticTextFields[key]->SetLabel(key + ": " + value);
+    }
 }
 
 private:
-    wxStaticText* _given_to;
-    wxStaticText* _givenAmount;
-    wxStaticText* _givenDate;
-    wxStaticText* _dueDate;
+    std::unordered_map<std::string, wxStaticText*> _staticTextFields;
 };
 
 #endif // BORROW_ACCOUNT_VIEW_HPP

@@ -10,36 +10,39 @@
 class home : public wxFrame
 {
 public:
-home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600)) {
+home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE | wxMAXIMIZE) {
     #ifdef WIN32
         SetIcon(wxICON(IDI_APPICON));
     #else
     #endif
         _mainSizer = new wxBoxSizer(wxVERTICAL);
         
-        // Accounts Section
-        _mainSizer->Add(new wxStaticText(this, wxID_ANY, "Accounts"), 0, wxEXPAND | wxALL, 10);
-        _accountScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
-        _accountScrollWindow->SetScrollRate(5, 5);
-        _accountSizer = new wxBoxSizer(wxVERTICAL);
-        _accountGrid = new wxGridSizer(4, 10, 10);
-        _accountSizer->Add(_accountGrid, 1, wxEXPAND | wxALL, 10);
-        _accountScrollWindow->SetSizer(_accountSizer);
-        _mainSizer->Add(_accountScrollWindow, 1, wxEXPAND | wxALL, 10);
+        _notebook = new wxNotebook(this, wxID_ANY);
         
-        // Categories Section
-        _mainSizer->Add(new wxStaticText(this, wxID_ANY, "Categories"), 0, wxEXPAND | wxALL, 10);
-        _categoryScrollWindow = new wxScrolledWindow(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+        // Accounts Tab
+        wxPanel* accountPanel = new wxPanel(_notebook);
+        wxBoxSizer* accountSizer = new wxBoxSizer(wxVERTICAL);
+        accountSizer->Add(new wxStaticText(accountPanel, wxID_ANY, "Here you can manage all your financial accounts, segregated by type."), 0, wxEXPAND | wxALL, 10);
+        
+        _accountNotebook = new wxNotebook(accountPanel, wxID_ANY);
+        accountSizer->Add(_accountNotebook, 1, wxEXPAND | wxALL, 10);
+        
+        accountPanel->SetSizer(accountSizer);
+        _notebook->AddPage(accountPanel, "Accounts");
+        
+        // Categories Tab
+        wxPanel* categoryPanel = new wxPanel(_notebook);
+        wxBoxSizer* categorySizer = new wxBoxSizer(wxVERTICAL);
+        _categoryScrollWindow = new wxScrolledWindow(categoryPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxHSCROLL);
         _categoryScrollWindow->SetScrollRate(5, 5);
         _categorySizer = new wxBoxSizer(wxVERTICAL);
-        _categoryGrid = new wxGridSizer(4, 10, 10);
-        _categorySizer->Add(_categoryGrid, 1, wxEXPAND | wxALL, 10);
         _categoryScrollWindow->SetSizer(_categorySizer);
-        _mainSizer->Add(_categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
-
-        updateAccounts();
-        updateCategories();
-
+        categorySizer->Add(_categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
+        categoryPanel->SetSizer(categorySizer);
+        _notebook->AddPage(categoryPanel, "Categories");
+        
+        _mainSizer->Add(_notebook, 1, wxEXPAND | wxALL, 10);
+        
         // Buttons (Always Visible)
         wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
         wxButton* addAccountButton = new wxButton(this, wxID_ANY, "Add Account");
@@ -57,38 +60,59 @@ home() : wxFrame(nullptr, wxID_ANY, "Home", wxDefaultPosition, wxSize(800, 600))
         _mainSizer->Add(buttonSizer, 0, wxEXPAND | wxALL, 10);
         SetSizerAndFit(_mainSizer);
         Centre();
+        Maximize();
+        
+        // Update views
+        updateAccounts();
+        updateCategories();
     }
 
 private:
     wxBoxSizer* _mainSizer;
-    wxScrolledWindow* _accountScrollWindow;
+    wxNotebook* _notebook;
+    wxNotebook* _accountNotebook;
     wxScrolledWindow* _categoryScrollWindow;
-    wxBoxSizer* _accountSizer;
     wxBoxSizer* _categorySizer;
-    wxGridSizer* _accountGrid;
-    wxGridSizer* _categoryGrid;
+    std::unordered_map<std::string, wxPanel*> _accountTypePanels;
+    std::unordered_map<std::string, wxGridSizer*> _accountTypeGrids;
     std::unordered_map<std::string, wxWindow*> _accountViews;
-    std::unordered_map<std::string, wxWindow*> _categoryViews;    
+    std::unordered_map<std::string, wxWindow*> _categoryViews;  
     
     model_manager& _models = model_manager::getInstance();
 
     void updateAccounts() {
         for (auto account : _models.getAccounts()) {
+            std::string type = account_type(account.first);
+            if (_accountTypePanels.find(type) == _accountTypePanels.end()) {
+                wxPanel* panel = new wxPanel(_accountNotebook);
+                wxBoxSizer* panelSizer = new wxBoxSizer(wxVERTICAL);
+                wxGridSizer* gridSizer = new wxGridSizer(4, 10, 10);
+                panelSizer->Add(gridSizer, 1, wxEXPAND | wxALL, 10);
+                panel->SetSizer(panelSizer);
+                _accountNotebook->AddPage(panel, type);
+                _accountTypePanels[type] = panel;
+                _accountTypeGrids[type] = gridSizer;
+            }
+            
             if (!_accountViews.count(account.first)) {
-                auto accountView = model_view_factory::create(_accountScrollWindow, account.second);
-                _accountGrid->Add(accountView, 0, wxEXPAND | wxALL, 10);
+                auto accountView = model_view_factory::create(_accountTypePanels[type], account.second);
+                if(accountView == nullptr) continue;
+                _accountTypeGrids[type]->Add(accountView, 0, wxEXPAND | wxALL, 10);
                 _accountViews[account.first] = accountView;
             }
         }
-        _accountScrollWindow->FitInside();
-        _accountScrollWindow->Layout();
+        for (auto& panel : _accountTypePanels) {
+            panel.second->Layout();
+        }
+        _accountNotebook->Layout();
     }
+    
 
     void updateCategories() {
         for (auto category : _models.getCategories()) {
             if (!_categoryViews.count(category.first)) {
                 auto categoryView = model_view_factory::create(_categoryScrollWindow, category.second);
-                _categoryGrid->Add(categoryView, 0, wxEXPAND | wxALL, 10);
+                _categorySizer->Add(categoryView, 0, wxEXPAND | wxALL, 10);
                 _categoryViews[category.first] = categoryView;
             }
         }

@@ -6,21 +6,19 @@
 
 class BankAccount : public Account {
 public:
-    BankAccount() = default;
+    BankAccount(){
+        _background_color = wxColour(40, 54, 73, 1); //muted teal
+        _foreground_color = wxColour(220, 220, 220, 1); // off white
+    }
 
-    //Getters
-    std::string getHeader() const { return _bank_name+": "+std::to_string(_balance); }
-    std::string getBankName() const { return _bank_name; }
-    double getBalance() const { return _balance; }
     double portfolioValue() const override { return _balance; }
-    std::string getAccountNumber() const { return _account_number; }
-    std::string getBranch() const { return _branch; }
-    std::string getIfsc() const { return _ifsc; }
-    
 
-    //Inherited functions
     std::string getID() const override {
         return "BA."+_bank_name+"."+_account_number;
+    }
+
+    std::string getType() const override {
+        return "Bank Account";
     }
 
     json toJson() const override {
@@ -49,6 +47,15 @@ public:
             {"Account Number", "string"},
             {"Branch", "string"},
             {"IFSC", "string"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {_bank_name, std::to_string(_balance)},
+            {"Account Number", _account_number},
+            {"Branch", _branch},
+            {"IFSC", _ifsc}
         };
     }
 

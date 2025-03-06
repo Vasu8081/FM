@@ -78,7 +78,7 @@ public:
         try {
             json j = json::parse(std::string(accounts.mb_str()));
             for (auto& account_json : j) {
-                std::string account_id = account_json["Id"].get<std::string>();
+                std::string account_id = account_json["ID"].get<std::string>();
                 std::shared_ptr<Account> acc = std::dynamic_pointer_cast<Account>(model_factory::create(account_id));
                 if (acc) {
                     acc->fromJson(account_json);

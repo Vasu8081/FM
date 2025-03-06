@@ -7,20 +7,21 @@
 
 class GiveAccount : public Account {
 public:
-    GiveAccount() : _given_date(), _due_date() {}
+    GiveAccount(){
+        _background_color = wxColour(90, 100, 90);
+        _foreground_color = wxColour(235, 245, 235);
+    }
 
     std::string getID() const override {
         return "GV." + _name;
     }
 
-    // Getters
-    std::string getGivenTo() const { return _name; }
-    double getGivenAmount() const { return _given_amount; }
-    double portfolioValue() const override { return _given_amount; }
-    wxDateTime getGivenDate() const { return _given_date; }
-    wxDateTime getDueDate() const { return _due_date; }
+    std::string getType() const override {
+        return "Give Account";
+    }
 
-    // Inherited functions
+    double portfolioValue() const override { return _given_amount; }
+
     json toJson() const override {
         json j = {
             {"ID", getID()},
@@ -62,6 +63,15 @@ public:
             {"Given To", "string"},
             {"Given Date", "date"},
             {"Due Date", "date"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {"Given To", _name},
+            {"Given Amount", std::to_string(_given_amount)},
+            {"Given Date", _given_date.FormatISODate().ToStdString()},
+            {"Due Date", _due_date.FormatISODate().ToStdString()}
         };
     }
 

@@ -7,22 +7,21 @@
 
 class RdAccount : public Account {
 public:
-    RdAccount() = default;
+    RdAccount(){
+        _background_color = wxColour(85, 70, 65, 1);
+        _foreground_color = wxColour(245, 230, 225, 1);
+    }
 
     std::string getID() const override {
         return "RD."+_name;
     }
 
-    //Getters
-    double getMonthlyPayment() const { return _monthly_payment; }
-    double getPaidAmount() const { return _paid_amount; }
-    double getMaturityAmount() const { return _maturity_amount; }
-    double portfolioValue() const override { return _paid_amount; }
-    wxDateTime getStartDate() const { return _start_date; }
-    wxDateTime getMonthlyPaymentDate() const { return _monthly_payment_date; }
-    wxDateTime getMaturityDate() const { return _maturity_date; }
+    std::string getType() const override {
+        return "RD";
+    }
 
-    //Inherited functions
+    double portfolioValue() const override { return _paid_amount; }
+
     json toJson() const override {
         json j = {
             {"ID", getID()},
@@ -55,6 +54,18 @@ public:
             {"Start Date", "date"},
             {"Monthly Payment Date", "date"},
             {"Maturity Date", "date"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {"RD Name", _name},
+            {"Monthly Payment", std::to_string(_monthly_payment)},
+            {"Paid Amount", std::to_string(_paid_amount)},
+            {"Maturity Amount", std::to_string(_maturity_amount)},
+            {"Start Date", _start_date.FormatISODate().ToStdString()},
+            {"Monthly Payment Date", _monthly_payment_date.FormatISODate().ToStdString()},
+            {"Maturity Date", _maturity_date.FormatISODate().ToStdString()}
         };
     }
 

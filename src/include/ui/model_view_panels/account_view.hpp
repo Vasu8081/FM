@@ -14,9 +14,22 @@
 class AccountView : public ModelView
 {
 public:
-    AccountView(wxWindow *parent, std::shared_ptr<Account> model) : ModelView(parent, model) {}
+    AccountView(wxWindow *parent, std::shared_ptr<Account> model) : ModelView(parent, model) {
+        _foregroundColour = model->getForegroundColor();
+        _backgroundColour = model->getBackgroundColor();
+    }
 
 protected:
+
+    wxStaticText* createStaticText(wxWindow* parent, const wxString& label)
+    {
+        auto staticText = new wxStaticText(parent, wxID_ANY, label);
+        staticText->SetForegroundColour(_foregroundColour);
+        return staticText;
+    }
+
+    wxColour _foregroundColour;
+    wxColour _backgroundColour;
 
     void viewTransactions(wxCommandEvent& event){
         auto model = std::dynamic_pointer_cast<Account>(_model);

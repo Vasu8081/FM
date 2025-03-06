@@ -8,24 +8,23 @@
 
 class CreditCardAccount : public Account {
 public:
-    CreditCardAccount() = default;
+    CreditCardAccount(){
+        _background_color = wxColour(112, 98, 118);
+        _foreground_color = wxColour(240, 230, 250);
+    }
+
+    double portfolioValue() const override {
+        return _limit_left-_credit_limit;
+    }
 
     std::string getID() const override {
         return "CC." + _card_number;
     }
 
-    // Getters
-    std::string getCardNumber() const { return _card_number; }
-    std::string getCVV() const { return _cvv; }
-    wxDateTime getExpiryDate() const { return _expiry_date; }
-    wxDateTime getBillingDate() const { return _billing_date; }
-    wxDateTime getPaymentDueDate() const { return _payment_due_date; }
-    double portfolioValue() const override { return _limit_left-_credit_limit; }
-    double getCreditLimit() const { return _credit_limit; }
-    double getLimitLeft() const { return _limit_left; }
-    
+    std::string getType() const override {
+        return "Credit Card";
+    }
 
-    // Inherited functions
     json toJson() const override {
         json j = {
             {"ID", getID()},
@@ -85,6 +84,19 @@ public:
             {"Billing Date", "date"},
             {"Payment Due Date", "date"},
             {"Credit Limit", "double"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {"Card Name", _name},
+            {"Card Number", _card_number},
+            {"CVV", _cvv},
+            {"Expiry Date", _expiry_date.FormatISODate().ToStdString()},
+            {"Billing Date", _billing_date.FormatISODate().ToStdString()},
+            {"Payment Due Date", _payment_due_date.FormatISODate().ToStdString()},
+            {"Credit Limit", std::to_string(_credit_limit)},
+            {"Limit Left", std::to_string(_limit_left)}
         };
     }
 

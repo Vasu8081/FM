@@ -7,22 +7,21 @@
 
 class ChitAccount : public Account {
 public:
-    ChitAccount() = default;
+    ChitAccount(){
+        _background_color = wxColour(95, 85, 75);
+        _foreground_color = wxColour(245, 238, 230);
+    }
+
+    double portfolioValue() const override { return _paid_amount; }
 
     std::string getID() const override {
         return "CHIT."+_name;
     }
 
-    //Getters
-    double getMonthlyPayment() const { return _monthly_payment; }
-    double getPaidAmount() const { return _paid_amount; }
-    double getMaturityAmount() const { return _maturity_amount; }
-    double portfolioValue() const override { return _paid_amount; }
-    wxDateTime getStartDate() const { return _start_date; }
-    wxDateTime getMonthlyPaymentDate() const { return _monthly_payment_date; }
-    wxDateTime getMaturityDate() const { return _maturity_date; }
+    std::string getType() const override {
+        return "Chit Account";
+    }
 
-    //Inherited functions
     json toJson() const override {
         json j = {
             {"Id", getID()},
@@ -55,6 +54,17 @@ public:
             {"Start Date", "date"},
             {"Monthly Payment Date", "date"},
             {"Maturity Date", "date"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {"Chit Name", _name},
+            {"Monthly Payment", std::to_string(_monthly_payment)},
+            {"Maturity Amount", std::to_string(_maturity_amount)},
+            {"Start Date", _start_date.FormatISODate().ToStdString()},
+            {"Monthly Payment Date", _monthly_payment_date.FormatISODate().ToStdString()},
+            {"Maturity Date", _maturity_date.FormatISODate().ToStdString()}
         };
     }
 

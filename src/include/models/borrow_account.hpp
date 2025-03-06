@@ -7,21 +7,21 @@
 
 class BorrowAccount : public Account {
 public:
-    BorrowAccount() : _borrowed_date(), _due_date() {}
+    BorrowAccount() {
+        _background_color = wxColour(58, 80, 107);
+        _foreground_color = wxColour(235, 235, 235);
+    }
 
     std::string getID() const override {
         return "BG." + _name;
     }
 
-    // Getters
-    std::string getBorrower() const { return _name; }
-    std::string getUpiId() const { return _upi_id; }
-    double getBorrowedAmount() const { return _borrowed_amount; }
-    double portfolioValue() const override { return -_borrowed_amount; }
-    wxDateTime getBorrowedDate() const { return _borrowed_date; }
-    wxDateTime getDueDate() const { return _due_date; }
+    std::string getType() const override {
+        return "Borrow Account";
+    }
 
-    // Inherited functions
+    double portfolioValue() const override { return -_borrowed_amount; }
+
     json toJson() const override {
         json j = {
             {"ID", getID()},
@@ -65,6 +65,16 @@ public:
             {"UPI ID", "string"},
             {"Borrowed Date", "date"},
             {"Due Date", "date"}
+        };
+    }
+
+    std::unordered_map<std::string, std::string> displayFormFields() const override {
+        return {
+            {"Borrower", _name},
+            {"UPI ID", _upi_id},
+            {"Borrowed Amount", std::to_string(_borrowed_amount)},
+            {"Borrowed Date", _borrowed_date.FormatISODate().ToStdString()},
+            {"Due Date", _due_date.FormatISODate().ToStdString()}
         };
     }
 
