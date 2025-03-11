@@ -112,8 +112,6 @@ private:
                         _accountTypeNumCols[type] = numColumns;
                     }
                 }
-                
-                wxMessageBox(type+" "+std::to_string(columnWidth)+" "+std::to_string(parentWidth)+" "+std::to_string(numColumns));
                 _accountTypeGrids[type]->SetCols(_accountTypeNumCols[type]);
                 _accountTypeGrids[type]->Add(accountView, 0, wxEXPAND | wxALL, 10);
                 _accountViews[account.first] = accountView;
