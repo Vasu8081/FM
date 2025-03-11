@@ -154,7 +154,6 @@ protected:
 
     void update() override
     {
-        wxMessageBox("Product Updated");
         auto model = std::dynamic_pointer_cast<Account>(_model);
         auto displayFields = model->displayFormFields();
         for (auto &[key, value] : displayFields)
