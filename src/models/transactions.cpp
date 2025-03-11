@@ -12,6 +12,7 @@ json Transaction::toJson() const
     j["Description"] = _description;
     j["Date"] = _date.FormatISODate();
     j["Amount"] = _amount;
+    j["Quantity"] = _quantity;
     return j;
 }
 

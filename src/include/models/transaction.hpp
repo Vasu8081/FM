@@ -44,7 +44,7 @@ protected:
     std::string _description;
     wxDateTime _date;
     double _amount;
-    double _quantity;
+    double _quantity = 0.0;
 };
 
 #endif // TRANSACTION_HPP

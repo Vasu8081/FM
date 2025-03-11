@@ -53,10 +53,6 @@ public:
             _isin = j.at("Isin").get<std::string>();
         if (j.contains("Exchange Code"))
             _exchange_code = j.at("Exchange Code").get<std::string>();
-        if (j.contains("Quantity"))
-            _quantity = j.at("Quantity").get<double>();
-        if (j.contains("Average Bought Price"))
-            _average_bought_price = j.at("Average Bought Price").get<double>();
         _product = _api.getProduct(_exchange_code + "%7C" + _isin);
         // std::thread t([this](){
         //     while(true) {
@@ -73,9 +69,7 @@ public:
         return {
             {"Stock Name", "string"},
             {"Isin", "string"},
-            {"Exchange Code", "string"},
-            {"Quantity", "double"},
-            {"Average Bought Price", "double"}};
+            {"Exchange Code", "string"}};
     }
 
     std::unordered_map<std::string, std::string> displayFormFields() const override
@@ -134,7 +128,7 @@ public:
 private:
     Upstox &_api = Upstox::getInstance();
     std::string _isin;
-    double _quantity;
+    double _quantity = 0.0;
     std::string _exchange_code;
     double _average_bought_price = 0.0;
     double _pnl_made = 0.0;
