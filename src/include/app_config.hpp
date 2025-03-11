@@ -161,14 +161,24 @@ private:
         wxTextCtrl *textCtrl = new wxTextCtrl(&dialog, wxID_ANY, _user_name, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
         wxButton *okButton = new wxButton(&dialog, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize);
         wxButton *cancelButton = new wxButton(&dialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
+        dialog.SetDefaultItem(okButton);
         wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
         sizer->Add(textCtrl, 0, wxALL | wxEXPAND, 5);
         sizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 5);
         sizer->Add(cancelButton, 0, wxALL | wxALIGN_CENTER, 5);
         dialog.SetSizer(sizer);
-        dialog.Fit();
-        dialog.ShowModal();
-        _user_name = textCtrl->GetValue();
+        
+        textCtrl->Bind(wxEVT_TEXT_ENTER, [&](wxCommandEvent &) {
+            wxCommandEvent event(wxEVT_BUTTON, wxID_OK);
+            wxPostEvent(okButton, event);
+        });        
+        
+        if (dialog.ShowModal() == wxID_OK) {
+            _user_name = textCtrl->GetValue();
+        }
+        else{
+            wxAbort();
+        }      
     }
 
     // Private constructor ensures only one instance

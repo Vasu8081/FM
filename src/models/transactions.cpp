@@ -67,6 +67,11 @@ void Transaction::fromJson(const json &j)
     {
         _quantity = j["Quantity"].get<double>();
     }
+
+    if(j.contains("Quantity (only for stock account)"))
+    {
+        _quantity = j["Quantity (only for stock account)"].get<double>();
+    }
 }
 
 std::unordered_map<std::string, std::string> Transaction::inputFormFields() const
@@ -78,7 +83,7 @@ std::unordered_map<std::string, std::string> Transaction::inputFormFields() cons
         {"Description", "string"},
         {"Date", "date"},
         {"Amount", "double"},
-        {"Quantity", "double"}};
+        {"Quantity (only for stock account)", "double"}};
 }
 
 // Getters
