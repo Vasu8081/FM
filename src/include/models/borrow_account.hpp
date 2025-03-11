@@ -70,11 +70,20 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
-            {"Borrower", _name},
-            {"UPI ID", _upi_id},
-            {"Borrowed Amount", std::to_string(_borrowed_amount)},
+            {"header", _name},
+            {"Total Borrowed Amount", std::to_string(_borrowed_amount)},
             {"Borrowed Date", _borrowed_date.FormatISODate().ToStdString()},
             {"Due Date", _due_date.FormatISODate().ToStdString()}
+        };
+    }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Total Borrowed Amount" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Total Borrowed Amount", wxColour(235, 170, 235)}
         };
     }
 

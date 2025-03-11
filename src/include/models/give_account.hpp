@@ -68,10 +68,20 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
-            {"Given To", _name},
+            {"header", _name},
             {"Given Amount", std::to_string(_given_amount)},
             {"Given Date", _given_date.FormatISODate().ToStdString()},
             {"Due Date", _due_date.FormatISODate().ToStdString()}
+        };
+    }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Given Amount" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Given Amount", wxColour(235, 170, 235)}
         };
     }
 

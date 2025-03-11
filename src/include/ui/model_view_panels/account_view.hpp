@@ -17,15 +17,65 @@ public:
     AccountView(wxWindow *parent, std::shared_ptr<Account> model) : ModelView(parent, model) {
         _foregroundColour = model->getForegroundColor();
         _backgroundColour = model->getBackgroundColor();
+        auto sizer = new wxBoxSizer(wxVERTICAL);
+        auto displayFields = model->displayFormFields();
+        auto boldFields = model->boldFormFields();
+        auto overrideColors = model->overrideFormColors();
+        auto staticBox = new wxStaticBox(this, wxID_ANY, displayFields["header"]);
+        if (boldFields.find("header") != boldFields.end()) {
+            wxFont font = staticBox->GetFont();
+            font.SetWeight(wxFONTWEIGHT_BOLD);
+            staticBox->SetFont(font);
+        }
+        staticBox->SetForegroundColour(_foregroundColour);
+        wxStaticBoxSizer* staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
+        
+        
+        for (auto& [key, value] : displayFields)
+        {
+            if(key == "header") continue;
+            auto field_sizer = createStaticText(this, key , value);
+
+            if (boldFields.find(key) != boldFields.end()) {
+                wxFont font = _staticTextFields[key]->GetFont();
+                font.SetWeight(wxFONTWEIGHT_BOLD);
+                _staticTextFields[key]->SetFont(font);
+            }
+            if(overrideColors.find(key)!= overrideColors.end()){
+                _staticTextFields[key]->SetForegroundColour(overrideColors[key]);
+            }
+            
+            staticBoxSizer->Add(field_sizer, 0, wxEXPAND | wxALL, 5);
+        }
+        
+        auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
+        staticBoxSizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
+        Bind(wxEVT_BUTTON, &AccountView::viewTransactions, this, view_transactions->GetId());
+        
+        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
+        
+        SetSizer(sizer);
+        SetBackgroundColour(_backgroundColour);
     }
 
 protected:
 
-    wxStaticText* createStaticText(wxWindow* parent, const wxString& label)
+    std::unordered_map<std::string, wxStaticText*> _staticTextFields;
+
+    wxBoxSizer* createStaticText(wxWindow* parent, const wxString& key, const wxString& value)
     {
-        auto staticText = new wxStaticText(parent, wxID_ANY, label);
-        staticText->SetForegroundColour(_foregroundColour);
-        return staticText;
+        auto box_sizer = new wxBoxSizer(wxHORIZONTAL);
+        auto staticKey = new wxStaticText(parent, wxID_ANY, key);
+        staticKey->SetForegroundColour(_foregroundColour);
+
+        auto staticValue = new wxStaticText(parent, wxID_ANY, value);
+        staticValue->SetForegroundColour(_foregroundColour);
+
+        _staticTextFields[key.ToStdString()] = staticValue;
+        box_sizer->Add(staticKey, 0, wxALL, 10);
+        box_sizer->Add(staticValue, 0, wxEXPAND | wxALL, 10);
+
+        return box_sizer;
     }
 
     wxColour _foregroundColour;
@@ -41,7 +91,10 @@ protected:
         std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<Transaction> a, std::shared_ptr<Transaction> b){
             return a->getDate() > b->getDate();
         });
-        
+        if(transactions.size() <= 0){
+            wxMessageBox("No transactions found");
+            return;
+        }
         auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(400, 600), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
         auto sizer = new wxBoxSizer(wxVERTICAL);
         
@@ -95,7 +148,16 @@ protected:
         dialog->ShowModal();
     }
 
-    virtual void update() override = 0;
+    void update() override
+    {
+        auto model = std::dynamic_pointer_cast<Account>(_model);
+        auto displayFields = model->displayFormFields();
+        for (auto& [key, value] : displayFields)
+        {
+            if(key == "header") continue;
+            _staticTextFields[key]->SetLabel(value);
+        }
+    }
 };
 
 #endif // BANK_ACCOUNT_VIEW_HPP

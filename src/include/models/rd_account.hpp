@@ -59,7 +59,7 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
-            {"RD Name", _name},
+            {"header", _name},
             {"Monthly Payment", std::to_string(_monthly_payment)},
             {"Paid Amount", std::to_string(_paid_amount)},
             {"Maturity Amount", std::to_string(_maturity_amount)},
@@ -68,6 +68,17 @@ public:
             {"Maturity Date", _maturity_date.FormatISODate().ToStdString()}
         };
     }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Paid Amount" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Paid Amount", wxColour(235, 170, 235)}
+        };
+    }
+
 
     void amountIn(double amount) override {
         _paid_amount = _paid_amount + amount;

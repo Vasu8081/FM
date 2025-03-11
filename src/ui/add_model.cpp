@@ -40,6 +40,8 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
             auto accounts = model_manager_.getAccounts();
             wxArrayString accountChoices;
             int index = 0;
+            accountChoices.Add("");
+            accountMapping[index++] = "";
             for (auto& act : accounts) {
                 accountChoices.Add(act.second->getName());
                 accountMapping[index++] = act.first;
@@ -51,6 +53,8 @@ AddModelForm::AddModelForm(wxWindow* parent, const std::string& type) : wxPanel(
             auto categories = model_manager_.getCategories();
             wxArrayString categoryChoices;
             int index = 0;
+            categoryChoices.Add("");
+            categoryMapping[index++] = "";
             for (auto& cat : categories) {
                 categoryChoices.Add(cat.second->getName());
                 categoryMapping[index++] = cat.first;

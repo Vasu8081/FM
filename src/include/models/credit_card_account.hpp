@@ -89,7 +89,7 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
-            {"Card Name", _name},
+            {"header", _name},
             {"Card Number", _card_number},
             {"CVV", _cvv},
             {"Expiry Date", _expiry_date.FormatISODate().ToStdString()},
@@ -97,6 +97,16 @@ public:
             {"Payment Due Date", _payment_due_date.FormatISODate().ToStdString()},
             {"Credit Limit", std::to_string(_credit_limit)},
             {"Limit Left", std::to_string(_limit_left)}
+        };
+    }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Limit Left" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Limit Left", wxColour(235, 170, 235)}
         };
     }
 

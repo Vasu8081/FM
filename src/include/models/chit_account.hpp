@@ -4,6 +4,7 @@
 #include <string>
 #include <models/account.hpp>
 #include <wx/datetime.h>
+#include <format>
 
 class ChitAccount : public Account {
 public:
@@ -24,7 +25,7 @@ public:
 
     json toJson() const override {
         json j = {
-            {"Id", getID()},
+            {"ID", getID()},
             {"Chit Name", _name},
             {"Monthly Payment", _monthly_payment},
             {"Paid Amount", _paid_amount},
@@ -58,13 +59,30 @@ public:
     }
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
+        int months = (_maturity_date.GetYear() - _start_date.GetYear()) * 12 +(_maturity_date.GetMonth() - _start_date.GetMonth())+1;
+        double total_paid_amount = _monthly_payment*months;
+        double total_interest = ((_maturity_amount-total_paid_amount)*100.0)/total_paid_amount;
+        double yearly_interest = (total_interest*12.0)/months;
         return {
-            {"Chit Name", _name},
-            {"Monthly Payment", std::to_string(_monthly_payment)},
-            {"Maturity Amount", std::to_string(_maturity_amount)},
-            {"Start Date", _start_date.FormatISODate().ToStdString()},
-            {"Monthly Payment Date", _monthly_payment_date.FormatISODate().ToStdString()},
-            {"Maturity Date", _maturity_date.FormatISODate().ToStdString()}
+            {"header", _name},
+            {"Monthly Payment", std::format("{:.2f}", _monthly_payment)},
+            {"Maturity Amount", std::format("{:.2f}", _maturity_amount)},
+            {"Monthly Payment Date", std::to_string(_monthly_payment_date.GetDay())+"th of every month"},
+            {"Start Date", _start_date.Format("%b-%y").ToStdString()},
+            {"Maturity Date", _maturity_date.Format("%b-%y").ToStdString()},
+            {"Months", std::to_string(months)},
+            {"Interest Rate per Annum", std::format("{:.2f}", yearly_interest)},
+            {"Paid Till Now", std::format("{:.2f}", _paid_amount)}
+        };
+    }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Paid Till Now" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Paid Till Now", wxColour(235, 170, 235)}
         };
     }
 
@@ -80,7 +98,7 @@ public:
 
 private:
     double _monthly_payment;
-    double _paid_amount;
+    double _paid_amount = 0;
     double _maturity_amount;
     wxDateTime _start_date;
     wxDateTime _maturity_date;

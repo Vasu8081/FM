@@ -7,14 +7,14 @@
 class BankAccount : public Account {
 public:
     BankAccount(){
-        _background_color = wxColour(40, 54, 73, 1); //muted teal
-        _foreground_color = wxColour(220, 220, 220, 1); // off white
+        _background_color = wxColour(90, 100, 90);
+        _foreground_color = wxColour(235, 245, 235);
     }
 
     double portfolioValue() const override { return _balance; }
 
     std::string getID() const override {
-        return "BA."+_bank_name+"."+_account_number;
+        return "BA."+_name+"."+_account_number;
     }
 
     std::string getType() const override {
@@ -24,7 +24,7 @@ public:
     json toJson() const override {
         json j = {
             {"ID", getID()},
-            {"Bank Name", _bank_name},
+            {"Bank Name", _name},
             {"Balance", _balance},
             {"Account Number", _account_number},
             {"Branch", _branch},
@@ -35,7 +35,7 @@ public:
     }
 
     void fromJson(const json& j) override {
-        if(j.contains("Bank Name")) _bank_name = j.at("Bank Name").get<std::string>(), _name = j.at("Bank Name").get<std::string>();
+        if(j.contains("Bank Name")) _name = j.at("Bank Name").get<std::string>();
         if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
         if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
         if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();
@@ -52,10 +52,21 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
-            {_bank_name, std::to_string(_balance)},
+            {"header", _name},
+            {"Balance", std::to_string(_balance)},
             {"Account Number", _account_number},
             {"Branch", _branch},
             {"IFSC", _ifsc}
+        };
+    }
+
+    std::set<std::string> boldFormFields() const override {
+        return { "header", "Balance" };
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {
+            {"Balance", wxColour(235, 170, 235)}
         };
     }
 
@@ -71,7 +82,6 @@ public:
 
 private:
     std::string _account_number;
-    std::string _bank_name;
     std::string _branch;
     std::string _ifsc;
     double _balance = 0.0;

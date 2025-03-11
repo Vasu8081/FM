@@ -13,7 +13,9 @@ public:
         model->registerObserver([this]() { update(); });
     }
 
-    virtual void update() = 0;
+    virtual void update() {
+        wxMessageBox( "Not implemented");
+    }
 
 protected:
     std::shared_ptr<Model> _model;

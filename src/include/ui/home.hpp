@@ -73,34 +73,54 @@ private:
     wxNotebook* _accountNotebook;
     wxScrolledWindow* _categoryScrollWindow;
     wxBoxSizer* _categorySizer;
-    std::unordered_map<std::string, wxPanel*> _accountTypePanels;
+    std::unordered_map<std::string, wxWindow*> _accountTypePanels;
     std::unordered_map<std::string, wxGridSizer*> _accountTypeGrids;
+    std::unordered_map<std::string, int> _accountTypeNumCols;
     std::unordered_map<std::string, wxWindow*> _accountViews;
-    std::unordered_map<std::string, wxWindow*> _categoryViews;  
+    std::unordered_map<std::string, wxWindow*> _categoryViews;
     
     model_manager& _models = model_manager::getInstance();
 
     void updateAccounts() {
         for (auto account : _models.getAccounts()) {
-            std::string type = account_type(account.first);
+            std::string type = account.second->getType();
+    
             if (_accountTypePanels.find(type) == _accountTypePanels.end()) {
-                wxPanel* panel = new wxPanel(_accountNotebook);
+                auto panel = new wxScrolledWindow(_accountNotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxHSCROLL);
+                panel->SetScrollRate(5, 5);
                 wxBoxSizer* panelSizer = new wxBoxSizer(wxVERTICAL);
-                wxGridSizer* gridSizer = new wxGridSizer(4, 10, 10);
-                panelSizer->Add(gridSizer, 1, wxEXPAND | wxALL, 10);
+                wxGridSizer* gridSizer = new wxGridSizer(1, 10, 10);
+                panelSizer->Add(gridSizer, 0, wxEXPAND | wxALL, 10);
                 panel->SetSizer(panelSizer);
                 _accountNotebook->AddPage(panel, type);
                 _accountTypePanels[type] = panel;
                 _accountTypeGrids[type] = gridSizer;
             }
-            
+    
             if (!_accountViews.count(account.first)) {
                 auto accountView = model_view_factory::create(_accountTypePanels[type], account.second);
-                if(accountView == nullptr) continue;
+                if (accountView == nullptr) continue;
+                accountView->Fit();
+                int columnWidth = accountView->GetSize().GetWidth();
+                int parentWidth = _accountTypePanels[type]->GetClientSize().GetWidth();
+                int numColumns = std::max(1, parentWidth / columnWidth);
+                if(_accountTypeNumCols.find(type)==_accountTypeNumCols.end()){
+                    _accountTypeNumCols[type] = numColumns;
+                }
+                else{
+                    if(_accountTypeNumCols[type] > numColumns){
+                        _accountTypeNumCols[type] = numColumns;
+                    }
+                }
+                
+                wxMessageBox(type+" "+std::to_string(columnWidth)+" "+std::to_string(parentWidth)+" "+std::to_string(numColumns));
+                _accountTypeGrids[type]->SetCols(_accountTypeNumCols[type]);
                 _accountTypeGrids[type]->Add(accountView, 0, wxEXPAND | wxALL, 10);
                 _accountViews[account.first] = accountView;
             }
         }
+    
+        // Adjust layout
         for (auto& panel : _accountTypePanels) {
             panel.second->Layout();
         }

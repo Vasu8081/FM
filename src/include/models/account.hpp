@@ -6,6 +6,10 @@
 #include <unordered_map>
 #include <models/transaction.hpp>
 #include <wx/colour.h>
+#include <set>
+#include <vector>
+#include <format>
+#include <wx/wx.h>
 
 class Account : public virtual Model {
 public:
@@ -24,6 +28,10 @@ public:
 
     virtual std::unordered_map<std::string, std::string> displayFormFields() const = 0;
 
+    virtual std::set<std::string> boldFormFields() const = 0;
+
+    virtual std::unordered_map<std::string, wxColour> overrideFormColors() const = 0;
+
     wxColour getForegroundColor() const { return _foreground_color; }
     wxColour getBackgroundColor() const { return _background_color; }
 
@@ -38,8 +46,14 @@ public:
     std::string getName() const { return _name; }
 
     //Setters
-    void addFromTransaction(std::shared_ptr<Transaction> t) { _from_transactions.push_back(t); amountOut(t->getAmount()); }
-    void addToTransaction(std::shared_ptr<Transaction> t) { _to_transactions.push_back(t); amountIn(t->getAmount()); }
+    void addFromTransaction(std::shared_ptr<Transaction> t) { 
+        _from_transactions.push_back(t);
+        amountOut(t->getAmount());
+    }
+    void addToTransaction(std::shared_ptr<Transaction> t) { 
+        _to_transactions.push_back(t);
+        amountIn(t->getAmount());
+    }
 
     std::vector<std::shared_ptr<Transaction>> getFromTransactions() const { return _from_transactions; }
     std::vector<std::shared_ptr<Transaction>> getToTransactions() const { return _to_transactions; }
