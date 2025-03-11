@@ -65,8 +65,11 @@ protected:
     wxBoxSizer* createStaticText(wxWindow* parent, const wxString& key, const wxString& value)
     {
         auto box_sizer = new wxBoxSizer(wxHORIZONTAL);
-        auto staticKey = new wxStaticText(parent, wxID_ANY, key);
+        auto staticKey = new wxStaticText(parent, wxID_ANY, key + " : ");
         staticKey->SetForegroundColour(_foregroundColour);
+        wxFont font = staticKey->GetFont();
+        font.SetWeight(wxFONTWEIGHT_BOLD);
+        staticKey->SetFont(font);
 
         auto staticValue = new wxStaticText(parent, wxID_ANY, value);
         staticValue->SetForegroundColour(_foregroundColour);

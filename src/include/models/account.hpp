@@ -64,6 +64,34 @@ protected:
     wxColour _background_color;
     std::vector<std::shared_ptr<Transaction>> _from_transactions;
     std::vector<std::shared_ptr<Transaction>> _to_transactions;
+
+//View formatters
+
+    std::string format_amount(double amount) const {
+        return std::format("{:.2f}", amount);
+    }
+
+    std::string format_monthly_payment_date(wxDateTime bill_date) const {
+        return std::to_string(bill_date.GetDay())+"th of every month";
+    }
+
+    std::string format_month_year(wxDateTime date) const {
+        return date.Format("%b-%y").ToStdString();
+    }
+
+    std::string format_date_month_year(wxDateTime date) const {
+        return date.FormatISODate().ToStdString();
+    }
+
+    std::string format_integer(int value) const{
+        return std::to_string(value);
+    }
+
+    std::string format_percentage(double value) const {
+        return std::format("{:.2f}%", value);
+    }
+
+
 };
 
 #endif // ACCOUNT_HPP

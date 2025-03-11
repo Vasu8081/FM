@@ -65,24 +65,24 @@ public:
         double yearly_interest = (total_interest*12.0)/months;
         return {
             {"header", _name},
-            {"Monthly Payment", std::format("{:.2f}", _monthly_payment)},
-            {"Maturity Amount", std::format("{:.2f}", _maturity_amount)},
-            {"Monthly Payment Date", std::to_string(_monthly_payment_date.GetDay())+"th of every month"},
-            {"Start Date", _start_date.Format("%b-%y").ToStdString()},
-            {"Maturity Date", _maturity_date.Format("%b-%y").ToStdString()},
-            {"Months", std::to_string(months)},
-            {"Interest Rate per Annum", std::format("{:.2f}", yearly_interest)},
-            {"Paid Till Now", std::format("{:.2f}", _paid_amount)}
+            {"Monthly Payment", format_amount(_monthly_payment)},
+            {"Total Expected Amount", format_amount(_maturity_amount)},
+            {"Payment Due Date", format_monthly_payment_date(_monthly_payment_date)},
+            {"First Installment", format_month_year(_start_date)},
+            {"Final Installment", format_month_year(_maturity_date)},
+            {"Tenure (in months)", format_integer(months)},
+            {"Annual Interest Rate", format_percentage(yearly_interest)},
+            {"Total Amount Paid", format_amount(_paid_amount)}
         };
     }
 
     std::set<std::string> boldFormFields() const override {
-        return { "header", "Paid Till Now" };
+        return { "header", "Total Amount Paid" };
     }
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override {
         return {
-            {"Paid Till Now", wxColour(235, 170, 235)}
+            {"Total Amount Paid", wxColour(235, 170, 235)}
         };
     }
 
