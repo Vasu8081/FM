@@ -53,7 +53,7 @@ public:
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
             {"header", _name},
-            {"Balance", Amount(_balance)},
+            {"Balance", Formatter::Amount(_balance)},
             {"Account Number", _account_number},
             {"Branch", _branch},
             {"IFSC", _ifsc}
@@ -70,13 +70,13 @@ public:
         };
     }
 
-    void amountIn(double amount) override {
-        _balance = _balance + amount;
+    void amountIn(std::shared_ptr<Transaction> t) override {
+        _balance = _balance + t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(double amount) override {
-        _balance = _balance - amount;
+    void amountOut(std::shared_ptr<Transaction> t) override {
+        _balance = _balance - t->getAmount();
         notifyObservers();
     }
 

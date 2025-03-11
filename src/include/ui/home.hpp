@@ -149,6 +149,7 @@ private:
         accountTypes.Add("Credit Card");
         accountTypes.Add("Rd Account");
         accountTypes.Add("Chit Account");
+        accountTypes.Add("Stock Account");
 
         wxChoice* choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
         choice->SetSelection(0);

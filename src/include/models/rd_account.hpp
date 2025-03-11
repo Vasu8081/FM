@@ -64,14 +64,14 @@ public:
         double yearly_interest = (total_interest*12.0)/months;
         return {
             {"header", _name},
-            {"Monthly Payment", Amount(_monthly_payment)},
-            {"Total Expected Amount", Amount(_maturity_amount)},
-            {"Payment Due Date", MonthlyPaymentDate(_monthly_payment_date)},
-            {"First Installment", MonthYear(_start_date)},
-            {"Final Installment", MonthYear(_maturity_date)},
-            {"Tenure (in months)", Integer(months)},
-            {"Annual Interest Rate", Percentage(yearly_interest)},
-            {"Total Amount Paid", Amount(_paid_amount)}
+            {"Monthly Payment", Formatter::Amount(_monthly_payment)},
+            {"Total Expected Amount", Formatter::Amount(_maturity_amount)},
+            {"Payment Due Date", Formatter::MonthlyPaymentDate(_monthly_payment_date)},
+            {"First Installment", Formatter::MonthYear(_start_date)},
+            {"Final Installment", Formatter::MonthYear(_maturity_date)},
+            {"Tenure (in months)", Formatter::Integer(months)},
+            {"Annual Interest Rate", Formatter::Percentage(yearly_interest)},
+            {"Total Amount Paid", Formatter::Amount(_paid_amount)}
         };
     }
 
@@ -86,13 +86,13 @@ public:
     }
 
 
-    void amountIn(double amount) override {
-        _paid_amount = _paid_amount + amount;
+    void amountIn(std::shared_ptr<Transaction> t) override {
+        _paid_amount = _paid_amount + t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(double amount) override {
-        _paid_amount = _paid_amount - amount;
+    void amountOut(std::shared_ptr<Transaction> t) override {
+        _paid_amount = _paid_amount - t->getAmount();
         notifyObservers();
     }
 

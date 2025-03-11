@@ -2,16 +2,14 @@
 #define ACCOUNT_HPP
 
 #include <models/model.hpp>
-#include <string>
+#include <formatter.hpp>
 #include <unordered_map>
 #include <models/transaction.hpp>
 #include <wx/colour.h>
 #include <set>
 #include <vector>
-#include <format>
 #include <wx/wx.h>
-#include <sstream>
-#include <locale>
+
 
 class Account : public virtual Model {
 public:
@@ -38,9 +36,9 @@ public:
     wxColour getBackgroundColor() const { return _background_color; }
 
     //Behavior if this Account is a to Account during a Transaction
-    virtual void amountIn(double amount) = 0;
+    virtual void amountIn(std::shared_ptr<Transaction> t) = 0;
     //Behavior if this Account is a from Account during a Transaction
-    virtual void amountOut(double amount) = 0;
+    virtual void amountOut(std::shared_ptr<Transaction> t) = 0;
     // Get the value of the portfolio can be positive or negative based on how it contributes to overall portfolio value
     virtual double portfolioValue() const = 0;
 
@@ -50,11 +48,11 @@ public:
     //Setters
     void addFromTransaction(std::shared_ptr<Transaction> t) { 
         _from_transactions.push_back(t);
-        amountOut(t->getAmount());
+        amountOut(t);
     }
     void addToTransaction(std::shared_ptr<Transaction> t) { 
         _to_transactions.push_back(t);
-        amountIn(t->getAmount());
+        amountIn(t);
     }
 
     std::vector<std::shared_ptr<Transaction>> getFromTransactions() const { return _from_transactions; }
@@ -66,67 +64,6 @@ protected:
     wxColour _background_color;
     std::vector<std::shared_ptr<Transaction>> _from_transactions;
     std::vector<std::shared_ptr<Transaction>> _to_transactions;
-
-//View formatters
-
-    std::string Amount(double amount) const {
-        return formatWithCommas(amount);
-    }
-
-    std::string MonthlyPaymentDate(wxDateTime billDate) const {
-        return std::format("{}{} of every month", billDate.GetDay(), getOrdinalSuffix(billDate.GetDay()));
-    }
-
-    std::string MonthYear(wxDateTime date) const {
-        return date.Format("%b-%y").ToStdString();
-    }
-
-    std::string DateMonthYear(wxDateTime date) const {
-        return date.FormatISODate().ToStdString();
-    }
-
-    std::string Integer(int value) const{
-        return std::to_string(value);
-    }
-
-    std::string Percentage(double value) const {
-        return std::format("{:.2f}%", value);
-    }
-
-private:
-    std::string getOrdinalSuffix(int day) const {
-        if (day >= 11 && day <= 13) return "th";
-        switch (day % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
-    }
-
-    std::string formatWithCommas(double amount) const {
-        std::ostringstream stream;
-        stream << std::fixed << std::setprecision(2) << amount;
-        std::string str = stream.str();
-        if (str.find(".00") != std::string::npos) {
-            str = str.substr(0, str.find(".00"));
-        }
-    
-        int n = str.find('.');
-        if (n == std::string::npos) {
-            n = str.length();
-        }
-        
-        int insertPosition = n - 3;
-        while (insertPosition > 0) {
-            str.insert(insertPosition, ",");
-            insertPosition -= 2;
-        }
-    
-        return str;
-    }
-    
-
 };
 
 #endif // ACCOUNT_HPP

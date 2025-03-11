@@ -25,6 +25,7 @@ public:
     std::string getDescription() const;
     wxDateTime getDate() const;
     double getAmount() const;
+    double getQuantity() const;
 
     // Setters
     void setFromAccount(std::shared_ptr<Account> from_account_id);
@@ -33,6 +34,7 @@ public:
     void setDescription(std::string description);
     void setDate(wxDateTime date);
     void setAmount(double amount);
+    void setQuantity(double quantity);
 
 protected:
     std::shared_ptr<Account> _from_account_id;
@@ -41,6 +43,7 @@ protected:
     std::string _description;
     wxDateTime _date;
     double _amount;
+    double _quantity;
 };
 
 #endif // TRANSACTION_HPP

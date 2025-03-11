@@ -114,7 +114,7 @@ protected:
             std::string fromAccount = t->getFromAccount() ? t->getFromAccount()->getName() : "External";
             std::string toAccount = t->getToAccount() ? t->getToAccount()->getName() : "External";
             std::string category = t->getCategory() ? t->getCategory()->getName() : "None";
-            std::string amount = std::to_string(t->getAmount());
+            std::string amount = Formatter::Amount(t->getAmount());
             std::string date = t->getDate().FormatISODate().ToStdString();
             
 
@@ -153,6 +153,7 @@ protected:
 
     void update() override
     {
+        wxMessageBox("Product Updated");
         auto model = std::dynamic_pointer_cast<Account>(_model);
         auto displayFields = model->displayFormFields();
         for (auto& [key, value] : displayFields)

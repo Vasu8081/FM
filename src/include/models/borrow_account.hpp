@@ -71,8 +71,8 @@ public:
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
             {"header", _name},
-            {"Total Borrowed Amount", Amount(_borrowed_amount)},
-            {"Due Date", DateMonthYear(_due_date)}
+            {"Total Borrowed Amount", Formatter::Amount(_borrowed_amount)},
+            {"Due Date", Formatter::DateMonthYear(_due_date)}
         };
     }
 
@@ -86,13 +86,13 @@ public:
         };
     }
 
-    void amountIn(double amount) override {
-        _borrowed_amount -= amount;
+    void amountIn(std::shared_ptr<Transaction> t) override {
+        _borrowed_amount -= t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(double amount) override {
-        _borrowed_amount += amount;
+    void amountOut(std::shared_ptr<Transaction> t) override {
+        _borrowed_amount += t->getAmount();
         notifyObservers();
     }
 

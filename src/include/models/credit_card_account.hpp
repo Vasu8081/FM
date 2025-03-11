@@ -92,11 +92,11 @@ public:
             {"header", _name},
             {"Card Number", _card_number},
             {"Security Code", _cvv},
-            {"Expiry Date", MonthYear(_expiry_date)},
-            {"Statement Generation", MonthlyPaymentDate(_billing_date)},
-            {"Due Date", MonthlyPaymentDate(_payment_due_date)},
-            {"Total Credit Limit", Amount(_credit_limit)},
-            {"Available Credit", Amount(_limit_left)}
+            {"Expiry Date", Formatter::MonthYear(_expiry_date)},
+            {"Statement Generation", Formatter::MonthlyPaymentDate(_billing_date)},
+            {"Due Date", Formatter::MonthlyPaymentDate(_payment_due_date)},
+            {"Total Credit Limit", Formatter::Amount(_credit_limit)},
+            {"Available Credit", Formatter::Amount(_limit_left)}
         };
     }
 
@@ -110,12 +110,12 @@ public:
         };
     }
 
-    void amountIn(double amount) override {
-        _limit_left += amount;
+    void amountIn(std::shared_ptr<Transaction> t) override {
+        _limit_left += t->getAmount();
     }
 
-    void amountOut(double amount) override {
-        _limit_left -= amount;
+    void amountOut(std::shared_ptr<Transaction> t) override {
+        _limit_left -= t->getAmount();
     }
 
 private:

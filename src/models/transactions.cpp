@@ -49,7 +49,11 @@ void Transaction::fromJson(const json& j) {
 
     if(j.contains("Amount")){
         _amount = j["Amount"].get<double>();
-    }  
+    }
+
+    if(j.contains("Quantity")){
+        _quantity = j["Quantity"].get<double>();
+    }
 }
 
 std::unordered_map<std::string, std::string> Transaction::inputFormFields() const {
@@ -59,7 +63,8 @@ std::unordered_map<std::string, std::string> Transaction::inputFormFields() cons
         {"Category", "Category"},
         {"Description", "string"},
         {"Date", "date"},
-        {"Amount", "double"}
+        {"Amount", "double"},
+        {"Quantity", "double"}
     };
 }
 
@@ -70,6 +75,7 @@ std::shared_ptr<Category> Transaction::getCategory() const { return _category_id
 std::string Transaction::getDescription() const { return _description; }
 wxDateTime Transaction::getDate() const { return _date; }
 double Transaction::getAmount() const { return _amount; }
+double Transaction::getQuantity() const { return _quantity; }
 
 // Setters
 void Transaction::setFromAccount(std::shared_ptr<Account> from_account_id) { _from_account_id = from_account_id; }
@@ -78,3 +84,4 @@ void Transaction::setCategory(std::shared_ptr<Category> category_id) { _category
 void Transaction::setDescription(std::string description) { _description = description; }
 void Transaction::setDate(wxDateTime date) { _date = date; }
 void Transaction::setAmount(double amount) { _amount = amount; }
+void Transaction::setQuantity(double quantity) { _quantity = quantity; }

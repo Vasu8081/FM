@@ -69,8 +69,8 @@ public:
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
             {"header", _name},
-            {"Given Amount", Amount(_given_amount)},
-            {"Due Date", DateMonthYear(_due_date)}
+            {"Given Amount", Formatter::Amount(_given_amount)},
+            {"Due Date", Formatter::DateMonthYear(_due_date)}
         };
     }
 
@@ -84,13 +84,13 @@ public:
         };
     }
 
-    void amountIn(double amount) override {
-        _given_amount += amount;
+    void amountIn(std::shared_ptr<Transaction> t) override {
+        _given_amount += t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(double amount) override {
-        _given_amount -= amount;
+    void amountOut(std::shared_ptr<Transaction> t) override {
+        _given_amount -= t->getAmount();
         notifyObservers();
     }
 

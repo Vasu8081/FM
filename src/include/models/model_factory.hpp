@@ -10,6 +10,7 @@
 #include <models/credit_card_account.hpp>
 #include <models/chit_account.hpp>
 #include <models/rd_account.hpp>
+#include <models/stock_account.hpp>
 #include <models/transaction.hpp>
 #include <models/category.hpp>
 
@@ -33,6 +34,9 @@ public:
         }
         if(id.find("RD.")==0 || id.find("RD Account")==0){
             return std::make_shared<RdAccount>();
+        }
+        if(id.find("STOCK.")==0 || id.find("Stock Account")==0){
+            return std::make_shared<StockAccount>();
         }
         if(id.find("Transaction")==0){
             return std::make_shared<Transaction>();
