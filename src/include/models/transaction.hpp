@@ -9,12 +9,13 @@ class model_manager;
 class Account;
 class Category;
 
-class Transaction : public Model {
+class Transaction : public Model
+{
 public:
     Transaction() = default;
 
     json toJson() const override;
-    void fromJson(const json& j) override;
+    void fromJson(const json &j) override;
 
     std::unordered_map<std::string, std::string> inputFormFields() const override;
 

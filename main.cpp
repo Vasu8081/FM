@@ -8,21 +8,23 @@
 class FM final : public wxApp
 {
 public:
-    bool OnInit() override {
-        if(!wxApp::OnInit()) return false;
+    bool OnInit() override
+    {
+        if (!wxApp::OnInit())
+            return false;
         wxInitAllImageHandlers();
-        
-        onedrive& onedrive_ = onedrive::getInstance();
 
-        model_manager& model_manager_ = model_manager::getInstance();
+        onedrive &onedrive_ = onedrive::getInstance();
+
+        model_manager &model_manager_ = model_manager::getInstance();
         model_manager_.loadAccounts();
         model_manager_.loadCategories();
         model_manager_.loadTransactions();
-        
-        task_bar_icon* task_bar_icon_ = new task_bar_icon();
+
+        task_bar_icon *task_bar_icon_ = new task_bar_icon();
 
         task_bar_icon_->show();
-        
+
         return true;
     }
 };

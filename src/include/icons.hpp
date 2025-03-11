@@ -7,32 +7,34 @@
 #include <wx/wx.h>
 #include <icons/wxMaterialDesignArtProvider.hpp>
 
-class Icons {
+class Icons
+{
 private:
     wxString _client = wxART_CLIENT_MATERIAL_FILLED;
     wxSize _size = wxSize(16, 16);
     wxColor _color = *wxBLACK;
 
-    Icons() {
+    Icons()
+    {
         wxArtProvider::Push(new wxMaterialDesignArtProvider);
     }
 
     ~Icons() {}
-    
 
 public:
-    Icons(const Icons&) = delete;
-    Icons& operator=(const Icons&) = delete;
+    Icons(const Icons &) = delete;
+    Icons &operator=(const Icons &) = delete;
 
-    static Icons& getInstance() {
+    static Icons &getInstance()
+    {
         static Icons instance;
         return instance;
     }
 
-    wxBitmap get(const wxString& id) {
+    wxBitmap get(const wxString &id)
+    {
         return wxMaterialDesignArtProvider::GetBitmap(id, _client, _size, _color);
     }
-
 };
 
 #endif // ICONS_HPP

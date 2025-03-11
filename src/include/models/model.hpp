@@ -13,7 +13,7 @@ public:
     Model() = default;
 
     virtual json toJson() const = 0;
-    virtual void fromJson(const json& j) = 0;
+    virtual void fromJson(const json &j) = 0;
 
     virtual std::unordered_map<std::string, std::string> inputFormFields() const = 0;
 

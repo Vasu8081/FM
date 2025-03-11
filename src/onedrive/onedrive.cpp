@@ -6,21 +6,25 @@
 using json = nlohmann::json;
 
 // Curl response write callback
-size_t onedrive::writeCallback(void* contents, size_t size, size_t nmemb, std::string* userData) {
+size_t onedrive::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userData)
+{
     size_t totalSize = size * nmemb;
-    userData->append((char*)contents, totalSize);
+    userData->append((char *)contents, totalSize);
     return totalSize;
 }
 
 // Curl write callback for file downloads
-size_t onedrive::writeFileCallback(void* ptr, size_t size, size_t nmemb, FILE* stream) {
+size_t onedrive::writeFileCallback(void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
     return fwrite(ptr, size, nmemb, stream);
 }
 
 // Retrieve device code for manual authentication
-std::string onedrive::getDeviceCode(std::string &userCode, int &interval) {
-    CURL* curl = curl_easy_init();
-    if (!curl) return "";
+std::string onedrive::getDeviceCode(std::string &userCode, int &interval)
+{
+    CURL *curl = curl_easy_init();
+    if (!curl)
+        return "";
 
     std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/devicecode";
     std::string postFields = "client_id=" + _config.getClientId() + "&scope=Files.ReadWrite offline_access";
@@ -35,7 +39,8 @@ std::string onedrive::getDeviceCode(std::string &userCode, int &interval) {
     CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
 
-    if (res != CURLE_OK) return "";
+    if (res != CURLE_OK)
+        return "";
 
     json responseJson = json::parse(response);
     userCode = responseJson["user_code"];
@@ -46,14 +51,17 @@ std::string onedrive::getDeviceCode(std::string &userCode, int &interval) {
 }
 
 // Polling to get access token
-std::string onedrive::getAccessToken(const std::string& deviceCode, int interval) {
-    CURL* curl = curl_easy_init();
-    if (!curl) return "";
+std::string onedrive::getAccessToken(const std::string &deviceCode, int interval)
+{
+    CURL *curl = curl_easy_init();
+    if (!curl)
+        return "";
 
     std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/token";
     std::string postFields =
         "grant_type=urn:ietf:params:oauth:grant-type:device_code"
-        "&client_id=" + _config.getClientId() +
+        "&client_id=" +
+        _config.getClientId() +
         "&device_code=" + deviceCode;
 
     std::string response;
@@ -63,38 +71,47 @@ std::string onedrive::getAccessToken(const std::string& deviceCode, int interval
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
-    while (true) {
+    while (true)
+    {
         response.clear();
         CURLcode res = curl_easy_perform(curl);
 
-        if (res != CURLE_OK) return "";
+        if (res != CURLE_OK)
+            return "";
 
         json responseJson = json::parse(response);
-        
-        if (responseJson.contains("access_token")) {
+
+        if (responseJson.contains("access_token"))
+        {
             _config.setAccessToken(responseJson["access_token"]);
             _config.setRefreshToken(responseJson["refresh_token"]);
             _config.save();
             return responseJson["access_token"];
-        } 
+        }
 
-        if (responseJson.contains("error") && responseJson["error"] == "authorization_pending") {
+        if (responseJson.contains("error") && responseJson["error"] == "authorization_pending")
+        {
             std::this_thread::sleep_for(std::chrono::seconds(interval));
-        } else {
+        }
+        else
+        {
             return "";
         }
     }
 }
 
 // Refresh token if available
-std::string onedrive::refreshAccessToken() {
-    CURL* curl = curl_easy_init();
-    if (!curl) return "";
+std::string onedrive::refreshAccessToken()
+{
+    CURL *curl = curl_easy_init();
+    if (!curl)
+        return "";
 
     std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/token";
     std::string postFields =
         "grant_type=refresh_token"
-        "&client_id=" + _config.getClientId() +
+        "&client_id=" +
+        _config.getClientId() +
         "&refresh_token=" + _config.getRefreshToken();
 
     std::string response;
@@ -107,10 +124,12 @@ std::string onedrive::refreshAccessToken() {
     CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
 
-    if (res != CURLE_OK) return "";
+    if (res != CURLE_OK)
+        return "";
 
     json responseJson = json::parse(response);
-    if (responseJson.contains("access_token")) {
+    if (responseJson.contains("access_token"))
+    {
         _config.setAccessToken(responseJson["access_token"]);
         _config.setRefreshToken(responseJson["refresh_token"]);
         _config.save();
@@ -121,9 +140,11 @@ std::string onedrive::refreshAccessToken() {
 }
 
 // Upload file to onedrive
-void onedrive::uploadFile(const std::string& localPath, const std::string& oneDrivePath) {
+void onedrive::uploadFile(const std::string &localPath, const std::string &oneDrivePath)
+{
     std::ifstream file(localPath, std::ios::binary);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         std::cerr << "Error: Could not open file for upload: " << localPath << std::endl;
         return;
     }
@@ -134,13 +155,14 @@ void onedrive::uploadFile(const std::string& localPath, const std::string& oneDr
     std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + oneDrivePath + ":/content";
     std::cout << "🔹 Uploading to: " << url << std::endl;
 
-    CURL* curl = curl_easy_init();
-    if (!curl) {
+    CURL *curl = curl_easy_init();
+    if (!curl)
+    {
         std::cerr << "Error: Failed to initialize curl for upload" << std::endl;
         return;
     }
 
-    struct curl_slist* headers = NULL;
+    struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, ("Authorization: Bearer " + _config.getAccessToken()).c_str());
     headers = curl_slist_append(headers, "Content-Type: application/octet-stream");
 
@@ -153,11 +175,16 @@ void onedrive::uploadFile(const std::string& localPath, const std::string& oneDr
     long http_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         std::cerr << "Upload failed: " << curl_easy_strerror(res) << std::endl;
-    } else if (http_code != 200 && http_code != 201) {
+    }
+    else if (http_code != 200 && http_code != 201)
+    {
         std::cerr << "Upload failed! HTTP Response Code: " << http_code << std::endl;
-    } else {
+    }
+    else
+    {
         std::cout << "File uploaded successfully to onedrive: " << oneDrivePath << std::endl;
     }
 
@@ -165,26 +192,28 @@ void onedrive::uploadFile(const std::string& localPath, const std::string& oneDr
     curl_easy_cleanup(curl);
 }
 
-
 // Download file from onedrive
-void onedrive::downloadFile(const std::string& oneDrivePath, const std::string& localPath) {
+void onedrive::downloadFile(const std::string &oneDrivePath, const std::string &localPath)
+{
     std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + oneDrivePath + ":/content";
     std::cout << "🔹 Downloading from: " << url << std::endl;
 
-    FILE* file = fopen(localPath.c_str(), "wb");
-    if (!file) {
+    FILE *file = fopen(localPath.c_str(), "wb");
+    if (!file)
+    {
         std::cerr << "Error: Could not open file for writing: " << localPath << std::endl;
         return;
     }
 
-    CURL* curl = curl_easy_init();
-    if (!curl) {
+    CURL *curl = curl_easy_init();
+    if (!curl)
+    {
         std::cerr << "Error: Failed to initialize curl for download" << std::endl;
         fclose(file);
         return;
     }
 
-    struct curl_slist* headers = NULL;
+    struct curl_slist *headers = NULL;
     headers = curl_slist_append(headers, ("Authorization: Bearer " + _config.getAccessToken()).c_str());
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -199,11 +228,16 @@ void onedrive::downloadFile(const std::string& oneDrivePath, const std::string& 
     long http_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
-    if (res != CURLE_OK) {
+    if (res != CURLE_OK)
+    {
         std::cerr << "Download failed: " << curl_easy_strerror(res) << std::endl;
-    } else if (http_code == 200) {
+    }
+    else if (http_code == 200)
+    {
         std::cout << "File downloaded successfully from onedrive: " << oneDrivePath << std::endl;
-    } else {
+    }
+    else
+    {
         std::cerr << "Download failed! HTTP Response Code: " << http_code << std::endl;
     }
 
@@ -212,14 +246,16 @@ void onedrive::downloadFile(const std::string& oneDrivePath, const std::string& 
     fclose(file);
 }
 
-void onedrive::sync_up() {
-    uploadFile(_config.getTransactionsFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/transactions.json");
-    uploadFile(_config.getAccountDefnsFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/account_defns.json");
-    uploadFile(_config.getCategoriesFilePath().ToStdString(), "FinanceManager/"+_config.getUserName()+"/categories.json");
+void onedrive::sync_up()
+{
+    uploadFile(_config.getTransactionsFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/transactions.json");
+    uploadFile(_config.getAccountDefnsFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/account_defns.json");
+    uploadFile(_config.getCategoriesFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/categories.json");
 }
 
-void onedrive::sync_down() {
-    downloadFile("FinanceManager/"+_config.getUserName()+"/transactions.json", _config.getTransactionsFilePath().ToStdString());
-    downloadFile("FinanceManager/"+_config.getUserName()+"/account_defns.json", _config.getAccountDefnsFilePath().ToStdString());
-    downloadFile("FinanceManager/"+_config.getUserName()+"/categories.json", _config.getCategoriesFilePath().ToStdString());
+void onedrive::sync_down()
+{
+    downloadFile("FinanceManager/" + _config.getUserName() + "/transactions.json", _config.getTransactionsFilePath().ToStdString());
+    downloadFile("FinanceManager/" + _config.getUserName() + "/account_defns.json", _config.getAccountDefnsFilePath().ToStdString());
+    downloadFile("FinanceManager/" + _config.getUserName() + "/categories.json", _config.getCategoriesFilePath().ToStdString());
 }

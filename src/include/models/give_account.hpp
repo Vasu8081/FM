@@ -5,91 +5,105 @@
 #include <models/account.hpp>
 #include <wx/datetime.h>
 
-class GiveAccount : public Account {
+class GiveAccount : public Account
+{
 public:
-    GiveAccount(){
+    GiveAccount()
+    {
         _background_color = wxColour(90, 100, 90);
         _foreground_color = wxColour(235, 245, 235);
     }
 
-    std::string getID() const override {
+    std::string getID() const override
+    {
         return "GV." + _name;
     }
 
-    std::string getType() const override {
+    std::string getType() const override
+    {
         return "Give Account";
     }
 
     double portfolioValue() const override { return _given_amount; }
 
-    json toJson() const override {
+    json toJson() const override
+    {
         json j = {
             {"ID", getID()},
             {"Given To", _name},
-            {"Given Amount", _given_amount}
-        };
-        if (_given_date.IsValid()) {
+            {"Given Amount", _given_amount}};
+        if (_given_date.IsValid())
+        {
             j["Given Date"] = _given_date.FormatISODate();
         }
-        if (_due_date.IsValid()) {
+        if (_due_date.IsValid())
+        {
             j["Due Date"] = _due_date.FormatISODate();
         }
         return j;
     }
 
-    void fromJson(const json& j) override {
-        if(j.contains("Given To")) _name = j.at("Given To").get<std::string>();
-        
-        if(j.contains("Given Date")) {
+    void fromJson(const json &j) override
+    {
+        if (j.contains("Given To"))
+            _name = j.at("Given To").get<std::string>();
+
+        if (j.contains("Given Date"))
+        {
             wxDateTime temp;
             temp.ParseISODate(j.at("Given Date").get<std::string>());
-            if (temp.IsValid()) {
+            if (temp.IsValid())
+            {
                 _given_date = temp;
             }
         }
 
-        if(j.contains("Due Date")) {
+        if (j.contains("Due Date"))
+        {
             wxDateTime temp;
             temp.ParseISODate(j.at("Due Date").get<std::string>());
-            if (temp.IsValid()) {
+            if (temp.IsValid())
+            {
                 _due_date = temp;
             }
         }
-        
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override
+    {
         return {
             {"Given To", "string"},
             {"Given Date", "date"},
-            {"Due Date", "date"}
-        };
+            {"Due Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override {
+    std::unordered_map<std::string, std::string> displayFormFields() const override
+    {
         return {
             {"header", _name},
             {"Given Amount", Formatter::Amount(_given_amount)},
-            {"Due Date", Formatter::DateMonthYear(_due_date)}
-        };
+            {"Due Date", Formatter::DateMonthYear(_due_date)}};
     }
 
-    std::set<std::string> boldFormFields() const override {
-        return { "header", "Given Amount" };
+    std::set<std::string> boldFormFields() const override
+    {
+        return {"header", "Given Amount"};
     }
 
-    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override
+    {
         return {
-            {"Given Amount", wxColour(235, 170, 235)}
-        };
+            {"Given Amount", wxColour(235, 170, 235)}};
     }
 
-    void amountIn(std::shared_ptr<Transaction> t) override {
+    void amountIn(std::shared_ptr<Transaction> t) override
+    {
         _given_amount += t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(std::shared_ptr<Transaction> t) override {
+    void amountOut(std::shared_ptr<Transaction> t) override
+    {
         _given_amount -= t->getAmount();
         notifyObservers();
     }

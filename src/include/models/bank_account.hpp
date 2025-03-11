@@ -4,78 +4,90 @@
 #include <string>
 #include <models/account.hpp>
 
-class BankAccount : public Account {
+class BankAccount : public Account
+{
 public:
-    BankAccount(){
+    BankAccount()
+    {
         _background_color = wxColour(90, 100, 90);
         _foreground_color = wxColour(235, 245, 235);
     }
 
     double portfolioValue() const override { return _balance; }
 
-    std::string getID() const override {
-        return "BA."+_name+"."+_account_number;
+    std::string getID() const override
+    {
+        return "BA." + _name + "." + _account_number;
     }
 
-    std::string getType() const override {
+    std::string getType() const override
+    {
         return "Bank Account";
     }
 
-    json toJson() const override {
+    json toJson() const override
+    {
         json j = {
             {"ID", getID()},
             {"Bank Name", _name},
             {"Balance", _balance},
             {"Account Number", _account_number},
             {"Branch", _branch},
-            {"IFSC", _ifsc}
-        };
+            {"IFSC", _ifsc}};
 
         return j;
     }
 
-    void fromJson(const json& j) override {
-        if(j.contains("Bank Name")) _name = j.at("Bank Name").get<std::string>();
-        if(j.contains("Account Number")) _account_number = j.at("Account Number").get<std::string>();
-        if(j.contains("Branch")) _branch = j.at("Branch").get<std::string>();
-        if(j.contains("IFSC")) _ifsc = j.at("IFSC").get<std::string>();
+    void fromJson(const json &j) override
+    {
+        if (j.contains("Bank Name"))
+            _name = j.at("Bank Name").get<std::string>();
+        if (j.contains("Account Number"))
+            _account_number = j.at("Account Number").get<std::string>();
+        if (j.contains("Branch"))
+            _branch = j.at("Branch").get<std::string>();
+        if (j.contains("IFSC"))
+            _ifsc = j.at("IFSC").get<std::string>();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override {
+    std::unordered_map<std::string, std::string> inputFormFields() const override
+    {
         return {
             {"Bank Name", "string"},
             {"Account Number", "string"},
             {"Branch", "string"},
-            {"IFSC", "string"}
-        };
+            {"IFSC", "string"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override {
+    std::unordered_map<std::string, std::string> displayFormFields() const override
+    {
         return {
             {"header", _name},
             {"Balance", Formatter::Amount(_balance)},
             {"Account Number", _account_number},
             {"Branch", _branch},
-            {"IFSC", _ifsc}
-        };
+            {"IFSC", _ifsc}};
     }
 
-    std::set<std::string> boldFormFields() const override {
-        return { "header", "Balance" };
+    std::set<std::string> boldFormFields() const override
+    {
+        return {"header", "Balance"};
     }
 
-    std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+    std::unordered_map<std::string, wxColour> overrideFormColors() const override
+    {
         return {
-            {"Balance", wxColour(235, 170, 235)}
-        };
+            {"Balance", wxColour(235, 170, 235)}};
     }
 
-    void amountIn(std::shared_ptr<Transaction> t) override {
+    void amountIn(std::shared_ptr<Transaction> t) override
+    {
         _balance = _balance + t->getAmount();
         notifyObservers();
     }
 
-    void amountOut(std::shared_ptr<Transaction> t) override {
+    void amountOut(std::shared_ptr<Transaction> t) override
+    {
         _balance = _balance - t->getAmount();
         notifyObservers();
     }

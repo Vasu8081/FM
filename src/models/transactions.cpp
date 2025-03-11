@@ -3,7 +3,8 @@
 #include <models/account.hpp>
 #include <models/category.hpp>
 
-json Transaction::toJson() const {
+json Transaction::toJson() const
+{
     json j;
     j["From Account"] = _from_account_id ? _from_account_id->getID() : "";
     j["To Account"] = _to_account_id ? _to_account_id->getID() : "";
@@ -14,49 +15,61 @@ json Transaction::toJson() const {
     return j;
 }
 
-void Transaction::fromJson(const json& j) {
-    model_manager& model_manager_ = model_manager::getInstance();
+void Transaction::fromJson(const json &j)
+{
+    model_manager &model_manager_ = model_manager::getInstance();
 
-    if(j.contains("From Account")){
+    if (j.contains("From Account"))
+    {
         auto id = j["From Account"].get<std::string>();
-        if(id != "") {
+        if (id != "")
+        {
             _from_account_id = model_manager_.getAccounts()[id];
         }
     }
 
-    if(j.contains("To Account")){
+    if (j.contains("To Account"))
+    {
         auto id = j["To Account"].get<std::string>();
-        if(id != "") {
+        if (id != "")
+        {
             _to_account_id = model_manager_.getAccounts()[id];
         }
     }
 
-    if(j.contains("Category")){
+    if (j.contains("Category"))
+    {
         auto id = j["Category"].get<std::string>();
-        if(id != "") {
+        if (id != "")
+        {
             _category_id = model_manager_.getCategories()[id];
         }
     }
 
-    if(j.contains("Description")){
+    if (j.contains("Description"))
+    {
         _description = j["Description"].get<std::string>();
     }
 
-    if (j.contains("Date")) {
+    if (j.contains("Date"))
+    {
         wxString date_str = j["Date"].get<std::string>();
         _date.ParseISODate(date_str);
     }
 
-    if(j.contains("Amount")){
+    if (j.contains("Amount"))
+    {
         _amount = j["Amount"].get<double>();
     }
 
-    if(j.contains("Quantity")){
+    if (j.contains("Quantity"))
+    {
         _quantity = j["Quantity"].get<double>();
     }
 }
 
-std::unordered_map<std::string, std::string> Transaction::inputFormFields() const {
+std::unordered_map<std::string, std::string> Transaction::inputFormFields() const
+{
     return {
         {"From Account", "Account"},
         {"To Account", "Account"},
@@ -64,8 +77,7 @@ std::unordered_map<std::string, std::string> Transaction::inputFormFields() cons
         {"Description", "string"},
         {"Date", "date"},
         {"Amount", "double"},
-        {"Quantity", "double"}
-    };
+        {"Quantity", "double"}};
 }
 
 // Getters
