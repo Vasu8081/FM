@@ -91,22 +91,22 @@ public:
         return {
             {"header", _name},
             {"Card Number", _card_number},
-            {"CVV", _cvv},
-            {"Expiry Date", _expiry_date.FormatISODate().ToStdString()},
-            {"Billing Date", _billing_date.FormatISODate().ToStdString()},
-            {"Payment Due Date", _payment_due_date.FormatISODate().ToStdString()},
-            {"Credit Limit", std::to_string(_credit_limit)},
-            {"Limit Left", std::to_string(_limit_left)}
+            {"Security Code", _cvv},
+            {"Expiry Date", MonthYear(_expiry_date)},
+            {"Statement Generation", MonthlyPaymentDate(_billing_date)},
+            {"Due Date", MonthlyPaymentDate(_payment_due_date)},
+            {"Total Credit Limit", Amount(_credit_limit)},
+            {"Available Credit", Amount(_limit_left)}
         };
     }
 
     std::set<std::string> boldFormFields() const override {
-        return { "header", "Limit Left" };
+        return { "header", "Available Credit" };
     }
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override {
         return {
-            {"Limit Left", wxColour(235, 170, 235)}
+            {"Available Credit", wxColour(235, 170, 235)}
         };
     }
 

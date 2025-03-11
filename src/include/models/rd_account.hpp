@@ -58,24 +58,30 @@ public:
     }
 
     std::unordered_map<std::string, std::string> displayFormFields() const override {
+        int months = (_maturity_date.GetYear() - _start_date.GetYear()) * 12 +(_maturity_date.GetMonth() - _start_date.GetMonth())+1;
+        double total_paid_amount = _monthly_payment*months;
+        double total_interest = ((_maturity_amount-total_paid_amount)*100.0)/total_paid_amount;
+        double yearly_interest = (total_interest*12.0)/months;
         return {
             {"header", _name},
-            {"Monthly Payment", std::to_string(_monthly_payment)},
-            {"Paid Amount", std::to_string(_paid_amount)},
-            {"Maturity Amount", std::to_string(_maturity_amount)},
-            {"Start Date", _start_date.FormatISODate().ToStdString()},
-            {"Monthly Payment Date", _monthly_payment_date.FormatISODate().ToStdString()},
-            {"Maturity Date", _maturity_date.FormatISODate().ToStdString()}
+            {"Monthly Payment", Amount(_monthly_payment)},
+            {"Total Expected Amount", Amount(_maturity_amount)},
+            {"Payment Due Date", MonthlyPaymentDate(_monthly_payment_date)},
+            {"First Installment", MonthYear(_start_date)},
+            {"Final Installment", MonthYear(_maturity_date)},
+            {"Tenure (in months)", Integer(months)},
+            {"Annual Interest Rate", Percentage(yearly_interest)},
+            {"Total Amount Paid", Amount(_paid_amount)}
         };
     }
 
     std::set<std::string> boldFormFields() const override {
-        return { "header", "Paid Amount" };
+        return { "header", "Total Amount Paid" };
     }
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override {
         return {
-            {"Paid Amount", wxColour(235, 170, 235)}
+            {"Total Amount Paid", wxColour(235, 170, 235)}
         };
     }
 

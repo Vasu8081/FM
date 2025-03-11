@@ -10,6 +10,8 @@
 #include <vector>
 #include <format>
 #include <wx/wx.h>
+#include <sstream>
+#include <locale>
 
 class Account : public virtual Model {
 public:
@@ -67,30 +69,63 @@ protected:
 
 //View formatters
 
-    std::string format_amount(double amount) const {
-        return std::format("{:.2f}", amount);
+    std::string Amount(double amount) const {
+        return formatWithCommas(amount);
     }
 
-    std::string format_monthly_payment_date(wxDateTime bill_date) const {
-        return std::to_string(bill_date.GetDay())+"th of every month";
+    std::string MonthlyPaymentDate(wxDateTime billDate) const {
+        return std::format("{}{} of every month", billDate.GetDay(), getOrdinalSuffix(billDate.GetDay()));
     }
 
-    std::string format_month_year(wxDateTime date) const {
+    std::string MonthYear(wxDateTime date) const {
         return date.Format("%b-%y").ToStdString();
     }
 
-    std::string format_date_month_year(wxDateTime date) const {
+    std::string DateMonthYear(wxDateTime date) const {
         return date.FormatISODate().ToStdString();
     }
 
-    std::string format_integer(int value) const{
+    std::string Integer(int value) const{
         return std::to_string(value);
     }
 
-    std::string format_percentage(double value) const {
+    std::string Percentage(double value) const {
         return std::format("{:.2f}%", value);
     }
 
+private:
+    std::string getOrdinalSuffix(int day) const {
+        if (day >= 11 && day <= 13) return "th";
+        switch (day % 10) {
+            case 1: return "st";
+            case 2: return "nd";
+            case 3: return "rd";
+            default: return "th";
+        }
+    }
+
+    std::string formatWithCommas(double amount) const {
+        std::ostringstream stream;
+        stream << std::fixed << std::setprecision(2) << amount;
+        std::string str = stream.str();
+        if (str.find(".00") != std::string::npos) {
+            str = str.substr(0, str.find(".00"));
+        }
+    
+        int n = str.find('.');
+        if (n == std::string::npos) {
+            n = str.length();
+        }
+        
+        int insertPosition = n - 3;
+        while (insertPosition > 0) {
+            str.insert(insertPosition, ",");
+            insertPosition -= 2;
+        }
+    
+        return str;
+    }
+    
 
 };
 

@@ -65,14 +65,14 @@ public:
         double yearly_interest = (total_interest*12.0)/months;
         return {
             {"header", _name},
-            {"Monthly Payment", format_amount(_monthly_payment)},
-            {"Total Expected Amount", format_amount(_maturity_amount)},
-            {"Payment Due Date", format_monthly_payment_date(_monthly_payment_date)},
-            {"First Installment", format_month_year(_start_date)},
-            {"Final Installment", format_month_year(_maturity_date)},
-            {"Tenure (in months)", format_integer(months)},
-            {"Annual Interest Rate", format_percentage(yearly_interest)},
-            {"Total Amount Paid", format_amount(_paid_amount)}
+            {"Monthly Payment", Amount(_monthly_payment)},
+            {"Total Expected Amount", Amount(_maturity_amount)},
+            {"Payment Due Date", MonthlyPaymentDate(_monthly_payment_date)},
+            {"First Installment", MonthYear(_start_date)},
+            {"Final Installment", MonthYear(_maturity_date)},
+            {"Tenure (in months)", Integer(months)},
+            {"Annual Interest Rate", Percentage(yearly_interest)},
+            {"Total Amount Paid", Amount(_paid_amount)}
         };
     }
 

@@ -53,7 +53,7 @@ public:
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
             {"header", _name},
-            {"Balance", std::to_string(_balance)},
+            {"Balance", Amount(_balance)},
             {"Account Number", _account_number},
             {"Branch", _branch},
             {"IFSC", _ifsc}

@@ -71,9 +71,8 @@ public:
     std::unordered_map<std::string, std::string> displayFormFields() const override {
         return {
             {"header", _name},
-            {"Total Borrowed Amount", std::to_string(_borrowed_amount)},
-            {"Borrowed Date", _borrowed_date.FormatISODate().ToStdString()},
-            {"Due Date", _due_date.FormatISODate().ToStdString()}
+            {"Total Borrowed Amount", Amount(_borrowed_amount)},
+            {"Due Date", DateMonthYear(_due_date)}
         };
     }
 
