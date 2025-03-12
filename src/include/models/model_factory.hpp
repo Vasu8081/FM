@@ -14,56 +14,49 @@
 #include <models/transaction.hpp>
 #include <models/category.hpp>
 
-class model_factory {
-    public:
-        static model_factory& getInstance() {
-            static model_factory instance;
-            return instance;
+class model_factory
+{
+public:
+    static std::shared_ptr<Model> create(const std::string &id)
+    {
+        if (id.find("BA.") == 0 || id.find("Bank Account") == 0)
+        {
+            return std::make_shared<BankAccount>();
         }
-    
-        std::shared_ptr<Model> create(const std::string &id) {
-            for (const auto& pair : _id_to_class) {
-                if (id.find(pair.first) == 0) {
-                    return pair.second();
-                }
-            }
-
-            for(const auto& pair : _name_to_class) {
-                if (id.find(pair.first) == 0) {
-                    return pair.second();
-                }
-            }
-            
-            return nullptr;
+        if (id.find("BG.") == 0 || id.find("Borrow Account") == 0)
+        {
+            return std::make_shared<BorrowAccount>();
         }
-    
-    private:
-        std::unordered_map<std::string, std::function<std::shared_ptr<Model>()>> _id_to_class;
-        std::unordered_map<std::string, std::function<std::shared_ptr<Model>()>> _name_to_class;
-        model_factory() {
-            _id_to_class = {
-                {"BA.", []() { return std::make_shared<BankAccount>(); }},
-                {"BG.", []() { return std::make_shared<BorrowAccount>(); }},
-                {"GV.", []() { return std::make_shared<GiveAccount>(); }},
-                {"CC.", []() { return std::make_shared<CreditCardAccount>(); }},
-                {"CHIT.", []() { return std::make_shared<ChitAccount>(); }},
-                {"RD.", []() { return std::make_shared<RdAccount>(); }},
-                {"STOCK.", []() { return std::make_shared<StockAccount>(); }},
-                {"CAT.", []() { return std::make_shared<Category>(); }},
-            };
-
-            _name_to_class = {
-                {"Bank Account", []() { return std::make_shared<BankAccount>(); }},
-                {"Borrow Account", []() { return std::make_shared<BorrowAccount>(); }},
-                {"Give Account", []() { return std::make_shared<GiveAccount>(); }},
-                {"Credit Card", []() { return std::make_shared<CreditCardAccount>(); }},
-                {"Chit Account", []() { return std::make_shared<ChitAccount>(); }},
-                {"RD Account", []() { return std::make_shared<RdAccount>(); }},
-                {"Stock Account", []() { return std::make_shared<StockAccount>(); }},
-                {"Transaction", []() { return std::make_shared<Transaction>(); }},
-                {"Category", []() { return std::make_shared<Category>(); }},
-            };
+        if (id.find("GV.") == 0 || id.find("Give Account") == 0)
+        {
+            return std::make_shared<GiveAccount>();
         }
-    };
+        if (id.find("CC.") == 0 || id.find("Credit Card") == 0)
+        {
+            return std::make_shared<CreditCardAccount>();
+        }
+        if (id.find("CHIT.") == 0 || id.find("Chit Account") == 0)
+        {
+            return std::make_shared<ChitAccount>();
+        }
+        if (id.find("RD.") == 0 || id.find("RD Account") == 0)
+        {
+            return std::make_shared<RdAccount>();
+        }
+        if (id.find("STOCK.") == 0 || id.find("Stock Account") == 0)
+        {
+            return std::make_shared<StockAccount>();
+        }
+        if (id.find("Transaction") == 0)
+        {
+            return std::make_shared<Transaction>();
+        }
+        if (id.find("CAT.") == 0 || id.find("Category") == 0)
+        {
+            return std::make_shared<Category>();
+        }
+        return nullptr;
+    }
+};
 
 #endif
