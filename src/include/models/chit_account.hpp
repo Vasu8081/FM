@@ -71,10 +71,8 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override
     {
-        int months = (_maturity_date.GetYear() - _start_date.GetYear()) * 12 + (_maturity_date.GetMonth() - _start_date.GetMonth()) + 1;
-        double total_paid_amount = _monthly_payment * months;
-        double total_interest = ((_maturity_amount - total_paid_amount) * 100.0) / total_paid_amount;
-        double yearly_interest = (total_interest * 12.0) / months;
+        auto months = Calculator::calculateMonthsDifference(_start_date, _maturity_date)+1;
+        auto yearly_interest = Calculator::findRDInterestRate(_monthly_payment, _maturity_amount, months);
         return {
             {"header", _name},
             {"Monthly Payment", Formatter::Amount(_monthly_payment)},

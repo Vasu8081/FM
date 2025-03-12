@@ -9,6 +9,7 @@
 #include <set>
 #include <vector>
 #include <wx/wx.h>
+#include <calculator.hpp>
 
 class Account : public virtual Model
 {

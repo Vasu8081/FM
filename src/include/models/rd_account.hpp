@@ -10,8 +10,8 @@ class RdAccount : public Account
 public:
     RdAccount()
     {
-        _background_color = wxColour(85, 70, 65, 1);
-        _foreground_color = wxColour(245, 230, 225, 1);
+        _background_color = wxColour(95, 85, 75);
+        _foreground_color = wxColour(245, 238, 230);
     }
 
     std::string getID() const override
@@ -70,10 +70,8 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override
     {
-        int months = (_maturity_date.GetYear() - _start_date.GetYear()) * 12 + (_maturity_date.GetMonth() - _start_date.GetMonth()) + 1;
-        double total_paid_amount = _monthly_payment * months;
-        double total_interest = ((_maturity_amount - total_paid_amount) * 100.0) / total_paid_amount;
-        double yearly_interest = (total_interest * 12.0) / months;
+        auto months = Calculator::calculateMonthsDifference(_start_date, _maturity_date);
+        auto yearly_interest = Calculator::findRDInterestRate(_monthly_payment, _maturity_amount, months);
         return {
             {"header", _name},
             {"Monthly Payment", Formatter::Amount(_monthly_payment)},

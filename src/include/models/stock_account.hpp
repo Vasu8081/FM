@@ -54,14 +54,16 @@ public:
         if (j.contains("Exchange Code"))
             _exchange_code = j.at("Exchange Code").get<std::string>();
         _product = _api.getProduct(_exchange_code + "%7C" + _isin);
-        // std::thread t([this](){
-        //     while(true) {
-        //         _product = _api.getProduct(_exchange_code+"%7C"+_isin);
-        //         notifyObservers();
-        //         std::this_thread::sleep_for(std::chrono::seconds(20));
-        //     }
-        // });
-        // t.detach();
+        std::thread t([this]() {
+            while (true) {
+                _product = _api.getProduct(_exchange_code + "%7C" + _isin);
+                wxTheApp->CallAfter([this]() {
+                    notifyObservers();
+                });
+                std::this_thread::sleep_for(std::chrono::seconds(3600));
+            }
+        });
+        t.detach();
     }
 
     std::unordered_map<std::string, std::string> inputFormFields() const override
@@ -74,17 +76,30 @@ public:
 
     std::unordered_map<std::string, std::string> displayFormFields() const override
     {
-        auto curr_price = _product["data"].begin().value()["last_price"].get<double>();
-        auto curr_pnl = (_quantity * curr_price) - (_quantity * _average_bought_price);
-        return {
-            {"header", _name},
-            {"Isin", _name},
-            {"Quantity", Formatter::Amount(_quantity)},
-            {"PnL Made Till Now", Formatter::Amount(_pnl_made)},
-            {"Average Bought Price", Formatter::Amount(_average_bought_price)},
-            {"Exchange Code", _exchange_code},
-            {"Current Price", Formatter::Amount(curr_price)},
-            {"Current PnL", Formatter::Amount(curr_pnl)}};
+        if(!_product.contains("data")){
+            return {
+                {"header", _name},
+                {"Isin", _name},
+                {"Quantity", Formatter::Amount(_quantity)},
+                {"PnL Made Till Now", Formatter::Amount(_pnl_made)},
+                {"Average Bought Price", Formatter::Amount(_average_bought_price)},
+                {"Exchange Code", _exchange_code},
+                {"Current Price", "Unable to fetch"},
+                {"Current PnL", "Unable to fetch"}};
+        }
+        else{
+            auto curr_price = _product["data"].begin().value()["last_price"].get<double>();
+            auto curr_pnl = (_quantity * curr_price) - (_quantity * _average_bought_price);
+            return {
+                {"header", _name},
+                {"Isin", _name},
+                {"Quantity", Formatter::Amount(_quantity)},
+                {"PnL Made Till Now", Formatter::Amount(_pnl_made)},
+                {"Average Bought Price", Formatter::Amount(_average_bought_price)},
+                {"Exchange Code", _exchange_code},
+                {"Current Price", Formatter::Amount(curr_price)},
+                {"Current PnL", Formatter::Amount(curr_pnl)}};
+        }
     }
 
     std::set<std::string> boldFormFields() const override
