@@ -156,13 +156,9 @@ private:
         wxBoxSizer *dialogSizer = new wxBoxSizer(wxVERTICAL);
 
         wxArrayString accountTypes;
-        accountTypes.Add("Bank Account");
-        accountTypes.Add("Borrow Account");
-        accountTypes.Add("Give Account");
-        accountTypes.Add("Credit Card");
-        accountTypes.Add("RD Account");
-        accountTypes.Add("Chit Account");
-        accountTypes.Add("Stock Account");
+        for(auto account_name : model_factory::getAccountNames()){
+            accountTypes.Add(account_name);
+        }
 
         wxChoice *choice = new wxChoice(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, accountTypes);
         choice->SetSelection(0);

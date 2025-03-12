@@ -4,6 +4,9 @@
 #include <models/model.hpp>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <vector>
+#include <functional>
 #include <models/bank_account.hpp>
 #include <models/borrow_account.hpp>
 #include <models/give_account.hpp>
@@ -17,45 +20,56 @@
 class model_factory
 {
 public:
+    using FactoryFunction = std::function<std::shared_ptr<Model>()>;
+    
     static std::shared_ptr<Model> create(const std::string &id)
     {
-        if (id.find("BA.") == 0 || id.find("Bank Account") == 0)
+        for (const auto &[key, creator] : getFactoryMap())
         {
-            return std::make_shared<BankAccount>();
-        }
-        if (id.find("BG.") == 0 || id.find("Borrow Account") == 0)
-        {
-            return std::make_shared<BorrowAccount>();
-        }
-        if (id.find("GV.") == 0 || id.find("Give Account") == 0)
-        {
-            return std::make_shared<GiveAccount>();
-        }
-        if (id.find("CC.") == 0 || id.find("Credit Card") == 0)
-        {
-            return std::make_shared<CreditCardAccount>();
-        }
-        if (id.find("CHIT.") == 0 || id.find("Chit Account") == 0)
-        {
-            return std::make_shared<ChitAccount>();
-        }
-        if (id.find("RD.") == 0 || id.find("RD Account") == 0)
-        {
-            return std::make_shared<RdAccount>();
-        }
-        if (id.find("STOCK.") == 0 || id.find("Stock Account") == 0)
-        {
-            return std::make_shared<StockAccount>();
-        }
-        if (id.find("Transaction") == 0)
-        {
-            return std::make_shared<Transaction>();
-        }
-        if (id.find("CAT.") == 0 || id.find("Category") == 0)
-        {
-            return std::make_shared<Category>();
+            if (id.find(key) == 0)
+            {
+                return creator();
+            }
         }
         return nullptr;
+    }
+
+    static std::vector<std::string> getAccountNames()
+    {
+        std::vector<std::string> names;
+        for (const auto &[key, _] : getFactoryMap())
+        {
+            if (key.find('.') == std::string::npos && key != "Category" && key != "Transaction")
+            {
+                names.push_back(key);
+            }
+        }
+        return names;
+    }
+
+private:
+    static const std::unordered_map<std::string, FactoryFunction> &getFactoryMap()
+    {
+        static const std::unordered_map<std::string, FactoryFunction> factoryMap = {
+            {"BA.", []() { return std::make_shared<BankAccount>(); }},
+            {"Bank Account", []() { return std::make_shared<BankAccount>(); }},
+            {"BG.", []() { return std::make_shared<BorrowAccount>(); }},
+            {"Borrow Account", []() { return std::make_shared<BorrowAccount>(); }},
+            {"GV.", []() { return std::make_shared<GiveAccount>(); }},
+            {"Give Account", []() { return std::make_shared<GiveAccount>(); }},
+            {"CC.", []() { return std::make_shared<CreditCardAccount>(); }},
+            {"Credit Card", []() { return std::make_shared<CreditCardAccount>(); }},
+            {"CHIT.", []() { return std::make_shared<ChitAccount>(); }},
+            {"Chit Account", []() { return std::make_shared<ChitAccount>(); }},
+            {"RD.", []() { return std::make_shared<RdAccount>(); }},
+            {"RD Account", []() { return std::make_shared<RdAccount>(); }},
+            {"STOCK.", []() { return std::make_shared<StockAccount>(); }},
+            {"Stock Account", []() { return std::make_shared<StockAccount>(); }},
+            {"Transaction", []() { return std::make_shared<Transaction>(); }},
+            {"CAT.", []() { return std::make_shared<Category>(); }},
+            {"Category", []() { return std::make_shared<Category>(); }}
+        };
+        return factoryMap;
     }
 };
 
