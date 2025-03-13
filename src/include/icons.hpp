@@ -12,7 +12,6 @@ class Icons
 private:
     wxString _client = wxART_CLIENT_MATERIAL_FILLED;
     wxSize _size = wxSize(16, 16);
-    wxColor _color = *wxBLACK;
 
     Icons()
     {
@@ -31,9 +30,9 @@ public:
         return instance;
     }
 
-    wxBitmap get(const wxString &id)
+    wxBitmap get(const wxString &id, wxColor color = *wxBLACK)
     {
-        return wxMaterialDesignArtProvider::GetBitmap(id, _client, _size, _color);
+        return wxMaterialDesignArtProvider::GetBitmap(id, _client, _size, color);
     }
 };
 

@@ -130,7 +130,7 @@ public:
         }
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Card Name", "string"},
@@ -142,13 +142,13 @@ public:
             {"Credit Limit", "double"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},
             {"Card Number", _card_number},
-            {"Security Code", _cvv},
-            {"Expiry Date", Formatter::MonthYear(_expiry_date)},
+            // {"Security Code", _cvv},
+            // {"Expiry Date", Formatter::MonthYear(_expiry_date)},
             {"Statement Generation", Formatter::MonthlyPaymentDate(_billing_date)},
             {"Due Date", Formatter::MonthlyPaymentDate(_payment_due_date)},
             {"Total Credit Limit", Formatter::Amount(_credit_limit)},

@@ -26,7 +26,7 @@ private:
     bool ValidateInputs();
 
 public:
-    AddModelForm(wxWindow *parent, const std::string &type);
+    AddModelForm(wxWindow *parent, const std::string &type, std::shared_ptr<Model> default_model = nullptr, bool from_account = false);
 };
 
 #endif // ADD_MODEL_HPP

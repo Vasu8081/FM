@@ -63,26 +63,41 @@ private:
         std::ostringstream stream;
         stream << std::fixed << std::setprecision(2) << amount;
         std::string str = stream.str();
+    
+        // Remove ".00" if present
         if (str.find(".00") != std::string::npos)
         {
             str = str.substr(0, str.find(".00"));
         }
-
+    
+        bool isNegative = (str[0] == '-'); // Check if negative
+        if (isNegative)
+        {
+            str = str.substr(1); // Remove the negative sign temporarily
+        }
+    
         int n = str.find('.');
         if (n == std::string::npos)
         {
             n = str.length();
         }
-
+    
         int insertPosition = n - 3;
         while (insertPosition > 0)
         {
             str.insert(insertPosition, ",");
             insertPosition -= 2;
         }
-
+    
+        // Add the negative sign back if necessary
+        if (isNegative)
+        {
+            str.insert(0, "-");
+        }
+    
         return str;
     }
+    
 };
 
 #endif // FORMATTER_HPP

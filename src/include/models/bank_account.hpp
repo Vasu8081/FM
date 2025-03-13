@@ -50,7 +50,7 @@ public:
             _ifsc = j.at("IFSC").get<std::string>();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Bank Name", "string"},
@@ -59,7 +59,7 @@ public:
             {"IFSC", "string"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},

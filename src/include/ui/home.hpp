@@ -173,13 +173,15 @@ private:
         if (dialog->ShowModal() == wxID_OK)
         {
             wxString selectedType = choice->GetStringSelection();
-            wxDialog *accountDialog = new wxDialog(this, wxID_ANY, "Add Account", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+            wxDialog *accountDialog = new wxDialog(this, wxID_ANY, "Add Account", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
             wxBoxSizer *accountSizer = new wxBoxSizer(wxVERTICAL);
 
             auto accountForm = new AddModelForm(accountDialog, selectedType.ToStdString());
             accountSizer->Add(accountForm, 1, wxEXPAND | wxALL, 5);
 
             accountDialog->SetSizer(accountSizer);
+            accountDialog->Fit();
+            accountDialog->Layout();
             accountDialog->Centre();
             accountDialog->ShowModal();
         }
@@ -188,7 +190,7 @@ private:
 
     void onAddTransactionButtonClicked(wxCommandEvent &event)
     {
-        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Add Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Add Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *transactionSizer = new wxBoxSizer(wxVERTICAL);
 
         auto transactionForm = new AddModelForm(transactionDialog, "Transaction");
@@ -196,18 +198,22 @@ private:
 
         transactionDialog->SetSizer(transactionSizer);
         transactionDialog->Centre();
+        transactionDialog->Fit();
+        transactionDialog->Layout();
         transactionDialog->ShowModal();
     }
 
     void onAddCategoryButtonClicked(wxCommandEvent &event)
     {
-        wxDialog *categoryDialog = new wxDialog(this, wxID_ANY, "Add Category", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        wxDialog *categoryDialog = new wxDialog(this, wxID_ANY, "Add Category", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *categorySizer = new wxBoxSizer(wxVERTICAL);
 
         auto categoryForm = new AddModelForm(categoryDialog, "Category");
         categorySizer->Add(categoryForm, 1, wxEXPAND | wxALL, 5);
 
         categoryDialog->SetSizer(categorySizer);
+        categoryDialog->Fit();
+        categoryDialog->Layout();
         categoryDialog->Centre();
         categoryDialog->ShowModal();
         updateCategories();

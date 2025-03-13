@@ -69,7 +69,7 @@ public:
         }
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Given To", "string"},
@@ -77,7 +77,7 @@ public:
             {"Due Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},

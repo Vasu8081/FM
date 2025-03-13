@@ -4,23 +4,25 @@
 #include <wx/spinctrl.h>
 #include <wx/choice.h>
 
-AddModelForm::AddModelForm(wxWindow *parent, const std::string &type) : wxPanel(parent)
+AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::shared_ptr<Model> default_model, bool from_account ) 
+    : wxPanel(parent)
 {
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     inputFields.clear();
     _model = std::dynamic_pointer_cast<Model>(model_factory::create(type));
+    
     if (!_model)
     {
         wxMessageBox("Invalid model type: " + type);
         return;
     }
 
-    fieldTypes = _model->inputFormFields();
     wxFlexGridSizer *sizer = new wxFlexGridSizer(2, 10, 10);
     sizer->AddGrowableCol(1);
 
-    for (auto &[key, fieldType] : fieldTypes)
+    for (auto &[key, fieldType] : _model->inputFormFields())
     {
+        fieldTypes[key] = fieldType;
         wxStaticText *label = new wxStaticText(this, wxID_ANY, key + ":");
         wxControl *input = nullptr;
         std::string defaultValue = "";
@@ -32,7 +34,8 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type) : wxPanel(
         else if (fieldType == "int")
         {
             int value = 0;
-            input = new wxSpinCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1), wxSP_ARROW_KEYS, 0, 100, value);
+            input = new wxSpinCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1), 
+                                   wxSP_ARROW_KEYS, 0, 100, value);
         }
         else if (fieldType == "double")
         {
@@ -54,14 +57,31 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type) : wxPanel(
             auto accounts = model_manager_.getAccounts();
             wxArrayString accountChoices;
             int index = 0;
+            int choose_index = 0;
             accountChoices.Add("");
             accountMapping[index++] = "";
             for (auto &act : accounts)
             {
+                if(default_model){
+                    auto mdl = std::dynamic_pointer_cast<Account>(default_model);
+                    if(mdl && mdl == act.second ){
+                        if(from_account && key == "From Account"){
+                            choose_index = index;
+                        }
+                        if(!from_account && key == "To Account"){
+                            choose_index = index;
+                        }
+                    }
+                }
                 accountChoices.Add(act.second->getName());
                 accountMapping[index++] = act.first;
             }
             wxChoice *accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(200, -1), accountChoices);
+            if(choose_index != 0){
+                accountChoice->SetSelection(choose_index);
+                accountChoice->Disable();
+            }
+            
             input = accountChoice;
         }
         else if (fieldType == "Category")
@@ -84,6 +104,7 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type) : wxPanel(
         if (input)
         {
             inputFields[key] = input;
+            input->SetMinSize(wxSize(250, -1));  // Set a minimum size for better fitting
             sizer->Add(label, 0, wxALIGN_CENTER_VERTICAL | wxALL, 5);
             sizer->Add(input, 1, wxEXPAND | wxALL, 5);
         }
@@ -105,9 +126,11 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type) : wxPanel(
     mainSizer->Add(sizer, 1, wxEXPAND | wxALL, 10);
     mainSizer->Add(buttonSizer, 0, wxALIGN_CENTER | wxALL, 10);
 
-    SetSizerAndFit(mainSizer);
-    Layout();
+    SetSizer(mainSizer);
+    Fit();  // Ensures proper fitting after adding elements
+    Layout();  // Recalculate the layout properly
 }
+
 
 bool AddModelForm::ValidateInputs()
 {

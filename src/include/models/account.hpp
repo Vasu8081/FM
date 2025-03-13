@@ -25,9 +25,9 @@ public:
 
     virtual void fromJson(const nlohmann::json &j) override = 0;
 
-    virtual std::unordered_map<std::string, std::string> inputFormFields() const override = 0;
+    virtual std::vector<std::pair<std::string, std::string>> inputFormFields() const override = 0;
 
-    virtual std::unordered_map<std::string, std::string> displayFormFields() const = 0;
+    virtual std::vector<std::pair<std::string, std::string>> displayFormFields() const = 0;
 
     virtual std::set<std::string> boldFormFields() const = 0;
 

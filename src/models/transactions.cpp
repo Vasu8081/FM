@@ -74,8 +74,9 @@ void Transaction::fromJson(const json &j)
     }
 }
 
-std::unordered_map<std::string, std::string> Transaction::inputFormFields() const
+std::vector<std::pair<std::string, std::string>> Transaction::inputFormFields() const
 {
+    //From Account and To Account also used in add_model.cpp (if changed name here, need to change there also)
     return {
         {"From Account", "Account"},
         {"To Account", "Account"},

@@ -40,7 +40,7 @@ public:
             _monthly_budget = j.at("Monthly Budget").get<double>();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Name", "string"},

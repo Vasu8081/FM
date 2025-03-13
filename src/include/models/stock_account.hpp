@@ -66,7 +66,7 @@ public:
         t.detach();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Stock Name", "string"},
@@ -74,7 +74,7 @@ public:
             {"Exchange Code", "string"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         if(!_product.contains("data")){
             return {

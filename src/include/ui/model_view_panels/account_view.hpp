@@ -22,7 +22,8 @@ public:
         auto displayFields = model->displayFormFields();
         auto boldFields = model->boldFormFields();
         auto overrideColors = model->overrideFormColors();
-        auto staticBox = new wxStaticBox(this, wxID_ANY, displayFields["header"]);
+        auto header_row = displayFields[0];
+        auto staticBox = new wxStaticBox(this, wxID_ANY, header_row.second);
         if (boldFields.find("header") != boldFields.end())
         {
             wxFont font = staticBox->GetFont();
@@ -51,14 +52,30 @@ public:
 
             staticBoxSizer->Add(field_sizer, 0, wxEXPAND | wxALL, 5);
         }
-
-        auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
-        staticBoxSizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
-        Bind(wxEVT_BUTTON, &AccountView::viewTransactions, this, view_transactions->GetId());
-
         sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
 
+        auto income = _icon.get(wxART_TRENDING_DOWN, wxColour(46, 204, 113));
+        auto expense = _icon.get(wxART_TRENDING_UP, *wxRED);
+
+        auto button_sizer = new wxBoxSizer(wxHORIZONTAL);
+
+        wxBitmapButton *incomeButton = new wxBitmapButton(this, wxID_ANY, income, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Income");
+        wxBitmapButton *expenseButton = new wxBitmapButton(this, wxID_ANY, expense, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Expense");
+        auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
+
+        button_sizer->Add(incomeButton, 0, wxALL, 5);
+        button_sizer->Add(view_transactions, 1, wxEXPAND | wxALL, 5);
+        button_sizer->Add(expenseButton, 0, wxALL, 5);
+
+        Bind(wxEVT_BUTTON, &AccountView::addIncome, this, incomeButton->GetId());
+        Bind(wxEVT_BUTTON, &AccountView::addExpense, this, expenseButton->GetId());
+        Bind(wxEVT_BUTTON, &AccountView::viewTransactions, this, view_transactions->GetId());
+
+        sizer->Add(button_sizer, 0, wxEXPAND | wxALL, 10);
+
         SetSizer(sizer);
+        Layout();
+        Fit();
         SetBackgroundColour(_backgroundColour);
     }
 
@@ -87,6 +104,35 @@ protected:
     wxColour _foregroundColour;
     wxColour _backgroundColour;
 
+    void addExpense(wxCommandEvent &event){
+        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Expense Transaction",  wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
+        wxBoxSizer *transactionSizer = new wxBoxSizer(wxVERTICAL);
+    
+        auto transactionForm = new AddModelForm(transactionDialog, "Transaction", _model, true);
+        transactionSizer->Add(transactionForm, 1, wxEXPAND | wxALL, 10);
+    
+        transactionDialog->SetSizer(transactionSizer);
+        transactionDialog->Fit();
+        transactionDialog->Layout();
+        transactionDialog->Centre();
+        transactionDialog->ShowModal();
+    }
+    
+
+    void addIncome(wxCommandEvent &event){
+        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Income Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
+        wxBoxSizer *transactionSizer = new wxBoxSizer(wxVERTICAL);
+
+        auto transactionForm = new AddModelForm(transactionDialog, "Transaction", _model, false);
+        transactionSizer->Add(transactionForm, 1, wxEXPAND | wxALL, 5);
+
+        transactionDialog->SetSizer(transactionSizer);
+        transactionDialog->Fit();
+        transactionDialog->Layout();
+        transactionDialog->Centre();
+        transactionDialog->ShowModal();
+    }
+
     void viewTransactions(wxCommandEvent &event)
     {
         auto model = std::dynamic_pointer_cast<Account>(_model);
@@ -102,7 +148,7 @@ protected:
             wxMessageBox("No transactions found");
             return;
         }
-        auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(400, 600), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(400, 600), wxDEFAULT_DIALOG_STYLE);
         auto sizer = new wxBoxSizer(wxVERTICAL);
 
         for (auto &t : transactions)
@@ -149,6 +195,8 @@ protected:
         }
 
         dialog->SetSizerAndFit(sizer);
+        dialog->Layout();
+        dialog->Centre();
         dialog->ShowModal();
     }
 
@@ -162,6 +210,8 @@ protected:
                 continue;
             _staticTextFields[key]->SetLabel(value);
         }
+        Layout();
+        Fit();
     }
 };
 
