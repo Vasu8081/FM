@@ -29,6 +29,8 @@ public:
 
     virtual std::vector<std::pair<std::string, std::string>> displayFormFields() const = 0;
 
+    virtual std::set<std::string> hiddenFormFields() const { return {}; }
+
     virtual std::set<std::string> boldFormFields() const = 0;
 
     virtual std::unordered_map<std::string, wxColour> overrideFormColors() const = 0;

@@ -47,6 +47,7 @@ public:
     wxString getAccountDefnsFilePath() const { return _account_defns_file_path.GetFullPath(); }
     wxString getTransactionsFilePath() const { return _transactions_file_path.GetFullPath(); }
     wxString getCategoriesFilePath() const { return _categories_file_path.GetFullPath(); }
+    wxString getPassword() const { return _password; }
 
     // Setters
     void setAccessToken(const std::string &access_token) { _onedrive_access_token = access_token; }
@@ -100,6 +101,7 @@ private:
     wxFileName _transactions_file_path;
     wxFileName _categories_file_path;
     wxString _user_name;
+    wxString _password = "0607";
 
     void init()
     {

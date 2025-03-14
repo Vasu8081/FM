@@ -22,16 +22,27 @@ public:
         auto displayFields = model->displayFormFields();
         auto boldFields = model->boldFormFields();
         auto overrideColors = model->overrideFormColors();
+        auto hiddenFields = model->hiddenFormFields();
         auto header_row = displayFields[0];
-        auto staticBox = new wxStaticBox(this, wxID_ANY, header_row.second);
-        if (boldFields.find("header") != boldFields.end())
-        {
-            wxFont font = staticBox->GetFont();
-            font.SetWeight(wxFONTWEIGHT_BOLD);
-            staticBox->SetFont(font);
+        auto headingSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto heading = new wxStaticText(this, wxID_ANY, header_row.second);
+        heading->SetForegroundColour(_foregroundColour);
+        wxFont font = heading->GetFont();
+        font.SetWeight(wxFONTWEIGHT_BOLD);
+        font.SetPointSize(font.GetPointSize() + 4);
+        heading->SetFont(font);
+        headingSizer->Add(heading, 0, wxEXPAND | wxALL, 5);
+        
+        if(hiddenFields.size() > 0){
+            auto eye_icon = _icon.get(wxART_VISIBILITY_OFF, *wxBLACK);
+            _eye_button = new wxBitmapButton(this, wxID_ANY, eye_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Toggle Hidden Values");
+            _eye_button->Bind(wxEVT_BUTTON, &AccountView::onHiddenValues, this);
+            headingSizer->AddStretchSpacer(1);
+            headingSizer->Add(_eye_button, 0, wxEXPAND | wxALL, 5);
         }
-        staticBox->SetForegroundColour(_foregroundColour);
-        wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
+        sizer->Add(headingSizer, 0, wxEXPAND | wxALL, 5);
+
+        wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this);
 
         for (auto &[key, value] : displayFields)
         {
@@ -50,9 +61,13 @@ public:
                 _staticTextFields[key]->SetForegroundColour(overrideColors[key]);
             }
 
-            staticBoxSizer->Add(field_sizer, 0, wxEXPAND | wxALL, 5);
+            if(hiddenFields.find(key) != hiddenFields.end()){
+                _staticTextFields[key]->SetLabel("********");
+            }
+
+            staticBoxSizer->Add(field_sizer, 0, wxEXPAND | wxALL, 1);
         }
-        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
+        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 2);
 
         auto income = _icon.get(wxART_TRENDING_DOWN, wxColour(46, 204, 113));
         auto expense = _icon.get(wxART_TRENDING_UP, *wxRED);
@@ -71,7 +86,7 @@ public:
         Bind(wxEVT_BUTTON, &AccountView::addExpense, this, expenseButton->GetId());
         Bind(wxEVT_BUTTON, &AccountView::viewTransactions, this, view_transactions->GetId());
 
-        sizer->Add(button_sizer, 0, wxEXPAND | wxALL, 10);
+        sizer->Add(button_sizer, 0, wxEXPAND | wxALL, 2);
 
         SetSizer(sizer);
         Layout();
@@ -81,6 +96,10 @@ public:
 
 protected:
     std::unordered_map<std::string, wxStaticText *> _staticTextFields;
+    wxColour _foregroundColour;
+    wxColour _backgroundColour;
+    wxBitmapButton *_eye_button;
+    bool _show_hidden_values = false;
 
     wxBoxSizer *createStaticText(wxWindow *parent, const wxString &key, const wxString &value)
     {
@@ -95,14 +114,11 @@ protected:
         staticValue->SetForegroundColour(_foregroundColour);
 
         _staticTextFields[key.ToStdString()] = staticValue;
-        box_sizer->Add(staticKey, 0, wxALL, 10);
-        box_sizer->Add(staticValue, 0, wxEXPAND | wxALL, 10);
+        box_sizer->Add(staticKey, 0, wxALL, 2);
+        box_sizer->Add(staticValue, 0, wxEXPAND | wxALL, 2);
 
         return box_sizer;
     }
-
-    wxColour _foregroundColour;
-    wxColour _backgroundColour;
 
     void addExpense(wxCommandEvent &event){
         wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Expense Transaction",  wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
@@ -118,7 +134,6 @@ protected:
         transactionDialog->ShowModal();
     }
     
-
     void addIncome(wxCommandEvent &event){
         wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Income Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *transactionSizer = new wxBoxSizer(wxVERTICAL);
@@ -200,8 +215,20 @@ protected:
         dialog->ShowModal();
     }
 
-    void update() override
-    {
+    void onHiddenValues(wxCommandEvent &event){
+        _show_hidden_values = !_show_hidden_values;
+        auto new_icon = _show_hidden_values ? _icon.get(wxART_VISIBILITY, *wxBLACK) : _icon.get(wxART_VISIBILITY_OFF, *wxBLACK);
+        _eye_button->SetBitmap(new_icon);
+        _eye_button->Refresh();
+        if(_show_hidden_values){
+            showHiddenValues();
+        }
+        else{
+            hideHiddenValues();
+        }
+    }
+
+    void showHiddenValues() {
         auto model = std::dynamic_pointer_cast<Account>(_model);
         auto displayFields = model->displayFormFields();
         for (auto &[key, value] : displayFields)
@@ -210,9 +237,35 @@ protected:
                 continue;
             _staticTextFields[key]->SetLabel(value);
         }
-        Layout();
-        Fit();
     }
+
+    void hideHiddenValues(){
+        auto model = std::dynamic_pointer_cast<Account>(_model);
+        auto displayFields = model->displayFormFields();
+        auto hiddenFields = model->hiddenFormFields();
+        for (auto &[key, value] : displayFields)
+        {
+            if (key == "header")
+                continue;
+            if(hiddenFields.find(key) != hiddenFields.end()){
+                _staticTextFields[key]->SetLabel("********");
+            }
+            else{
+                _staticTextFields[key]->SetLabel(value);
+            }
+        }
+    }
+
+    void update() override
+    {
+        if(_show_hidden_values){
+            showHiddenValues();
+        }
+        else{
+            hideHiddenValues();
+        }
+    }
+
 };
 
 #endif // BANK_ACCOUNT_VIEW_HPP

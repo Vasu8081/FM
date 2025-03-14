@@ -147,8 +147,8 @@ public:
         return {
             {"header", _name},
             {"Card Number", _card_number},
-            // {"Security Code", _cvv},
-            // {"Expiry Date", Formatter::MonthYear(_expiry_date)},
+            {"Security Code", _cvv},
+            {"Expiry Date", Formatter::MonthYear(_expiry_date)},
             {"Statement Generation", Formatter::MonthlyPaymentDate(_billing_date)},
             {"Due Date", Formatter::MonthlyPaymentDate(_payment_due_date)},
             {"Total Credit Limit", Formatter::Amount(_credit_limit)},
@@ -160,6 +160,11 @@ public:
     std::set<std::string> boldFormFields() const override
     {
         return {"header", "Available Credit"};
+    }
+
+    std::set<std::string> hiddenFormFields() const override
+    {
+        return {"Security Code", "Card Number", "Expiry Date"};
     }
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override

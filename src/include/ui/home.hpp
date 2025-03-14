@@ -114,12 +114,12 @@ private:
                 {
                     _accountTypeNumCols[type] = numColumns;
                 }
-                else
+                if (_accountTypeNumCols[type] > numColumns)
                 {
-                    if (_accountTypeNumCols[type] > numColumns)
-                    {
-                        _accountTypeNumCols[type] = numColumns;
-                    }
+                    _accountTypeNumCols[type] = numColumns;
+                }
+                if (_accountTypeNumCols[type] > 4){
+                    _accountTypeNumCols[type] = 4;
                 }
                 _accountTypeGrids[type]->SetCols(_accountTypeNumCols[type]);
                 _accountTypeGrids[type]->Add(accountView, 0, wxEXPAND | wxALL, 10);

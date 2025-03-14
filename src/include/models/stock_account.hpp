@@ -53,14 +53,19 @@ public:
             _isin = j.at("Isin").get<std::string>();
         if (j.contains("Exchange Code"))
             _exchange_code = j.at("Exchange Code").get<std::string>();
-        _product = _api.getProduct(_exchange_code + "%7C" + _isin);
+        
         std::thread t([this]() {
             while (true) {
-                _product = _api.getProduct(_exchange_code + "%7C" + _isin);
-                wxTheApp->CallAfter([this]() {
-                    notifyObservers();
-                });
-                std::this_thread::sleep_for(std::chrono::seconds(3600));
+                if(_api.isActive()){
+                    _product = _api.getProduct(_exchange_code + "%7C" + _isin);
+                    wxTheApp->CallAfter([this]() {
+                        notifyObservers();
+                    });
+                    std::this_thread::sleep_for(std::chrono::seconds(3600));
+                }
+                else{
+                    std::this_thread::sleep_for(std::chrono::seconds(20));
+                }
             }
         });
         t.detach();
@@ -79,7 +84,7 @@ public:
         if(!_product.contains("data")){
             return {
                 {"header", _name},
-                {"Isin", _name},
+                {"Isin", _isin},
                 {"Quantity", Formatter::Amount(_quantity)},
                 {"PnL Made Till Now", Formatter::Amount(_pnl_made)},
                 {"Average Bought Price", Formatter::Amount(_average_bought_price)},
@@ -92,7 +97,7 @@ public:
             auto curr_pnl = (_quantity * curr_price) - (_quantity * _average_bought_price);
             return {
                 {"header", _name},
-                {"Isin", _name},
+                {"Isin", _isin},
                 {"Quantity", Formatter::Amount(_quantity)},
                 {"PnL Made Till Now", Formatter::Amount(_pnl_made)},
                 {"Average Bought Price", Formatter::Amount(_average_bought_price)},
@@ -109,6 +114,11 @@ public:
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override
     {
+        if(!_product.contains("data")){
+            return {
+                {"Current PnL", wxColour(219, 68, 55)},
+                {"PnL Made Till Now", wxColour(255, 191, 0)}};
+        }
         auto curr_price = _product["data"].begin().value()["last_price"].get<double>();
         auto curr_pnl = (_quantity * curr_price) - (_quantity * _average_bought_price);
         if (curr_pnl < 0)
