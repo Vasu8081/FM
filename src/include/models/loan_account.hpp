@@ -71,7 +71,7 @@ public:
             {"Tenure", Formatter::Integer(_tenure)},
             {"Start Date", Formatter::DateMonthYear(_start_date)},
             {"EMI", Formatter::Amount(_emi)},
-            {"EMI Date", Formatter::DateMonthYear(_emi_date)},
+            {"EMI Date", Formatter::MonthlyPaymentDate(_emi_date)},
             {"Principal Left", Formatter::Amount(_principal_left)},
             {"Interest Paid", Formatter::Amount(_interest_paid)}};
     }
@@ -88,7 +88,11 @@ public:
     }
 
     void amountIn(std::shared_ptr<Transaction> t) override {
-        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, _roi, _emi_date, t->getDate(), _start_date);
+        auto interest_rate = _roi;
+        if(t->getInterestRate() > 0 ){
+            interest_rate = t->getInterestRate();
+        }
+        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_date, t->getDate(), _start_date);
         _principal_left -= (t->getAmount()-interest_accrued);
         _interest_paid += interest_accrued;
         notifyObservers();
@@ -98,6 +102,10 @@ public:
         _loan_amount += t->getAmount();
         _principal_left += t->getAmount();
         notifyObservers();
+    }
+
+    double getInterestRate() const {
+        return _roi;
     }
 
 private:

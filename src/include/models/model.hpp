@@ -22,10 +22,6 @@ public:
         _observers.push_back(observer);
     }
 
-private:
-    std::vector<std::function<void()>> _observers;
-
-protected:
     void notifyObservers()
     {
         for (auto observer : _observers)
@@ -33,6 +29,9 @@ protected:
             observer();
         }
     }
+
+private:
+    std::vector<std::function<void()>> _observers;
 };
 
 #endif // MODEL_H

@@ -229,6 +229,9 @@ public:
     void saveTransactions()
     {
         json j = json::array();
+        std::sort(_transactions.begin(), _transactions.end(), [](const std::shared_ptr<Transaction> &a, const std::shared_ptr<Transaction> &b) {
+            return a->getDate() < b->getDate();
+        });
         for (auto &transaction : _transactions)
         {
             j.push_back(transaction->toJson());

@@ -10,6 +10,7 @@
 #include <wx/statbmp.h>
 #include <wx/artprov.h>
 #include <wx/dialog.h>
+#include <ui/edit_model.hpp>
 
 class AccountView : public ModelView
 {
@@ -32,14 +33,21 @@ public:
         font.SetPointSize(font.GetPointSize() + 4);
         heading->SetFont(font);
         headingSizer->Add(heading, 0, wxEXPAND | wxALL, 5);
-        
+        auto edit_icon = _icon.get(wxART_EDIT, *wxBLACK);
+        auto edit_button = new wxBitmapButton(this, wxID_ANY, edit_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Edit Model");
+        edit_button->Bind(wxEVT_BUTTON, &AccountView::editModel, this);
+        headingSizer->AddStretchSpacer(1);
+        headingSizer->Add(edit_button, 0, wxEXPAND | wxALL, 5);
+
         if(hiddenFields.size() > 0){
             auto eye_icon = _icon.get(wxART_VISIBILITY_OFF, *wxBLACK);
             _eye_button = new wxBitmapButton(this, wxID_ANY, eye_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Toggle Hidden Values");
             _eye_button->Bind(wxEVT_BUTTON, &AccountView::onHiddenValues, this);
-            headingSizer->AddStretchSpacer(1);
             headingSizer->Add(_eye_button, 0, wxEXPAND | wxALL, 5);
         }
+
+
+
         sizer->Add(headingSizer, 0, wxEXPAND | wxALL, 5);
 
         wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this);
@@ -146,6 +154,21 @@ protected:
         transactionDialog->Layout();
         transactionDialog->Centre();
         transactionDialog->ShowModal();
+    }
+
+    void editModel(wxCommandEvent &event){
+        wxDialog *modelDialog = new wxDialog(this, wxID_ANY, "Edit Model", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
+        wxBoxSizer *modelSizer = new wxBoxSizer(wxVERTICAL);
+
+        auto account = std::dynamic_pointer_cast<Account>(_model);
+        auto modelForm = new EditModelForm(modelDialog, account->getType(), _model);
+        modelSizer->Add(modelForm, 1, wxEXPAND | wxALL, 5);
+
+        modelDialog->SetSizer(modelSizer);
+        modelDialog->Fit();
+        modelDialog->Layout();
+        modelDialog->Centre();
+        modelDialog->ShowModal();
     }
 
     void viewTransactions(wxCommandEvent &event)
