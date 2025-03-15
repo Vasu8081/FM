@@ -30,6 +30,23 @@ public:
         return (end_date.GetYear() - start_date.GetYear()) * 12 + (end_date.GetMonth() - start_date.GetMonth());
     }
 
+    static double calculateInterestAccrued(double principal_remaining, double annual_interest_rate, wxDateTime emi_date, wxDateTime transaction_date, wxDateTime start_date) {
+        double days_in_year = transaction_date.IsLeapYear(transaction_date.GetYear()) ? 366.0 : 365.0;
+        emi_date.SetYear(transaction_date.GetYear());
+        emi_date.SetMonth(transaction_date.GetMonth());
+        while (emi_date >= transaction_date) {
+            emi_date.Subtract(wxDateSpan::Months(1));
+        }
+        if (emi_date < start_date) {
+            emi_date = start_date;
+        }
+        int days_between = transaction_date.Subtract(emi_date).GetDays();
+        double daily_interest_rate = (annual_interest_rate / 100.0) / days_in_year;
+        double interest = principal_remaining * daily_interest_rate * days_between;
+    
+        return interest;
+    }
+
 private:
     static double calculateMaturityAmount(double monthly_deposit, double r, int tenure) {
         double maturity_amount = 0;

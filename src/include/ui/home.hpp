@@ -20,14 +20,18 @@ public:
 
         _notebook = new wxNotebook(this, wxID_ANY);
 
+        //Portfolio Tab
+        wxPanel *portfolioPanel = new wxPanel(_notebook);
+        wxBoxSizer *portfolioSizer = new wxBoxSizer(wxVERTICAL);
+        portfolioSizer->Add(accountSummaryView(portfolioPanel), 0, wxEXPAND | wxALL, 10);
+        portfolioPanel->SetSizer(portfolioSizer);
+        _notebook->AddPage(portfolioPanel, "Portfolio");
+
         // Accounts Tab
         wxPanel *accountPanel = new wxPanel(_notebook);
         wxBoxSizer *accountSizer = new wxBoxSizer(wxVERTICAL);
-        accountSizer->Add(new wxStaticText(accountPanel, wxID_ANY, "Here you can manage all your financial accounts, segregated by type."), 0, wxEXPAND | wxALL, 10);
-
         _accountNotebook = new wxNotebook(accountPanel, wxID_ANY);
         accountSizer->Add(_accountNotebook, 1, wxEXPAND | wxALL, 10);
-
         accountPanel->SetSizer(accountSizer);
         _notebook->AddPage(accountPanel, "Accounts");
 
@@ -36,11 +40,14 @@ public:
         wxBoxSizer *categorySizer = new wxBoxSizer(wxVERTICAL);
         _categoryScrollWindow = new wxScrolledWindow(categoryPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxHSCROLL);
         _categoryScrollWindow->SetScrollRate(5, 5);
+        
+        // Use wxBoxSizer to hold the grid sizer
         _categorySizer = new wxBoxSizer(wxVERTICAL);
         _categoryScrollWindow->SetSizer(_categorySizer);
         categorySizer->Add(_categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
         categoryPanel->SetSizer(categorySizer);
         _notebook->AddPage(categoryPanel, "Categories");
+        
 
         _mainSizer->Add(_notebook, 1, wxEXPAND | wxALL, 10);
 
@@ -81,6 +88,24 @@ private:
     std::unordered_map<std::string, wxWindow *> _categoryViews;
 
     model_manager &_models = model_manager::getInstance();
+
+    wxBoxSizer* accountSummaryView(wxPanel *accountPanel){
+        auto sizer = new wxBoxSizer(wxVERTICAL);
+        auto accounts = _models.getAccounts();
+        std::unordered_map<std::string, double> accountValues;
+        for(auto account_: accounts){
+            auto account = account_.second;
+            if(accountValues.find(account->getType()) == accountValues.end()){
+                accountValues[account->getType()] = 0;
+            }
+            accountValues[account->getType()] += account->portfolioValue();
+        }
+
+        for(auto accountValue: accountValues){
+            sizer->Add(new wxStaticText(accountPanel, wxID_ANY, accountValue.first + ": " + std::to_string(accountValue.second)), 0, wxEXPAND | wxALL, 10);
+        }
+        return sizer;
+    }
 
     void updateAccounts()
     {
@@ -137,18 +162,37 @@ private:
 
     void updateCategories()
     {
-        for (auto category : _models.getCategories())
+        // Clear the sizer before adding new elements to prevent duplication
+        _categorySizer->Clear(true);
+    
+        // Get the categories
+        auto categories = _models.getCategories();
+        int numCategories = categories.size();
+    
+        // Create a new grid sizer with 4 columns
+        int columns = 3;
+        int rows = (numCategories + columns - 1) / columns; // Calculate required rows
+        wxGridSizer *gridSizer = new wxGridSizer(rows, columns, 10, 10); // 10px padding
+    
+        // Loop through categories and add them to the grid
+        for (auto category : categories)
         {
             if (!_categoryViews.count(category.first))
             {
                 auto categoryView = model_view_factory::create(_categoryScrollWindow, category.second);
-                _categorySizer->Add(categoryView, 0, wxEXPAND | wxALL, 10);
                 _categoryViews[category.first] = categoryView;
             }
+    
+            gridSizer->Add(_categoryViews[category.first], 1, wxEXPAND | wxALL, 10);
         }
-        _categoryScrollWindow->FitInside();
+    
+        // Set the sizer for the scroll window
+        _categorySizer->Clear(true);
+        _categorySizer->Add(gridSizer, 1, wxEXPAND | wxALL, 10);
+        _categoryScrollWindow->SetSizerAndFit(_categorySizer);
         _categoryScrollWindow->Layout();
     }
+    
 
     void onAddAccountButtonClicked(wxCommandEvent &event)
     {
