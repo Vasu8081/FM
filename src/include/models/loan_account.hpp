@@ -28,6 +28,7 @@ public:
             {"Loan Name", _name},
             {"Loan Amount", _loan_amount},
             {"Rate of Interest", _roi},
+            {"Pre EMI", _pre_emi},
             {"Tenure", _tenure},
             {"Start Date", _start_date.FormatISODate()},
             {"EMI", _emi},
@@ -43,6 +44,8 @@ public:
             _name = j.at("Loan Name").get<std::string>();
         if (j.contains("Rate of Interest"))
             _roi = j.at("Rate of Interest").get<double>();
+        if (j.contains("Pre EMI"))
+            _pre_emi = j.at("Pre EMI").get<double>();
         if (j.contains("Tenure"))
             _tenure = j.at("Tenure").get<double>();
         if (j.contains("Start Date"))
@@ -57,6 +60,7 @@ public:
         return {
             {"Loan Name", "string"},
             {"Rate of Interest", "double"},
+            {"Pre EMI", "double"},
             {"Tenure", "double"},
             {"Start Date", "date"},
             {"EMI Date", "date"},
@@ -67,6 +71,7 @@ public:
         return {
             {"header", _name},
             {"Loan Amount", Formatter::Amount(_loan_amount)},
+            {"Pre EMI", Formatter::Amount(_pre_emi)},
             {"Rate of Interest", Formatter::Percentage(_roi)},
             {"Tenure", Formatter::Integer(_tenure)},
             {"Start Date", Formatter::DateMonthYear(_start_date)},
@@ -92,7 +97,7 @@ public:
         if(t->getInterestRate() > 0 ){
             interest_rate = t->getInterestRate();
         }
-        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_date, t->getDate(), _start_date);
+        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_cal_date, t->getDate(), _start_date);
         _principal_left -= (t->getAmount()-interest_accrued);
         _interest_paid += interest_accrued;
         notifyObservers();
@@ -109,10 +114,12 @@ public:
     }
 
 private:
+    double _pre_emi; // how much we paid before the EMI started
     double _loan_amount; // tells total how much loan we took
     double _roi; // rate of interest
     double _tenure; // how many months we have to pay
     wxDateTime _start_date; // when we took the loan
+    wxDateTime _emi_cal_date; // when we have to calculate the EMI
     wxDateTime _emi_date; // when we have to pay the EMI
     double _emi; // how much we have to pay every month
     double _principal_left; // how much principal is left
