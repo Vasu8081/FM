@@ -5,6 +5,7 @@
 #include <wx/notebook.h>
 #include <models/models_manager.hpp>
 #include <ui/add_model.hpp>
+#include <ui/account_summary.hpp>
 #include <ui/model_view_panels/model_view_factory.hpp>
 
 class home : public wxFrame
@@ -21,11 +22,8 @@ public:
         _notebook = new wxNotebook(this, wxID_ANY);
 
         //Portfolio Tab
-        wxPanel *portfolioPanel = new wxPanel(_notebook);
-        wxBoxSizer *portfolioSizer = new wxBoxSizer(wxVERTICAL);
-        portfolioSizer->Add(accountSummaryView(portfolioPanel), 0, wxEXPAND | wxALL, 10);
-        portfolioPanel->SetSizer(portfolioSizer);
-        _notebook->AddPage(portfolioPanel, "Portfolio");
+        wxPanel* accountSummary = new AccountSummaryPanel(_notebook);
+        _notebook->AddPage(accountSummary, "Portfolio");
 
         // Accounts Tab
         wxPanel *accountPanel = new wxPanel(_notebook);
@@ -88,24 +86,6 @@ private:
     std::unordered_map<std::string, wxWindow *> _categoryViews;
 
     model_manager &_models = model_manager::getInstance();
-
-    wxBoxSizer* accountSummaryView(wxPanel *accountPanel){
-        auto sizer = new wxBoxSizer(wxVERTICAL);
-        auto accounts = _models.getAccounts();
-        std::unordered_map<std::string, double> accountValues;
-        for(auto account_: accounts){
-            auto account = account_.second;
-            if(accountValues.find(account->getType()) == accountValues.end()){
-                accountValues[account->getType()] = 0;
-            }
-            accountValues[account->getType()] += account->portfolioValue();
-        }
-
-        for(auto accountValue: accountValues){
-            sizer->Add(new wxStaticText(accountPanel, wxID_ANY, accountValue.first + ": " + std::to_string(accountValue.second)), 0, wxEXPAND | wxALL, 10);
-        }
-        return sizer;
-    }
 
     void updateAccounts()
     {

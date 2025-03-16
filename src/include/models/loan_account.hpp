@@ -10,9 +10,11 @@ public:
         _foreground_color = wxColour(235, 245, 235);
     }
 
-    double portfolioValue() const override {
-        return -_loan_amount;
-    }
+    std::pair<std::string, double> portfolioValue() const override { return {"Principal Outstanding", _principal_left }; }
+
+    bool affectsPositivelyOnPortfolio() const override { return false; }
+
+    bool isDebtAccount() const override { return true; }
 
     std::string getID() const override {
         return "LA." + _name;
@@ -97,7 +99,7 @@ public:
         if(t->getInterestRate() > 0 ){
             interest_rate = t->getInterestRate();
         }
-        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_cal_date, t->getDate(), _start_date);
+        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_date, t->getDate(), _start_date);
         _principal_left -= (t->getAmount()-interest_accrued);
         _interest_paid += interest_accrued;
         notifyObservers();

@@ -20,7 +20,11 @@ public:
         _foreground_color = wxColour(235, 245, 235);
     }
 
-    double portfolioValue() const override { return _average_bought_price; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Stocks Invested", _average_bought_price*_quantity}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return true; }
+
+    bool isInvestmentAccount() const override { return true; }
 
     std::string getID() const override
     {

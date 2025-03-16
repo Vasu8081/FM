@@ -24,7 +24,11 @@ public:
         return "Give Account";
     }
 
-    double portfolioValue() const override { return _given_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Lended Amount", _given_amount}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return true; }
+
+    bool isSavingsAccount() const override { return true; }
 
     json toJson() const override
     {

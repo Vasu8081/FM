@@ -24,7 +24,11 @@ public:
         return "RD";
     }
 
-    double portfolioValue() const override { return _paid_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Invested Amount", _paid_amount}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return true; }
+
+    bool isInvestmentAccount() const override { return true; }
 
     json toJson() const override
     {

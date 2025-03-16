@@ -10,9 +10,11 @@ public:
         _foreground_color = wxColour(235, 245, 235);
     }
 
-    double portfolioValue() const override {
-        return _bought_value;
-    }
+    std::pair<std::string, double> portfolioValue() const override { return {"Property Value", _bought_value}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return true; }
+
+    bool isInvestmentAccount() const override { return true; }
 
     std::string getID() const override {
         return "PA." + _name;

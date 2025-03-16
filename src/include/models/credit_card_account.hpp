@@ -15,10 +15,11 @@ public:
         _foreground_color = wxColour(240, 230, 250);
     }
 
-    double portfolioValue() const override
-    {
-        return _limit_left - _credit_limit;
-    }
+    std::pair<std::string, double> portfolioValue() const override { return {"Outstandings", _credit_limit-_limit_left}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return false; }
+
+    bool isDebtAccount() const override { return true; }
 
     std::string getID() const override
     {

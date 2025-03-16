@@ -24,7 +24,11 @@ public:
         return "Borrow Account";
     }
 
-    double portfolioValue() const override { return -_borrowed_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Borrowed Amount", _borrowed_amount}; }
+
+    bool affectsPositivelyOnPortfolio() const override { return false; }
+
+    bool isDebtAccount() const override { return true; }
 
     json toJson() const override
     {
