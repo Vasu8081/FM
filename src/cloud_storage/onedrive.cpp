@@ -3,8 +3,12 @@
 #include <fstream>
 #include <thread>
 #include <chrono>
+#include <filesystem>
+#include <iostream>
+#include <ctime>
 
 using json = nlohmann::json;
+namespace fs = std::filesystem;
 
 std::string auth_code;
 bool auth_received = false;
@@ -122,7 +126,7 @@ std::string onedrive::refreshAccessToken()
     if (!curl)
         return "";
 
-    std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/token";
+    std::string url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
     std::string postFields =
         "grant_type=refresh_token"
         "&client_id=" +
@@ -155,26 +159,23 @@ std::string onedrive::refreshAccessToken()
 }
 
 // Upload file to onedrive
-void onedrive::uploadFile(const std::string &localPath, const std::string &oneDrivePath)
+bool onedrive::uploadFile(const std::string &localPath, const std::string &oneDrivePath)
 {
     std::ifstream file(localPath, std::ios::binary);
     if (!file.is_open())
     {
-        std::cerr << "Error: Could not open file for upload: " << localPath << std::endl;
-        return;
+        return false;
     }
 
     std::string fileData((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
 
     std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + oneDrivePath + ":/content";
-    std::cout << "🔹 Uploading to: " << url << std::endl;
 
     CURL *curl = curl_easy_init();
     if (!curl)
     {
-        std::cerr << "Error: Failed to initialize curl for upload" << std::endl;
-        return;
+        return false;
     }
 
     struct curl_slist *headers = NULL;
@@ -192,32 +193,28 @@ void onedrive::uploadFile(const std::string &localPath, const std::string &oneDr
 
     if (res != CURLE_OK)
     {
-        std::cerr << "Upload failed: " << curl_easy_strerror(res) << std::endl;
+        return false;
     }
     else if (http_code != 200 && http_code != 201)
     {
-        std::cerr << "Upload failed! HTTP Response Code: " << http_code << std::endl;
-    }
-    else
-    {
-        std::cout << "File uploaded successfully to onedrive: " << oneDrivePath << std::endl;
+        return false;
     }
 
     curl_slist_free_all(headers);
     curl_easy_cleanup(curl);
+    return true;
 }
 
 // Download file from onedrive
-void onedrive::downloadFile(const std::string &oneDrivePath, const std::string &localPath)
+bool onedrive::downloadFile(const std::string &oneDrivePath, const std::string &localPath)
 {
     std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + oneDrivePath + ":/content";
-    std::cout << "🔹 Downloading from: " << url << std::endl;
 
     FILE *file = fopen(localPath.c_str(), "wb");
     if (!file)
     {
         std::cerr << "Error: Could not open file for writing: " << localPath << std::endl;
-        return;
+        return false;
     }
 
     CURL *curl = curl_easy_init();
@@ -225,7 +222,7 @@ void onedrive::downloadFile(const std::string &oneDrivePath, const std::string &
     {
         std::cerr << "Error: Failed to initialize curl for download" << std::endl;
         fclose(file);
-        return;
+        return false;
     }
 
     struct curl_slist *headers = NULL;
@@ -246,31 +243,121 @@ void onedrive::downloadFile(const std::string &oneDrivePath, const std::string &
     if (res != CURLE_OK)
     {
         std::cerr << "Download failed: " << curl_easy_strerror(res) << std::endl;
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        fclose(file);
+        return false;
     }
     else if (http_code == 200)
     {
         std::cout << "File downloaded successfully from onedrive: " << oneDrivePath << std::endl;
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        fclose(file);
+        return true;
     }
     else
     {
         std::cerr << "Download failed! HTTP Response Code: " << http_code << std::endl;
+        curl_slist_free_all(headers);
+        curl_easy_cleanup(curl);
+        fclose(file);
+        return false;
     }
+}
 
-    curl_slist_free_all(headers);
+bool onedrive::isLocalFileNewer(const std::string &localFile, const std::string &serverTimestamp)
+{
+    if (!fs::exists(localFile))
+        return false;
+
+    auto lastModified = fs::last_write_time(localFile);
+    auto lastModifiedTime = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::system_clock::duration>(std::chrono::file_clock::to_sys(lastModified)));
+    
+    std::tm serverTm = {};
+    std::istringstream ss(serverTimestamp);
+    ss >> std::get_time(&serverTm, "%Y-%m-%dT%H:%M:%SZ");
+    std::time_t serverTime = std::mktime(&serverTm);
+
+    return lastModifiedTime > serverTime;
+}
+
+std::string onedrive::getServerTimestamp(const std::string &serverPath)
+{
+    CURL *curl = curl_easy_init();
+    if (!curl)
+        return "";
+
+    std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + serverPath + "?select=lastModifiedDateTime";
+    std::string response;
+    struct curl_slist *headers = NULL;
+    headers = curl_slist_append(headers, ("Authorization: Bearer " + _config.getAccessToken()).c_str());
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
-    fclose(file);
+    curl_slist_free_all(headers);
+
+    if (res != CURLE_OK)
+        return "";
+
+    json responseJson = json::parse(response);
+    if (responseJson.contains("lastModifiedDateTime"))
+        return responseJson["lastModifiedDateTime"];
+
+    return "";
 }
 
-void onedrive::sync_up()
+void onedrive::retryUpload(const std::string &localPath, const std::string &serverPath, int maxRetries)
 {
-    uploadFile(_config.getTransactionsFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/transactions.json");
-    uploadFile(_config.getAccountDefnsFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/account_defns.json");
-    uploadFile(_config.getCategoriesFilePath().ToStdString(), "FinanceManager/" + _config.getUserName() + "/categories.json");
+    int retries = 0;
+    while (retries < maxRetries)
+    {
+        if (uploadFile(localPath, serverPath))
+            return;
+        std::cerr << "Upload failed, retrying... (Attempt " << (retries + 1) << "/" << maxRetries << ")\n";
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        retries++;
+    }
+    std::cerr << "Upload failed after " << maxRetries << " attempts." << std::endl;
 }
 
-void onedrive::sync_down()
+void onedrive::retryDownload(const std::string &serverPath, const std::string &localPath, int maxRetries)
 {
-    downloadFile("FinanceManager/" + _config.getUserName() + "/transactions.json", _config.getTransactionsFilePath().ToStdString());
-    downloadFile("FinanceManager/" + _config.getUserName() + "/account_defns.json", _config.getAccountDefnsFilePath().ToStdString());
-    downloadFile("FinanceManager/" + _config.getUserName() + "/categories.json", _config.getCategoriesFilePath().ToStdString());
+    int retries = 0;
+    while (retries < maxRetries)
+    {
+        if (downloadFile(serverPath, localPath))
+            return;
+        std::cerr << "Download failed, retrying... (Attempt " << (retries + 1) << "/" << maxRetries << ")\n";
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        retries++;
+    }
+    std::cerr << "Download failed after " << maxRetries << " attempts." << std::endl;
 }
+
+void onedrive::syncFiles()
+{
+    std::vector<std::string> files = {"transactions.json", "account_defns.json", "categories.json"};
+    
+    for (const auto &file : files)
+    {
+        std::string localPath = _config.getAppDataPath().ToStdString()+"/" + file;
+        std::string serverPath = "FinanceManager/" + file;
+        
+        std::string serverTimestamp = getServerTimestamp(serverPath);
+        if (isLocalFileNewer(localPath, serverTimestamp))
+        {
+            retryUpload(localPath, serverPath, 3);
+        }
+        else
+        {
+            retryDownload(serverPath, localPath, 3);
+        }
+    }
+}
+
