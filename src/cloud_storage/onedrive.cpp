@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <iostream>
 #include <ctime>
+#include <wx/datetime.h>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
@@ -272,15 +273,18 @@ bool onedrive::isLocalFileNewer(const std::string &localFile, const std::string 
         return false;
 
     auto lastModified = fs::last_write_time(localFile);
-    auto lastModifiedTime = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::system_clock::duration>(std::chrono::file_clock::to_sys(lastModified)));
-    
-    std::tm serverTm = {};
-    std::istringstream ss(serverTimestamp);
-    ss >> std::get_time(&serverTm, "%Y-%m-%dT%H:%M:%SZ");
-    std::time_t serverTime = std::mktime(&serverTm);
+    wxDateTime localTime;
+    localTime.Set((time_t)std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::file_clock::to_sys(lastModified).time_since_epoch()).count());
 
-    return lastModifiedTime > serverTime;
+    wxDateTime serverTime;
+    serverTime.ParseISOCombined(serverTimestamp, 'T');
+
+    // wxMessageBox("Local Time: " + localTime.ToUTC().FormatISOCombined('T') + "\nServer Time: " + serverTime.FormatISOCombined('T'), "Time Comparison", wxOK | wxICON_INFORMATION);
+
+    return localTime.ToUTC().IsLaterThan(serverTime);
 }
+
 
 std::string onedrive::getServerTimestamp(const std::string &serverPath)
 {
@@ -352,10 +356,12 @@ void onedrive::syncFiles()
         std::string serverTimestamp = getServerTimestamp(serverPath);
         if (isLocalFileNewer(localPath, serverTimestamp))
         {
+            wxMessageBox("Local file is newer than server file. Uploading local file to server.", "Syncing Files", wxOK | wxICON_INFORMATION);
             retryUpload(localPath, serverPath, 3);
         }
         else
         {
+            wxMessageBox("Server file is newer than local file. Downloading server file to local.", "Syncing Files", wxOK | wxICON_INFORMATION);
             retryDownload(serverPath, localPath, 3);
         }
     }
