@@ -13,6 +13,7 @@
 #include <models/credit_card_account.hpp>
 #include <models/chit_account.hpp>
 #include <models/rd_account.hpp>
+#include <models/fd_account.hpp>
 #include <models/stock_account.hpp>
 #include <models/transaction.hpp>
 #include <models/category.hpp>
@@ -67,7 +68,9 @@ private:
             {"Stock Account", []() { return std::make_shared<StockAccount>(); }},
             {"Transaction", []() { return std::make_shared<Transaction>(); }},
             {"CAT.", []() { return std::make_shared<Category>(); }},
-            {"Category", []() { return std::make_shared<Category>(); }}
+            {"Category", []() { return std::make_shared<Category>(); }},
+            {"FD.", []() { return std::make_shared<FdAccount>(); }},
+            {"FD Account", []() { return std::make_shared<FdAccount>(); }},
         };
         return factoryMap;
     }
