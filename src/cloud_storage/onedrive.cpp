@@ -305,10 +305,18 @@ std::string onedrive::getServerTimestamp(const std::string &serverPath)
     CURLcode res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
+    long http_code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
     if (res != CURLE_OK)
         return "";
 
+    if(http_code == 404){
+        return "Not Found";
+    }
+    else if (http_code != 200)
+        return "";
+    
     json responseJson = json::parse(response);
     if (responseJson.contains("lastModifiedDateTime"))
         return responseJson["lastModifiedDateTime"];
@@ -354,14 +362,23 @@ void onedrive::syncFiles()
         std::string serverPath = "FinanceManager/" + file;
         
         std::string serverTimestamp = getServerTimestamp(serverPath);
+        if(serverTimestamp == "Not Found" && fs::exists(localPath)){
+            retryUpload(localPath, serverPath, 3);
+            continue;
+        }
+        else if(serverTimestamp == "Not Found" && !fs::exists(localPath)){
+            std::ofstream file(localPath);
+            file << "{}";
+            file.close();
+            retryUpload(localPath, serverPath, 3);
+            continue;
+        }
         if (isLocalFileNewer(localPath, serverTimestamp))
         {
-            wxMessageBox("Local file is newer than server file. Uploading local file to server.", "Syncing Files", wxOK | wxICON_INFORMATION);
             retryUpload(localPath, serverPath, 3);
         }
         else
         {
-            wxMessageBox("Server file is newer than local file. Downloading server file to local.", "Syncing Files", wxOK | wxICON_INFORMATION);
             retryDownload(serverPath, localPath, 3);
         }
     }
