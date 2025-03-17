@@ -2,7 +2,7 @@
 #include <wx/taskbar.h>
 #include <ui/task_bar_icon.hpp>
 #include <app_config.hpp>
-#include <onedrive/onedrive.hpp>
+#include <cloud_storage/onedrive.hpp>
 #include <models/models_manager.hpp>
 
 class FM final : public wxApp
@@ -13,7 +13,7 @@ public:
         if (!wxApp::OnInit())
             return false;
         wxInitAllImageHandlers();
-
+        
         onedrive &onedrive_ = onedrive::getInstance();
 
         model_manager &model_manager_ = model_manager::getInstance();

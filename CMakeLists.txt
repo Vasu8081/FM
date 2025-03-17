@@ -43,4 +43,4 @@ endif()
 message(STATUS "Curl include dirs: ${CURL_INCLUDE_DIR}")
 message(STATUS "CUrl libraries: ${CURL_LIBRARY}")
 
-target_link_libraries(FinanceManager ${wxWidgets_LIBRARIES} CURL::libcurl cpr::cpr onedrive icons models ui)
+target_link_libraries(FinanceManager ${wxWidgets_LIBRARIES} CURL::libcurl cpr::cpr cloud_storage icons models ui)

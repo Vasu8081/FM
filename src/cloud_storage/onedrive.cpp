@@ -1,33 +1,81 @@
-#include <onedrive/onedrive.hpp>
+#include <cloud_storage/onedrive.hpp>
+#include <crow.h>
 #include <fstream>
 #include <thread>
 #include <chrono>
 
 using json = nlohmann::json;
 
-// Curl response write callback
-size_t onedrive::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userData)
-{
-    size_t totalSize = size * nmemb;
-    userData->append((char *)contents, totalSize);
-    return totalSize;
+std::string auth_code;
+bool auth_received = false;
+
+void onedrive::startLocalServer() {
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/callback")
+    ([&](const crow::request& req) {
+        auto query_params = crow::query_string(req.url_params);
+        if (query_params.get("code")) {
+            auth_code = query_params.get("code");
+            auth_received = true;
+            return "Authorization successful! You can close this window.";
+        }
+        return "Failed to retrieve authorization code.";
+    });
+
+    std::thread server_thread([&]() {
+        app.port(8080).multithreaded().run();
+    });
+
+    while (!auth_received) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    app.stop();
+    server_thread.join();
 }
 
-// Curl write callback for file downloads
-size_t onedrive::writeFileCallback(void *ptr, size_t size, size_t nmemb, FILE *stream)
+std::string onedrive::waitForAuthCode()
 {
-    return fwrite(ptr, size, nmemb, stream);
+    std::string auth_url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=" + _config.getClientId() +
+    "&response_type=code&redirect_uri=http://localhost:8080/callback&scope=Files.ReadWrite offline_access";
+
+    std::string command;
+
+    #ifdef _WIN32
+        command = "start \"\" \"" + auth_url + "\"";  // Windows
+    #elif __APPLE__
+        command = "open \"" + auth_url + "\"";  // macOS
+    #else
+        command = "xdg-open \"" + auth_url + "\"";  // Linux
+    #endif
+
+    wxMessageBox("Please authorize the application by clicking on the link in the browser.", "Authorization Required", wxOK | wxICON_INFORMATION);
+
+    system(command.c_str());
+    startLocalServer();
+
+    int maxWait = 60; // Maximum wait time in seconds
+    while (!auth_received && maxWait > 0)
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        maxWait--;
+    }
+
+    return auth_code;
 }
 
-// Retrieve device code for manual authentication
-std::string onedrive::getDeviceCode(std::string &userCode, int &interval)
+std::string onedrive::getAccessToken(const std::string &authCode)
 {
     CURL *curl = curl_easy_init();
     if (!curl)
         return "";
 
-    std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/devicecode";
-    std::string postFields = "client_id=" + _config.getClientId() + "&scope=Files.ReadWrite offline_access";
+    std::string url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+    std::string postFields = "client_id=" + _config.getClientId() +
+                             "&code=" + authCode +
+                             "&redirect_uri=http://localhost:8080/callback"
+                             "&grant_type=authorization_code";
 
     std::string response;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -43,61 +91,28 @@ std::string onedrive::getDeviceCode(std::string &userCode, int &interval)
         return "";
 
     json responseJson = json::parse(response);
-    userCode = responseJson["user_code"];
-    interval = responseJson["interval"];
-
-    std::cout << "🔑 Go to: " << responseJson["verification_uri"] << " and enter code: " << userCode << std::endl;
-    return responseJson["device_code"];
+    if (responseJson.contains("access_token"))
+    {
+        _config.setAccessToken(responseJson["access_token"]);
+        _config.setRefreshToken(responseJson["refresh_token"]);
+        _config.save();
+        return responseJson["access_token"];
+    }
+    return "";
 }
 
-// Polling to get access token
-std::string onedrive::getAccessToken(const std::string &deviceCode, int interval)
+// Curl response write callback
+size_t onedrive::writeCallback(void *contents, size_t size, size_t nmemb, std::string *userData)
 {
-    CURL *curl = curl_easy_init();
-    if (!curl)
-        return "";
+    size_t totalSize = size * nmemb;
+    userData->append((char *)contents, totalSize);
+    return totalSize;
+}
 
-    std::string url = "https://login.microsoftonline.com/" + _config.getTenantId() + "/oauth2/v2.0/token";
-    std::string postFields =
-        "grant_type=urn:ietf:params:oauth:grant-type:device_code"
-        "&client_id=" +
-        _config.getClientId() +
-        "&device_code=" + deviceCode;
-
-    std::string response;
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POST, 1);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postFields.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
-    while (true)
-    {
-        response.clear();
-        CURLcode res = curl_easy_perform(curl);
-
-        if (res != CURLE_OK)
-            return "";
-
-        json responseJson = json::parse(response);
-
-        if (responseJson.contains("access_token"))
-        {
-            _config.setAccessToken(responseJson["access_token"]);
-            _config.setRefreshToken(responseJson["refresh_token"]);
-            _config.save();
-            return responseJson["access_token"];
-        }
-
-        if (responseJson.contains("error") && responseJson["error"] == "authorization_pending")
-        {
-            std::this_thread::sleep_for(std::chrono::seconds(interval));
-        }
-        else
-        {
-            return "";
-        }
-    }
+// Curl write callback for file downloads
+size_t onedrive::writeFileCallback(void *ptr, size_t size, size_t nmemb, FILE *stream)
+{
+    return fwrite(ptr, size, nmemb, stream);
 }
 
 // Refresh token if available

@@ -97,7 +97,18 @@ public:
         if(t->getInterestRate() > 0 ){
             interest_rate = t->getInterestRate();
         }
-        auto interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_date, t->getDate(), _start_date);
+        _emi_cal_date = _start_date;
+        double interest_accrued = 0.0;
+
+        if(_emi < t->getAmount()){
+            //Thinking it as prepayment use number of days to calculate interest
+            interest_accrued = Calculator::calculateInterestAccrued(_principal_left, interest_rate, _emi_cal_date, t->getDate(), _start_date);
+        }
+        else{
+            //Thinking it as EMI payment
+            interest_accrued = Calculator::calculateInterestEmi(_principal_left, interest_rate);
+        }
+
         _principal_left -= (t->getAmount()-interest_accrued);
         _interest_paid += interest_accrued;
         notifyObservers();

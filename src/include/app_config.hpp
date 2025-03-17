@@ -42,7 +42,7 @@ public:
     std::string getAccessToken() const { return _onedrive_access_token; }
     std::string getRefreshToken() const { return _onedrive_refresh_token; }
     std::string getClientId() const { return _onedrive_client_id; }
-    std::string getTenantId() const { return _onedrive_tenant_id; }
+
     std::string getUpstoxAccessToken() const { return _upstox_access_token; }
     wxString getAccountDefnsFilePath() const { return _account_defns_file_path.GetFullPath(); }
     wxString getTransactionsFilePath() const { return _transactions_file_path.GetFullPath(); }
@@ -53,7 +53,7 @@ public:
     void setAccessToken(const std::string &access_token) { _onedrive_access_token = access_token; }
     void setRefreshToken(const std::string &refresh_token) { _onedrive_refresh_token = refresh_token; }
     void setClientId(const std::string &client_id) { _onedrive_client_id = client_id; }
-    void setTenantId(const std::string &tenant_id) { _onedrive_tenant_id = tenant_id; }
+    
     void setUpstoxAccessToken(const std::string &access_token) { _upstox_access_token = access_token; }
     void setAccountDefnsFilePath(const wxString &path) { _account_defns_file_path = wxFileName(path); }
     void setTransactionsFilePath(const wxString &path) { _transactions_file_path = wxFileName(path); }
@@ -68,8 +68,6 @@ public:
             j.at("refresh_token").get_to(_onedrive_refresh_token);
         if (j.contains("client_id"))
             j.at("client_id").get_to(_onedrive_client_id);
-        if (j.contains("tenant_id"))
-            j.at("tenant_id").get_to(_onedrive_tenant_id);
         if (j.contains("ups_access_token"))
             j.at("ups_access_token").get_to(_upstox_access_token);
         _account_defns_file_path = wxString(j.value("account_defns_file_path", "").c_str(), wxConvUTF8);
@@ -83,7 +81,6 @@ public:
             {"access_token", _onedrive_access_token},
             {"refresh_token", _onedrive_refresh_token},
             {"client_id", _onedrive_client_id},
-            {"tenant_id", _onedrive_tenant_id},
             {"ups_access_token", _upstox_access_token},
             {"account_defns_file_path", std::string(_account_defns_file_path.GetFullPath().mb_str())},
             {"transactions_file_path", std::string(_transactions_file_path.GetFullPath().mb_str())},
@@ -95,7 +92,6 @@ private:
     std::string _onedrive_access_token;
     std::string _onedrive_refresh_token;
     std::string _onedrive_client_id;
-    std::string _onedrive_tenant_id;
     std::string _upstox_access_token;
     wxFileName _account_defns_file_path;
     wxFileName _transactions_file_path;
@@ -122,7 +118,6 @@ private:
         dialog.ShowModal();
         _onedrive_client_id = textCtrl->GetValue().ToStdString();
 
-        _onedrive_tenant_id = "consumers";
         _account_defns_file_path = wxFileName();
         _transactions_file_path = wxFileName();
         _categories_file_path = wxFileName();

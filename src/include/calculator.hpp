@@ -47,6 +47,10 @@ public:
         return interest;
     }
 
+    static double calculateInterestEmi(double principal, double rate) {
+        return (principal * rate)/1200;
+    }
+
 private:
     static double calculateMaturityAmount(double monthly_deposit, double r, int tenure) {
         double maturity_amount = 0;
