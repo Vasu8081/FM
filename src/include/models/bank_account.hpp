@@ -9,13 +9,11 @@ class BankAccount : public Account
 public:
     BankAccount()
     {
-        _background_color = wxColour(90, 100, 90);
-        _foreground_color = wxColour(235, 245, 235);
+        _background_color = wxColour(247, 230, 201);
+        _foreground_color = wxColour(61 , 61, 61);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Balance", _balance}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return true; }
 
     bool isSavingsAccount() const override { return true; }
 

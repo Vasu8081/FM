@@ -6,13 +6,11 @@
 class LoanAccount : public Account {
 public:
     LoanAccount() {
-        _background_color = wxColour(90, 100, 90);
+        _background_color = wxColour(140, 98, 62);
         _foreground_color = wxColour(235, 245, 235);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Principal Outstanding", _principal_left }; }
-
-    bool affectsPositivelyOnPortfolio() const override { return false; }
 
     bool isDebtAccount() const override { return true; }
 

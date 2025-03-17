@@ -11,13 +11,11 @@ class ChitAccount : public Account
 public:
     ChitAccount()
     {
-        _background_color = wxColour(95, 85, 75);
+        _background_color = wxColour(217, 187, 175);
         _foreground_color = wxColour(245, 238, 230);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Invested Amount", _paid_amount}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return true; }
 
     bool isInvestmentAccount() const override { return true; }
 

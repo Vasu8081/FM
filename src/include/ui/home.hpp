@@ -144,6 +144,7 @@ private:
     {
         // Clear the sizer before adding new elements to prevent duplication
         _categorySizer->Clear(true);
+        _categoryViews.clear();
     
         // Get the categories
         auto categories = _models.getCategories();
@@ -153,7 +154,7 @@ private:
         int columns = 3;
         int rows = (numCategories + columns - 1) / columns; // Calculate required rows
         wxGridSizer *gridSizer = new wxGridSizer(rows, columns, 10, 10); // 10px padding
-    
+        // wxMessageBox(wxString::Format("Rows: %d, Columns: %d", rows, columns));
         // Loop through categories and add them to the grid
         for (auto category : categories)
         {
@@ -161,15 +162,13 @@ private:
             {
                 auto categoryView = model_view_factory::create(_categoryScrollWindow, category.second);
                 _categoryViews[category.first] = categoryView;
+                gridSizer->Add(_categoryViews[category.first], 1, wxEXPAND | wxALL, 10);
             }
-    
-            gridSizer->Add(_categoryViews[category.first], 1, wxEXPAND | wxALL, 10);
         }
-    
         // Set the sizer for the scroll window
         _categorySizer->Clear(true);
-        _categorySizer->Add(gridSizer, 1, wxEXPAND | wxALL, 10);
-        _categoryScrollWindow->SetSizerAndFit(_categorySizer);
+        _categorySizer->Add(gridSizer, 0, wxEXPAND | wxALL, 10);
+        _categoryScrollWindow->SetSizer(_categorySizer);
         _categoryScrollWindow->Layout();
     }
     

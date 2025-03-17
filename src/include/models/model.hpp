@@ -12,6 +12,8 @@ class Model : public std::enable_shared_from_this<Model>
 public:
     Model() = default;
 
+    virtual std::string getType() const = 0;
+
     virtual json toJson() const = 0;
     virtual void fromJson(const json &j) = 0;
 

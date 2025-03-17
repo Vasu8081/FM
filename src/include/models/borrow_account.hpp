@@ -10,8 +10,8 @@ class BorrowAccount : public Account
 public:
     BorrowAccount()
     {
-        _background_color = wxColour(58, 80, 107);
-        _foreground_color = wxColour(235, 235, 235);
+        _background_color = wxColour(231, 212, 157);
+        _foreground_color = wxColour(61, 61, 61);
     }
 
     std::string getID() const override
@@ -25,8 +25,6 @@ public:
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Borrowed Amount", _borrowed_amount}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return false; }
 
     bool isDebtAccount() const override { return true; }
 

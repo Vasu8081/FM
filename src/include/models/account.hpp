@@ -19,7 +19,7 @@ public:
 
     virtual std::string getID() const = 0;
 
-    virtual std::string getType() const = 0;
+    virtual std::string getType() const override = 0;
 
     virtual nlohmann::json toJson() const override = 0;
 
@@ -44,9 +44,7 @@ public:
     virtual void amountOut(std::shared_ptr<Transaction> t) = 0;
     // Get the value of the portfolio can be positive or negative based on how it contributes to overall portfolio value
     virtual std::pair<std::string, double> portfolioValue() const = 0;
-
-    virtual bool affectsPositivelyOnPortfolio() const = 0;
-
+    
     virtual bool isSavingsAccount() const {
         return false;
     }

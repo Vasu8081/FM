@@ -180,7 +180,6 @@ void EditModelForm::OnEdit(wxCommandEvent &event)
             }
         }
     }
-
     _model->fromJson(inputJson);
     _model->notifyObservers();
     this->GetParent()->Close();

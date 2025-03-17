@@ -61,6 +61,10 @@ public:
             {
                 _accounts[transaction_->getToAccount()->getID()]->addToTransaction(transaction_);
             }
+            if (transaction_->getCategory())
+            {
+                _categories[transaction_->getCategory()->getID()]->addTransaction(transaction_);
+            }
         }
 
         std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_);

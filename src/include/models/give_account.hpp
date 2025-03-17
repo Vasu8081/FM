@@ -10,7 +10,7 @@ class GiveAccount : public Account
 public:
     GiveAccount()
     {
-        _background_color = wxColour(90, 100, 90);
+        _background_color = wxColour(123, 126, 117);
         _foreground_color = wxColour(235, 245, 235);
     }
 
@@ -25,8 +25,6 @@ public:
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Lended Amount", _given_amount}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return true; }
 
     bool isSavingsAccount() const override { return true; }
 

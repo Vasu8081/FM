@@ -25,6 +25,7 @@ private:
         // Calculate Values
         auto accounts = _models.getAccounts();
         std::unordered_map<std::string, std::pair<std::string, double>> accountValues;
+        std::unordered_map<std::string, wxColour> accountColors;
         
         double portfolioValue = 0.0;
         double investmentValue = 0.0;
@@ -45,10 +46,13 @@ private:
             }
 
             if(account->isInvestmentAccount()){
+                accountColors[account->getType()] = wxColour(233, 150, 91);
                 investmentValue += portfolio.second;
             } else if(account->isSavingsAccount()){
+                accountColors[account->getType()] = wxColour(50, 168, 82);
                 savingsValue += portfolio.second;
             } else if(account->isDebtAccount()){
+                accountColors[account->getType()] = wxColour(220, 77, 77);
                 debtValue += portfolio.second;
             }
         }
@@ -57,6 +61,12 @@ private:
         auto portfolioSummarySizer = new wxStaticBoxSizer(portfolioSummary, wxVERTICAL);
 
         auto portfolioGrid = new wxGridSizer(4, wxSize(10, 10));
+        std::unordered_map<std::string, wxColour> portfolioColors = {
+            {"Portfolio Value", wxColour(64, 64, 64)},
+            {"Investment Value", wxColour(233, 150, 91)},
+            {"Savings Value", wxColour(50, 168, 82)},
+            {"Debt Value", wxColour(220, 77, 77)}
+        };
         std::vector<std::pair<std::string, double>> portfolioValues = {
             {"Portfolio Value", portfolioValue},
             {"Investment Value", investmentValue},
@@ -67,7 +77,10 @@ private:
         for (const auto& portfolioValue : portfolioValues) {
             wxStaticBox* ptbox = new wxStaticBox(this, wxID_ANY, portfolioValue.first);
             auto sze = new wxStaticBoxSizer(ptbox, wxVERTICAL);
-            sze->Add(new wxStaticText(this, wxID_ANY, Formatter::Amount(portfolioValue.second)), 0, wxALL, 5);
+            ptbox->SetBackgroundColour(portfolioColors[portfolioValue.first]);
+            auto text = new wxStaticText(this, wxID_ANY, Formatter::Amount(portfolioValue.second));
+            text->SetForegroundColour(*wxWHITE);
+            sze->Add(text, 0, wxALL, 5);
             portfolioGrid->Add(sze, 0, wxEXPAND | wxTOP | wxBOTTOM, 5);
         }
 
@@ -84,9 +97,11 @@ private:
         for (const auto& accountValue : accountValues) {
             wxStaticBox* accountBox = new wxStaticBox(this, wxID_ANY, accountValue.first);
             auto accountBoxSizer = new wxStaticBoxSizer(accountBox, wxVERTICAL);
-
+            accountBox->SetBackgroundColour(accountColors[accountValue.first]);
             std::string totalValueText = accountValue.second.first + ": " + Formatter::Amount(accountValue.second.second);
-            accountBoxSizer->Add(new wxStaticText(this, wxID_ANY, totalValueText), 0, wxALL, 5);
+            auto text = new wxStaticText(this, wxID_ANY, totalValueText);
+            text->SetForegroundColour(*wxWHITE);
+            accountBoxSizer->Add(text, 0, wxALL, 5);
 
             gridSizer->Add(accountBoxSizer, 1, wxEXPAND | wxTOP | wxBOTTOM, 10);
         }

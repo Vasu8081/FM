@@ -103,9 +103,6 @@ public:
     }
 
 protected:
-    std::unordered_map<std::string, wxStaticText *> _staticTextFields;
-    wxColour _foregroundColour;
-    wxColour _backgroundColour;
     wxBitmapButton *_eye_button;
     bool _show_hidden_values = false;
 
@@ -160,8 +157,7 @@ protected:
         wxDialog *modelDialog = new wxDialog(this, wxID_ANY, "Edit Model", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *modelSizer = new wxBoxSizer(wxVERTICAL);
 
-        auto account = std::dynamic_pointer_cast<Account>(_model);
-        auto modelForm = new EditModelForm(modelDialog, account->getType(), _model);
+        auto modelForm = new EditModelForm(modelDialog, _model->getType(), _model);
         modelSizer->Add(modelForm, 1, wxEXPAND | wxALL, 5);
 
         modelDialog->SetSizer(modelSizer);

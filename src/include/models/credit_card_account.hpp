@@ -11,13 +11,11 @@ class CreditCardAccount : public Account
 public:
     CreditCardAccount()
     {
-        _background_color = wxColour(112, 98, 118);
+        _background_color = wxColour(173, 155, 141);
         _foreground_color = wxColour(240, 230, 250);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Outstandings", _credit_limit-_limit_left}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return false; }
 
     bool isDebtAccount() const override { return true; }
 

@@ -16,13 +16,11 @@ class StockAccount : public Account
 public:
     StockAccount()
     {
-        _background_color = wxColour(90, 100, 90);
+        _background_color = wxColour(78, 71, 65);
         _foreground_color = wxColour(235, 245, 235);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Stocks Invested", _average_bought_price*_quantity}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return true; }
 
     bool isInvestmentAccount() const override { return true; }
 

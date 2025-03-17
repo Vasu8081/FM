@@ -6,13 +6,11 @@
 class PropertyAccount : public Account {
 public:
     PropertyAccount() {
-        _background_color = wxColour(90, 100, 90);
+        _background_color = wxColour(156, 118, 107);
         _foreground_color = wxColour(235, 245, 235);
     }
 
     std::pair<std::string, double> portfolioValue() const override { return {"Property Value", _bought_value}; }
-
-    bool affectsPositivelyOnPortfolio() const override { return true; }
 
     bool isInvestmentAccount() const override { return true; }
 

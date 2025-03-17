@@ -14,6 +14,8 @@ class Transaction : public Model
 public:
     Transaction() = default;
 
+    std::string getType() const override { return "Transaction"; }
+
     json toJson() const override;
     void fromJson(const json &j) override;
 
