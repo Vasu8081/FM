@@ -40,13 +40,18 @@ public:
         headingSizer->Add(edit_button, 0, wxEXPAND | wxALL, 5);
 
         if(hiddenFields.size() > 0){
-            auto eye_icon = _icon.get(wxART_VISIBILITY_OFF, *wxBLACK);
+            auto eye_icon = _icon.get(wxART_VISIBILITY_OFF, *wxBLUE);
             _eye_button = new wxBitmapButton(this, wxID_ANY, eye_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Toggle Hidden Values");
             _eye_button->Bind(wxEVT_BUTTON, &AccountView::onHiddenValues, this);
             headingSizer->Add(_eye_button, 0, wxEXPAND | wxALL, 5);
         }
 
-
+        if(model->enableRefreshAlone()){
+            auto refresh_icon = _icon.get(wxART_REPLAY, *wxBLUE);
+            auto refresh_button = new wxBitmapButton(this, wxID_ANY, refresh_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Refresh");
+            refresh_button->Bind(wxEVT_BUTTON, &AccountView::refreshModel, this);
+            headingSizer->Add(refresh_button, 0, wxEXPAND | wxALL, 5);
+        }
 
         sizer->Add(headingSizer, 0, wxEXPAND | wxALL, 5);
 
@@ -137,6 +142,11 @@ protected:
         transactionDialog->Layout();
         transactionDialog->Centre();
         transactionDialog->ShowModal();
+    }
+
+    void refreshModel(wxCommandEvent &event){
+        auto mdl = std::dynamic_pointer_cast<Account>(_model);
+        mdl->refresh();
     }
     
     void addIncome(wxCommandEvent &event){

@@ -35,6 +35,12 @@ public:
 
     virtual std::unordered_map<std::string, wxColour> overrideFormColors() const = 0;
 
+    virtual bool enableRefreshAlone() const { return false; }
+
+    virtual void refresh() {
+        wxMessageBox("Refresh not implemented for this account type.");
+    }
+
     wxColour getForegroundColor() const { return _foreground_color; }
     wxColour getBackgroundColor() const { return _background_color; }
 

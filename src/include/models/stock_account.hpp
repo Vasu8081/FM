@@ -137,6 +137,21 @@ public:
         }
     }
 
+    bool enableRefreshAlone() const override
+    {
+        return true;
+    }
+
+    void refresh() override
+    {
+        if(_api.isActive()){
+            _product = _api.getProduct(_exchange_code + "%7C" + _isin);
+            wxTheApp->CallAfter([this]() {
+                notifyObservers();
+            });
+        }
+    }
+
     void amountIn(std::shared_ptr<Transaction> t) override
     {
         auto total_bought_price = _average_bought_price * _quantity + t->getAmount();

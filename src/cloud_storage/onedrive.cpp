@@ -43,7 +43,10 @@ void onedrive::startLocalServer() {
 std::string onedrive::waitForAuthCode()
 {
     std::string auth_url = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize?client_id=" + _config.getClientId() +
-    "&response_type=code&redirect_uri=http://localhost:8080/callback&scope=Files.ReadWrite offline_access";
+    "&response_type=code" +
+    "&redirect_uri=http://localhost:8080/callback" +
+    "&scope=Files.ReadWrite offline_access" +
+    "&prompt=select_account";
 
     std::string command;
 

@@ -24,13 +24,14 @@ public:
         return "FD";
     }
 
-    double portfolioValue() const override { 
+    std::pair<std::string, double> portfolioValue() const override { 
         if(wxDateTime::Now() < _maturity_date)
-            return _paid_amount;
+            return {"Invested Amount", _paid_amount};
         else
-            return _maturity_amount;
-
+            return {"Invested Amount", _maturity_amount};
     }
+
+    bool isInvestmentAccount() const override { return true; }
 
     json toJson() const override
     {
@@ -57,7 +58,7 @@ public:
             _maturity_date.ParseISODate(j.at("Maturity Date").get<std::string>());
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"FD Name", "string"},
@@ -66,7 +67,7 @@ public:
             {"Maturity Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         auto months = Calculator::calculateMonthsDifference(_start_date, _maturity_date);
         auto yearly_interest = Calculator::findFDInterestRate(_paid_amount, _maturity_amount, months);
