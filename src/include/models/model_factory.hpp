@@ -15,6 +15,8 @@
 #include <models/rd_account.hpp>
 #include <models/fd_account.hpp>
 #include <models/stock_account.hpp>
+#include <models/property_account.hpp>
+#include <models/loan_account.hpp>
 #include <models/transaction.hpp>
 #include <models/category.hpp>
 
@@ -69,6 +71,10 @@ private:
             {"Transaction", []() { return std::make_shared<Transaction>(); }},
             {"CAT.", []() { return std::make_shared<Category>(); }},
             {"Category", []() { return std::make_shared<Category>(); }},
+            {"PA.", []() { return std::make_shared<PropertyAccount>(); }},
+            {"Property Account", []() { return std::make_shared<PropertyAccount>(); }},
+            {"Loan Account", []() { return std::make_shared<LoanAccount>(); }},
+            {"LA.", []() { return std::make_shared<LoanAccount>(); }},
             {"FD.", []() { return std::make_shared<FdAccount>(); }},
             {"FD Account", []() { return std::make_shared<FdAccount>(); }},
         };

@@ -18,33 +18,63 @@ class CategoryView : public ModelView
 public:
     CategoryView(wxWindow *parent, std::shared_ptr<Category> model) : ModelView(parent, model)
     {
+        _foregroundColour = model->getForegroundColor();
+        _backgroundColour = model->getBackgroundColor();
         auto sizer = new wxBoxSizer(wxVERTICAL);
+        auto displayFields = model->displayFormFields();
+        auto boldFields = model->boldFormFields();
+        auto overrideColors = model->overrideFormColors();
+        auto header_row = displayFields[0];
+        auto headingSizer = new wxBoxSizer(wxHORIZONTAL);
+        auto heading = new wxStaticText(this, wxID_ANY, header_row.second);
+        heading->SetForegroundColour(_foregroundColour);
+        wxFont font = heading->GetFont();
+        font.SetWeight(wxFONTWEIGHT_BOLD);
+        font.SetPointSize(font.GetPointSize() + 4);
+        heading->SetFont(font);
+        headingSizer->Add(heading, 0, wxEXPAND | wxALL, 5);
+        auto edit_icon = _icon.get(wxART_EDIT, *wxBLACK);
+        auto edit_button = new wxBitmapButton(this, wxID_ANY, edit_icon, wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT, wxDefaultValidator, "Edit Model");
+        edit_button->Bind(wxEVT_BUTTON, &CategoryView::editModel, this);
+        headingSizer->AddStretchSpacer(1);
+        headingSizer->Add(edit_button, 0, wxEXPAND | wxALL, 5);
 
-        wxStaticBox *staticBox = new wxStaticBox(this, wxID_ANY, "Category Details");
-        wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(staticBox, wxVERTICAL);
+        sizer->Add(headingSizer, 0, wxEXPAND | wxALL, 5);
 
-        _category_name = new wxStaticText(this, wxID_ANY, "Name: " + model->getName());
-        _category_description = new wxStaticText(this, wxID_ANY, "Description: " + model->getDescription());
-        _category_monthly_budget = new wxStaticText(this, wxID_ANY, "Monthly Budget: " + std::to_string(model->getMonthlyBudget()));
-        _category_spent_this_month = new wxStaticText(this, wxID_ANY, "Spent This Month: " + std::to_string(model->getSpentThisMonth()));
-        _category_spent_last_month = new wxStaticText(this, wxID_ANY, "Spent Last Month: " + std::to_string(model->getSpentLastMonth()));
-        _category_average_three_months = new wxStaticText(this, wxID_ANY, "Average Last 3 Months: " + std::to_string(model->getAverageThreeMonths()));
+        wxStaticBoxSizer *staticBoxSizer = new wxStaticBoxSizer(wxVERTICAL, this);
 
-        staticBoxSizer->Add(_category_name, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_category_description, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_category_monthly_budget, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_category_spent_this_month, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_category_spent_last_month, 0, wxEXPAND | wxALL, 5);
-        staticBoxSizer->Add(_category_average_three_months, 0, wxEXPAND | wxALL, 5);
+        for (auto &[key, value] : displayFields)
+        {
+            if (key == "header")
+                continue;
+            auto field_sizer = createStaticText(this, key, value);
 
+            if (boldFields.find(key) != boldFields.end())
+            {
+                wxFont font = _staticTextFields[key]->GetFont();
+                font.SetWeight(wxFONTWEIGHT_BOLD);
+                _staticTextFields[key]->SetFont(font);
+            }
+            if (overrideColors.find(key) != overrideColors.end())
+            {
+                _staticTextFields[key]->SetForegroundColour(overrideColors[key]);
+            }
+
+            staticBoxSizer->Add(field_sizer, 0, wxEXPAND | wxALL, 1);
+        }
+        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 2);
+        auto button_sizer = new wxBoxSizer(wxHORIZONTAL);
         auto view_transactions = new wxButton(this, wxID_ANY, "View Transactions");
-        staticBoxSizer->Add(view_transactions, 0, wxEXPAND | wxALL, 5);
+        button_sizer->Add(view_transactions, 1, wxEXPAND | wxALL, 5);
+
         Bind(wxEVT_BUTTON, &CategoryView::viewTransactions, this, view_transactions->GetId());
 
-        sizer->Add(staticBoxSizer, 0, wxEXPAND | wxALL, 10);
+        sizer->Add(button_sizer, 0, wxEXPAND | wxALL, 2);
 
         SetSizer(sizer);
-        SetBackgroundColour(wxColour(254, 216, 177));
+        Layout();
+        Fit();
+        SetBackgroundColour(_backgroundColour);
     }
 
     void viewTransactions(wxCommandEvent &event)
@@ -57,6 +87,12 @@ public:
 
         auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(400, 600), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
         auto sizer = new wxBoxSizer(wxVERTICAL);
+
+        if (transactions.size() <= 0)
+        {
+            wxMessageBox("No transactions found");
+            return;
+        }
 
         for (auto &t : transactions)
         {
@@ -91,24 +127,31 @@ public:
         dialog->ShowModal();
     }
 
+    void editModel(wxCommandEvent &event){
+        wxDialog *modelDialog = new wxDialog(this, wxID_ANY, "Edit Model", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
+        wxBoxSizer *modelSizer = new wxBoxSizer(wxVERTICAL);
+
+        auto modelForm = new EditModelForm(modelDialog, _model->getType(), _model);
+        modelSizer->Add(modelForm, 1, wxEXPAND | wxALL, 5);
+
+        modelDialog->SetSizer(modelSizer);
+        modelDialog->Fit();
+        modelDialog->Layout();
+        modelDialog->Centre();
+        modelDialog->ShowModal();
+    }
+
     void update() override
     {
         auto model = std::dynamic_pointer_cast<Category>(_model);
-        _category_name->SetLabel("Name: " + model->getName());
-        _category_description->SetLabel("Description: " + model->getDescription());
-        _category_monthly_budget->SetLabel("Monthly Budget: " + std::to_string(model->getMonthlyBudget()));
-        _category_spent_this_month->SetLabel("Spent This Month: " + std::to_string(model->getSpentThisMonth()));
-        _category_spent_last_month->SetLabel("Spent Last Month: " + std::to_string(model->getSpentLastMonth()));
-        _category_average_three_months->SetLabel("Average Last 3 Months: " + std::to_string(model->getAverageThreeMonths()));
+        auto displayFields = model->displayFormFields();
+        for (auto &[key, value] : displayFields)
+        {
+            if (key == "header")
+                continue;
+            _staticTextFields[key]->SetLabel(value);
+        }
     }
-
-private:
-    wxStaticText *_category_name;
-    wxStaticText *_category_description;
-    wxStaticText *_category_monthly_budget;
-    wxStaticText *_category_spent_this_month;
-    wxStaticText *_category_spent_last_month;
-    wxStaticText *_category_average_three_months;
 };
 
 #endif // BANK_ACCOUNT_VIEW_HPP

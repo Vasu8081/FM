@@ -19,15 +19,17 @@ public:
 
     virtual std::string getID() const = 0;
 
-    virtual std::string getType() const = 0;
+    virtual std::string getType() const override = 0;
 
     virtual nlohmann::json toJson() const override = 0;
 
     virtual void fromJson(const nlohmann::json &j) override = 0;
 
-    virtual std::unordered_map<std::string, std::string> inputFormFields() const override = 0;
+    virtual std::vector<std::pair<std::string, std::string>> inputFormFields() const override = 0;
 
-    virtual std::unordered_map<std::string, std::string> displayFormFields() const = 0;
+    virtual std::vector<std::pair<std::string, std::string>> displayFormFields() const = 0;
+
+    virtual std::set<std::string> hiddenFormFields() const { return {}; }
 
     virtual std::set<std::string> boldFormFields() const = 0;
 
@@ -41,7 +43,19 @@ public:
     // Behavior if this Account is a from Account during a Transaction
     virtual void amountOut(std::shared_ptr<Transaction> t) = 0;
     // Get the value of the portfolio can be positive or negative based on how it contributes to overall portfolio value
-    virtual double portfolioValue() const = 0;
+    virtual std::pair<std::string, double> portfolioValue() const = 0;
+    
+    virtual bool isSavingsAccount() const {
+        return false;
+    }
+
+    virtual bool isInvestmentAccount() const {
+        return false;
+    }
+
+    virtual bool isDebtAccount() const {
+        return false;
+    }
 
     // Getters
     std::string getName() const { return _name; }

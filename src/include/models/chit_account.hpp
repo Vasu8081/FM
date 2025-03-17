@@ -11,11 +11,13 @@ class ChitAccount : public Account
 public:
     ChitAccount()
     {
-        _background_color = wxColour(95, 85, 75);
+        _background_color = wxColour(217, 187, 175);
         _foreground_color = wxColour(245, 238, 230);
     }
 
-    double portfolioValue() const override { return _paid_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Invested Amount", _paid_amount}; }
+
+    bool isInvestmentAccount() const override { return true; }
 
     std::string getID() const override
     {
@@ -58,7 +60,7 @@ public:
             _maturity_date.ParseISODate(j.at("Maturity Date").get<std::string>());
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Chit Name", "string"},
@@ -69,7 +71,7 @@ public:
             {"Maturity Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         auto months = Calculator::calculateMonthsDifference(_start_date, _maturity_date)+1;
         auto yearly_interest = Calculator::findRDInterestRate(_monthly_payment, _maturity_amount, months);

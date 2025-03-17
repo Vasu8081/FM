@@ -9,11 +9,13 @@ class BankAccount : public Account
 public:
     BankAccount()
     {
-        _background_color = wxColour(90, 100, 90);
-        _foreground_color = wxColour(235, 245, 235);
+        _background_color = wxColour(247, 230, 201);
+        _foreground_color = wxColour(61 , 61, 61);
     }
 
-    double portfolioValue() const override { return _balance; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Balance", _balance}; }
+
+    bool isSavingsAccount() const override { return true; }
 
     std::string getID() const override
     {
@@ -50,7 +52,7 @@ public:
             _ifsc = j.at("IFSC").get<std::string>();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Bank Name", "string"},
@@ -59,7 +61,7 @@ public:
             {"IFSC", "string"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},

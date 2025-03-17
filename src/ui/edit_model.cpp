@@ -1,16 +1,15 @@
-#include <ui/add_model.hpp>
+#include <ui/edit_model.hpp>
 #include <models/models_manager.hpp>
 #include <wx/sizer.h>
 #include <wx/spinctrl.h>
 #include <wx/choice.h>
 
-AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::shared_ptr<Model> default_model, bool from_account ) 
-    : wxPanel(parent)
+EditModelForm::EditModelForm(wxWindow *parent, const std::string &type, std::shared_ptr<Model> model) 
+    : wxPanel(parent), _model_type(type), _model(model)
 {
     wxBoxSizer *mainSizer = new wxBoxSizer(wxVERTICAL);
     inputFields.clear();
-    _model = std::dynamic_pointer_cast<Model>(model_factory::create(type));
-    
+
     if (!_model)
     {
         wxMessageBox("Invalid model type: " + type);
@@ -25,30 +24,40 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::share
         fieldTypes[key] = fieldType;
         wxStaticText *label = new wxStaticText(this, wxID_ANY, key + ":");
         wxControl *input = nullptr;
-        std::string defaultValue = "";
 
         if (fieldType == "string")
         {
+            std::string defaultValue = _model->toJson().value(key, "");
             input = new wxTextCtrl(this, wxID_ANY, defaultValue, wxDefaultPosition, wxSize(200, -1));
         }
         else if (fieldType == "int")
         {
-            int value = 0;
+            int value = _model->toJson().value(key, 0);
             input = new wxSpinCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1), 
                                    wxSP_ARROW_KEYS, 0, 100, value);
         }
         else if (fieldType == "double")
         {
-            input = new wxTextCtrl(this, wxID_ANY, std::to_string(0.0), wxDefaultPosition, wxSize(200, -1));
+            double value = _model->toJson().value(key, 0.0);
+            input = new wxTextCtrl(this, wxID_ANY, std::to_string(value), wxDefaultPosition, wxSize(200, -1));
         }
         else if (fieldType == "date")
         {
             wxDatePickerCtrl *datePicker = new wxDatePickerCtrl(this, wxID_ANY);
+            wxDateTime date;
+            std::string dateStr = _model->toJson().value(key, "");
+            if (!dateStr.empty())
+            {
+                date.ParseISODate(dateStr);
+            }
+            datePicker->SetValue(date);
             input = datePicker;
         }
         else if (fieldType == "bool")
         {
+            bool value = _model->toJson().value(key, false);
             wxCheckBox *checkBox = new wxCheckBox(this, wxID_ANY, "");
+            checkBox->SetValue(value);
             input = checkBox;
         }
         else if (fieldType == "Account")
@@ -57,31 +66,14 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::share
             auto accounts = model_manager_.getAccounts();
             wxArrayString accountChoices;
             int index = 0;
-            int choose_index = 0;
             accountChoices.Add("");
             accountMapping[index++] = "";
             for (auto &act : accounts)
             {
-                if(default_model){
-                    auto mdl = std::dynamic_pointer_cast<Account>(default_model);
-                    if(mdl && mdl == act.second ){
-                        if(from_account && key == "From Account"){
-                            choose_index = index;
-                        }
-                        if(!from_account && key == "To Account"){
-                            choose_index = index;
-                        }
-                    }
-                }
                 accountChoices.Add(act.second->getName());
                 accountMapping[index++] = act.first;
             }
             wxChoice *accountChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxSize(200, -1), accountChoices);
-            if(choose_index != 0){
-                accountChoice->SetSelection(choose_index);
-                accountChoice->Disable();
-            }
-            
             input = accountChoice;
         }
         else if (fieldType == "Category")
@@ -116,9 +108,9 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::share
 
     wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
     addButton = new wxButton(this, wxID_ANY, "Add", wxDefaultPosition, wxSize(80, 30));
-    addButton->Bind(wxEVT_BUTTON, &AddModelForm::OnAdd, this);
+    addButton->Bind(wxEVT_BUTTON, &EditModelForm::OnEdit, this);
     cancelButton = new wxButton(this, wxID_ANY, "Cancel", wxDefaultPosition, wxSize(80, 30));
-    cancelButton->Bind(wxEVT_BUTTON, &AddModelForm::OnCancel, this);
+    cancelButton->Bind(wxEVT_BUTTON, &EditModelForm::OnCancel, this);
     buttonSizer->AddStretchSpacer();
     buttonSizer->Add(cancelButton, 0, wxRIGHT, 10);
     buttonSizer->Add(addButton, 0);
@@ -132,12 +124,12 @@ AddModelForm::AddModelForm(wxWindow *parent, const std::string &type, std::share
 }
 
 
-bool AddModelForm::ValidateInputs()
+bool EditModelForm::ValidateInputs()
 {
     return true;
 }
 
-void AddModelForm::OnAdd(wxCommandEvent &event)
+void EditModelForm::OnEdit(wxCommandEvent &event)
 {
     if (!_model)
         return;
@@ -188,13 +180,12 @@ void AddModelForm::OnAdd(wxCommandEvent &event)
             }
         }
     }
-
     _model->fromJson(inputJson);
-    model_manager::getInstance().add(_model);
+    _model->notifyObservers();
     this->GetParent()->Close();
 }
 
-void AddModelForm::OnCancel(wxCommandEvent &event)
+void EditModelForm::OnCancel(wxCommandEvent &event)
 {
     this->GetParent()->Close();
 }

@@ -61,6 +61,10 @@ public:
             {
                 _accounts[transaction_->getToAccount()->getID()]->addToTransaction(transaction_);
             }
+            if (transaction_->getCategory())
+            {
+                _categories[transaction_->getCategory()->getID()]->addTransaction(transaction_);
+            }
         }
 
         std::shared_ptr<Category> category_ = std::dynamic_pointer_cast<Category>(model_);
@@ -229,6 +233,9 @@ public:
     void saveTransactions()
     {
         json j = json::array();
+        std::sort(_transactions.begin(), _transactions.end(), [](const std::shared_ptr<Transaction> &a, const std::shared_ptr<Transaction> &b) {
+            return a->getDate() < b->getDate();
+        });
         for (auto &transaction : _transactions)
         {
             j.push_back(transaction->toJson());

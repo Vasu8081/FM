@@ -13,6 +13,7 @@ json Transaction::toJson() const
     j["Date"] = _date.FormatISODate();
     j["Amount"] = _amount;
     j["Quantity"] = _quantity;
+    j["Interest Rate"] = _interest_rate;
     return j;
 }
 
@@ -35,6 +36,18 @@ void Transaction::fromJson(const json &j)
         if (id != "")
         {
             _to_account_id = model_manager_.getAccounts()[id];
+            if(_to_account_id->getType() == "Loan Account")
+            {
+                if(j.contains("Interest Rate"))
+                {
+                    _interest_rate = j["Interest Rate"].get<double>();
+                }
+                else
+                {
+                    auto la = std::dynamic_pointer_cast<LoanAccount>(_to_account_id);
+                    _interest_rate = la->getInterestRate();
+                }
+            }
         }
     }
 
@@ -74,8 +87,9 @@ void Transaction::fromJson(const json &j)
     }
 }
 
-std::unordered_map<std::string, std::string> Transaction::inputFormFields() const
+std::vector<std::pair<std::string, std::string>> Transaction::inputFormFields() const
 {
+    //From Account and To Account also used in add_model.cpp (if changed name here, need to change there also)
     return {
         {"From Account", "Account"},
         {"To Account", "Account"},
@@ -94,6 +108,7 @@ std::string Transaction::getDescription() const { return _description; }
 wxDateTime Transaction::getDate() const { return _date; }
 double Transaction::getAmount() const { return _amount; }
 double Transaction::getQuantity() const { return _quantity; }
+double Transaction::getInterestRate() const { return _interest_rate; }
 
 // Setters
 void Transaction::setFromAccount(std::shared_ptr<Account> from_account_id) { _from_account_id = from_account_id; }
@@ -103,3 +118,4 @@ void Transaction::setDescription(std::string description) { _description = descr
 void Transaction::setDate(wxDateTime date) { _date = date; }
 void Transaction::setAmount(double amount) { _amount = amount; }
 void Transaction::setQuantity(double quantity) { _quantity = quantity; }
+void Transaction::setInterestRate(double interest_rate) { _interest_rate = interest_rate; }

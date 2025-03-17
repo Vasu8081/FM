@@ -6,6 +6,7 @@
 #include <curl/curl.h>
 #include <json.hpp>
 #include <app_config.hpp>
+#include <crow.h>
 
 class onedrive
 {
@@ -14,16 +15,14 @@ private:
     {
         if (_config.getRefreshToken().empty())
         {
-            std::string deviceCode, userCode;
-            int interval;
-            std::string deviceCodeStr = getDeviceCode(userCode, interval);
-            if (deviceCodeStr.empty())
+            auto authCode = waitForAuthCode();
+            if (authCode.empty())
             {
-                std::cerr << "Error: Failed to get device code" << std::endl;
+                std::cerr << "Error: Failed to get authorization code" << std::endl;
                 return;
             }
 
-            auto accessToken = getAccessToken(deviceCodeStr, interval);
+            auto accessToken = getAccessToken(authCode);
             if (accessToken.empty())
             {
                 std::cerr << "Error: Failed to get access token" << std::endl;
@@ -39,12 +38,12 @@ private:
                 return;
             }
         }
-        sync_down();
+        syncFiles();
     }
 
     ~onedrive()
     {
-        sync_up();
+        syncFiles();
     }
 
     app_config &_config = app_config::getInstance();
@@ -53,11 +52,16 @@ private:
     static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *userData);
     static size_t writeFileCallback(void *ptr, size_t size, size_t nmemb, FILE *stream);
 
-    std::string getDeviceCode(std::string &userCode, int &interval);
-    std::string getAccessToken(const std::string &deviceCode, int interval);
+    void startLocalServer();
+    std::string waitForAuthCode();
+    std::string getAccessToken(const std::string &authCode);
     std::string refreshAccessToken();
-    void uploadFile(const std::string &localPath, const std::string &oneDrivePath);
-    void downloadFile(const std::string &oneDrivePath, const std::string &localPath);
+    bool uploadFile(const std::string &localPath, const std::string &oneDrivePath);
+    bool downloadFile(const std::string &oneDrivePath, const std::string &localPath);
+    void retryDownload(const std::string &serverPath, const std::string &localPath, int maxRetries);
+    void retryUpload(const std::string &localPath, const std::string &serverPath, int maxRetries);
+    std::string getServerTimestamp(const std::string &serverPath);
+    bool isLocalFileNewer(const std::string &localPath, const std::string &serverTimestamp);
 
 public:
     onedrive(const onedrive &) = delete;
@@ -69,8 +73,7 @@ public:
         return instance;
     }
 
-    void sync_up();
-    void sync_down();
+    void syncFiles();
 };
 
 #endif // ONEDRIVE_H

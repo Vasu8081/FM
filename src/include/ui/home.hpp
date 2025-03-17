@@ -5,6 +5,7 @@
 #include <wx/notebook.h>
 #include <models/models_manager.hpp>
 #include <ui/add_model.hpp>
+#include <ui/account_summary.hpp>
 #include <ui/model_view_panels/model_view_factory.hpp>
 
 class home : public wxFrame
@@ -20,14 +21,15 @@ public:
 
         _notebook = new wxNotebook(this, wxID_ANY);
 
+        //Portfolio Tab
+        wxPanel* accountSummary = new AccountSummaryPanel(_notebook);
+        _notebook->AddPage(accountSummary, "Portfolio");
+
         // Accounts Tab
         wxPanel *accountPanel = new wxPanel(_notebook);
         wxBoxSizer *accountSizer = new wxBoxSizer(wxVERTICAL);
-        accountSizer->Add(new wxStaticText(accountPanel, wxID_ANY, "Here you can manage all your financial accounts, segregated by type."), 0, wxEXPAND | wxALL, 10);
-
         _accountNotebook = new wxNotebook(accountPanel, wxID_ANY);
         accountSizer->Add(_accountNotebook, 1, wxEXPAND | wxALL, 10);
-
         accountPanel->SetSizer(accountSizer);
         _notebook->AddPage(accountPanel, "Accounts");
 
@@ -36,11 +38,14 @@ public:
         wxBoxSizer *categorySizer = new wxBoxSizer(wxVERTICAL);
         _categoryScrollWindow = new wxScrolledWindow(categoryPanel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL | wxHSCROLL);
         _categoryScrollWindow->SetScrollRate(5, 5);
+        
+        // Use wxBoxSizer to hold the grid sizer
         _categorySizer = new wxBoxSizer(wxVERTICAL);
         _categoryScrollWindow->SetSizer(_categorySizer);
         categorySizer->Add(_categoryScrollWindow, 1, wxEXPAND | wxALL, 10);
         categoryPanel->SetSizer(categorySizer);
         _notebook->AddPage(categoryPanel, "Categories");
+        
 
         _mainSizer->Add(_notebook, 1, wxEXPAND | wxALL, 10);
 
@@ -114,12 +119,12 @@ private:
                 {
                     _accountTypeNumCols[type] = numColumns;
                 }
-                else
+                if (_accountTypeNumCols[type] > numColumns)
                 {
-                    if (_accountTypeNumCols[type] > numColumns)
-                    {
-                        _accountTypeNumCols[type] = numColumns;
-                    }
+                    _accountTypeNumCols[type] = numColumns;
+                }
+                if (_accountTypeNumCols[type] > 4){
+                    _accountTypeNumCols[type] = 4;
                 }
                 _accountTypeGrids[type]->SetCols(_accountTypeNumCols[type]);
                 _accountTypeGrids[type]->Add(accountView, 0, wxEXPAND | wxALL, 10);
@@ -137,18 +142,36 @@ private:
 
     void updateCategories()
     {
-        for (auto category : _models.getCategories())
+        // Clear the sizer before adding new elements to prevent duplication
+        _categorySizer->Clear(true);
+        _categoryViews.clear();
+    
+        // Get the categories
+        auto categories = _models.getCategories();
+        int numCategories = categories.size();
+    
+        // Create a new grid sizer with 4 columns
+        int columns = 3;
+        int rows = (numCategories + columns - 1) / columns; // Calculate required rows
+        wxGridSizer *gridSizer = new wxGridSizer(rows, columns, 10, 10); // 10px padding
+        // wxMessageBox(wxString::Format("Rows: %d, Columns: %d", rows, columns));
+        // Loop through categories and add them to the grid
+        for (auto category : categories)
         {
             if (!_categoryViews.count(category.first))
             {
                 auto categoryView = model_view_factory::create(_categoryScrollWindow, category.second);
-                _categorySizer->Add(categoryView, 0, wxEXPAND | wxALL, 10);
                 _categoryViews[category.first] = categoryView;
+                gridSizer->Add(_categoryViews[category.first], 1, wxEXPAND | wxALL, 10);
             }
         }
-        _categoryScrollWindow->FitInside();
+        // Set the sizer for the scroll window
+        _categorySizer->Clear(true);
+        _categorySizer->Add(gridSizer, 0, wxEXPAND | wxALL, 10);
+        _categoryScrollWindow->SetSizer(_categorySizer);
         _categoryScrollWindow->Layout();
     }
+    
 
     void onAddAccountButtonClicked(wxCommandEvent &event)
     {
@@ -173,13 +196,15 @@ private:
         if (dialog->ShowModal() == wxID_OK)
         {
             wxString selectedType = choice->GetStringSelection();
-            wxDialog *accountDialog = new wxDialog(this, wxID_ANY, "Add Account", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+            wxDialog *accountDialog = new wxDialog(this, wxID_ANY, "Add Account", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
             wxBoxSizer *accountSizer = new wxBoxSizer(wxVERTICAL);
 
             auto accountForm = new AddModelForm(accountDialog, selectedType.ToStdString());
             accountSizer->Add(accountForm, 1, wxEXPAND | wxALL, 5);
 
             accountDialog->SetSizer(accountSizer);
+            accountDialog->Fit();
+            accountDialog->Layout();
             accountDialog->Centre();
             accountDialog->ShowModal();
         }
@@ -188,7 +213,7 @@ private:
 
     void onAddTransactionButtonClicked(wxCommandEvent &event)
     {
-        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Add Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        wxDialog *transactionDialog = new wxDialog(this, wxID_ANY, "Add Transaction", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *transactionSizer = new wxBoxSizer(wxVERTICAL);
 
         auto transactionForm = new AddModelForm(transactionDialog, "Transaction");
@@ -196,18 +221,22 @@ private:
 
         transactionDialog->SetSizer(transactionSizer);
         transactionDialog->Centre();
+        transactionDialog->Fit();
+        transactionDialog->Layout();
         transactionDialog->ShowModal();
     }
 
     void onAddCategoryButtonClicked(wxCommandEvent &event)
     {
-        wxDialog *categoryDialog = new wxDialog(this, wxID_ANY, "Add Category", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        wxDialog *categoryDialog = new wxDialog(this, wxID_ANY, "Add Category", wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE);
         wxBoxSizer *categorySizer = new wxBoxSizer(wxVERTICAL);
 
         auto categoryForm = new AddModelForm(categoryDialog, "Category");
         categorySizer->Add(categoryForm, 1, wxEXPAND | wxALL, 5);
 
         categoryDialog->SetSizer(categorySizer);
+        categoryDialog->Fit();
+        categoryDialog->Layout();
         categoryDialog->Centre();
         categoryDialog->ShowModal();
         updateCategories();

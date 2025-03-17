@@ -5,6 +5,12 @@
 #include <curl/curl.h>
 #include <wx/wx.h>
 #include <app_config.hpp>
+#include <cpr/cpr.h>
+#include <crow.h>
+#include <thread>
+#include <atomic>
+#include <chrono>
+#include <future>
 
 using nlohmann::json;
 
@@ -19,6 +25,8 @@ public:
         static Upstox instance;
         return instance;
     }
+
+    bool isActive() { return _active; }
 
     json getProduct(const std::string &symbol)
     {
@@ -64,29 +72,114 @@ public:
 private:
     app_config &_config = app_config::getInstance();
 
-    Upstox()
-    {
-        _access_token = _config.getUpstoxAccessToken();
-        if (_access_token.empty())
-        {
-            wxDialog updialog(NULL, wxID_ANY, "Enter upstox access token ", wxDefaultPosition, wxSize(300, 150));
-            wxTextCtrl *uptextCtrl = new wxTextCtrl(&updialog, wxID_ANY, _access_token, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
-            wxButton *upokButton = new wxButton(&updialog, wxID_OK, "OK", wxDefaultPosition, wxDefaultSize);
-            wxButton *upcancelButton = new wxButton(&updialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxDefaultSize);
-            wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-            sizer->Add(uptextCtrl, 0, wxALL | wxEXPAND, 5);
-            sizer->Add(upokButton, 0, wxALL | wxALIGN_CENTER, 5);
-            sizer->Add(upcancelButton, 0, wxALL | wxALIGN_CENTER, 5);
-            updialog.SetSizer(sizer);
-            updialog.Fit();
-            updialog.ShowModal();
-            _access_token = uptextCtrl->GetValue().ToStdString();
-            _config.setUpstoxAccessToken(_access_token);
-            _config.save();
-        }
+    std::string _access_token;
+    std::string _base_url = "https://api-v2.upstox.com"; // Replace with actual API base URL
+    std::string _auth_code;
+    bool _active = false;
+
+    bool checkAccessToken() {
+        cpr::Response response = cpr::Get(cpr::Url{_base_url + "/portfolio/long-term-holdings"}, cpr::Header{{"Authorization", "Bearer " + _access_token}});
+        return response.status_code == 401;
     }
 
-    std::string _access_token;
+    std::atomic<bool> auth_received{false};  // Shared flag to stop the server
+
+    void startLocalServer() {
+        crow::SimpleApp app;
+    
+        CROW_ROUTE(app, "/callback")
+        ([&](const crow::request& req) {
+            auto query_params = crow::query_string(req.url_params);
+            if (query_params.get("code")) {
+                _auth_code = query_params.get("code");
+                auth_received.store(true);
+                return "Authorization successful! You can close this window.";
+            }
+            return "Failed to retrieve authorization code.";
+        });
+    
+        std::thread server_thread([&]() {
+            app.port(8080).multithreaded().run();
+        });
+    
+        while (!auth_received.load()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    
+        app.stop();
+        server_thread.join();
+    }
+
+    std::string getAuthorizationCode() {
+        std::string auth_url = _base_url + "/login/authorization/dialog?client_id=a373377f-1b34-40f7-923c-0f23f0fec7dd&redirect_uri=http://localhost:8080/callback";
+        std::string command;
+        #ifdef _WIN32
+            command = "start \"\" \"" + auth_url + "\"";  // Windows needs extra quoting
+        #elif __APPLE__
+            command = "open \"" + auth_url + "\"";  // macOS
+        #else
+            command = "xdg-open \"" + auth_url + "\"";  // Linux
+        #endif
+    
+        system(command.c_str());
+        startLocalServer();
+        return _auth_code;
+    }
+    
+    std::string requestNewAccessToken(const std::string& code) {
+        cpr::Response response = cpr::Post(
+            cpr::Url{_base_url + "/login/authorization/token"},
+            cpr::Payload{
+                {"client_id", "a373377f-1b34-40f7-923c-0f23f0fec7dd"},
+                {"client_secret", "hwm3xojo9h"},
+                {"code", code},
+                {"redirect_uri", "http://localhost:8080/callback"},
+                {"grant_type", "authorization_code"}
+            },
+            cpr::Header{{"Content-Type", "application/x-www-form-urlencoded"}} 
+        );
+    
+        if (response.status_code == 200) {
+            try {
+                json jsonResponse = json::parse(response.text);
+                if (jsonResponse.contains("access_token")) {
+                    return jsonResponse["access_token"].get<std::string>();
+                } else {
+                    std::cerr << "Error: No access_token found in response." << std::endl;
+                }
+            } catch (json::parse_error& e) {
+                std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+            }
+        } else {
+            std::cerr << "Failed to get access token! HTTP Code: " << response.status_code << std::endl;
+            std::cerr << "Response: " << response.text << std::endl;
+        }
+    
+        return "";
+    }
+    
+
+    Upstox() {
+        _access_token = _config.getUpstoxAccessToken();
+
+        if (_access_token.empty() || checkAccessToken()) {
+
+            std::string _auth_code = getAuthorizationCode();
+            if (!_auth_code.empty()) {
+                std::string new_token = requestNewAccessToken(_auth_code);
+                if (!new_token.empty()) {
+                    _config.setUpstoxAccessToken(new_token);
+                    _config.save();
+                    _access_token = new_token;
+                    _active = true;
+                }
+            }
+        }
+        else{
+            _active = true;
+        }
+
+    }
 
     static size_t writeCallback(void *contents, size_t size, size_t nmemb, std::string *output)
     {

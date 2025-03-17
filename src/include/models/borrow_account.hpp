@@ -10,8 +10,8 @@ class BorrowAccount : public Account
 public:
     BorrowAccount()
     {
-        _background_color = wxColour(58, 80, 107);
-        _foreground_color = wxColour(235, 235, 235);
+        _background_color = wxColour(231, 212, 157);
+        _foreground_color = wxColour(61, 61, 61);
     }
 
     std::string getID() const override
@@ -24,7 +24,9 @@ public:
         return "Borrow Account";
     }
 
-    double portfolioValue() const override { return -_borrowed_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Borrowed Amount", _borrowed_amount}; }
+
+    bool isDebtAccount() const override { return true; }
 
     json toJson() const override
     {
@@ -72,7 +74,7 @@ public:
         }
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Borrower", "string"},
@@ -81,7 +83,7 @@ public:
             {"Due Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},

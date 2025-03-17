@@ -1,2 +1,2 @@
-IDI_APPICON ICON "fm.ico"
+IDI_APPICON ICON "resources/FinanceManager.ico"
 #include "wx/msw/wx.rc"

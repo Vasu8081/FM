@@ -10,7 +10,7 @@ class GiveAccount : public Account
 public:
     GiveAccount()
     {
-        _background_color = wxColour(90, 100, 90);
+        _background_color = wxColour(123, 126, 117);
         _foreground_color = wxColour(235, 245, 235);
     }
 
@@ -24,7 +24,9 @@ public:
         return "Give Account";
     }
 
-    double portfolioValue() const override { return _given_amount; }
+    std::pair<std::string, double> portfolioValue() const override { return {"Lended Amount", _given_amount}; }
+
+    bool isSavingsAccount() const override { return true; }
 
     json toJson() const override
     {
@@ -69,7 +71,7 @@ public:
         }
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Given To", "string"},
@@ -77,7 +79,7 @@ public:
             {"Due Date", "date"}};
     }
 
-    std::unordered_map<std::string, std::string> displayFormFields() const override
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const override
     {
         return {
             {"header", _name},

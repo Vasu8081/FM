@@ -7,6 +7,7 @@
 #include <memory>
 #include <unordered_map>
 #include <json.hpp>
+#include <wx/colour.h>
 
 class Category : public Model
 {
@@ -16,13 +17,29 @@ public:
         spends.assign(12, 0.0);
     }
 
+    wxColour getBackgroundColor() const
+    {
+        return wxColour(206, 196, 186);
+    }
+
+    wxColour getForegroundColor() const
+    {
+        return wxColour(61, 61, 61);
+    }
+
     virtual ~Category() = default;
 
     std::string getID() const { return "CAT." + _name; };
 
+    std::string getType() const override
+    {
+        return "Category";
+    }
+
     nlohmann::json toJson() const override
     {
         nlohmann::json j = {
+            {"ID", getID()},
             {"Name", _name},
             {"Description", _description},
             {"Monthly Budget", _monthly_budget},
@@ -40,13 +57,35 @@ public:
             _monthly_budget = j.at("Monthly Budget").get<double>();
     }
 
-    std::unordered_map<std::string, std::string> inputFormFields() const override
+    std::vector<std::pair<std::string, std::string>> inputFormFields() const override
     {
         return {
             {"Name", "string"},
             {"Description", "string"},
             {"Monthly Budget", "double"}};
     }
+
+    std::vector<std::pair<std::string, std::string>> displayFormFields() const
+    {
+        return {
+            {"header", _name},
+            {"Description", _description},
+            {"Monthly Budget", Formatter::Amount(_monthly_budget)},
+            {"Spent This Month", Formatter::Amount(spends[0])},
+            {"Spent Last Month", Formatter::Amount(spends[1])},
+            {"Average Last 3 Months", Formatter::Amount(calculateAverage(3))}};
+    }
+
+    std::set<std::string> boldFormFields() const
+    {
+        return {"header", "Description", "Monthly Budget"};
+    }
+
+    std::unordered_map<std::string, wxColour> overrideFormColors() const
+    {
+        return {{"header", wxColour(0, 0, 255)}};
+    }
+
 
     // Getters
     std::string getName() const { return _name; }
@@ -71,6 +110,7 @@ public:
         {
             spends[monthOffset] += amount;
         }
+        notifyObservers();
     }
 
 private:
