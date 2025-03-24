@@ -72,6 +72,7 @@ public:
     }
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override {
+        return {};
         return {
             {"Property Name", wxColour(235, 245, 235)},
             {"Bought Value", wxColour(235, 245, 235)}

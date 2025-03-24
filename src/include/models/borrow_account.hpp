@@ -98,6 +98,7 @@ public:
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override
     {
+        return {};
         return {
             {"Total Borrowed Amount", wxColour(235, 170, 235)}};
     }

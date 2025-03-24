@@ -78,6 +78,7 @@ public:
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override
     {
+        return {};
         return {
             {"Balance", wxColour(235, 170, 235)}};
     }

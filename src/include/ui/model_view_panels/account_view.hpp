@@ -184,65 +184,87 @@ protected:
         auto to_transactions = model->getToTransactions();
         auto transactions = from_transactions;
         transactions.insert(transactions.end(), to_transactions.begin(), to_transactions.end());
-
+    
         std::sort(transactions.begin(), transactions.end(), [](std::shared_ptr<Transaction> a, std::shared_ptr<Transaction> b)
                   { return a->getDate() > b->getDate(); });
-        if (transactions.size() <= 0)
+    
+        if (transactions.empty())
         {
             wxMessageBox("No transactions found");
             return;
         }
-        auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(400, 600), wxDEFAULT_DIALOG_STYLE);
-        auto sizer = new wxBoxSizer(wxVERTICAL);
-
-        for (auto &t : transactions)
+    
+        auto dialog = new wxDialog(this, wxID_ANY, "Transactions", wxDefaultPosition, wxSize(500, 600), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+        auto mainSizer = new wxBoxSizer(wxVERTICAL);
+    
+        // Scrolled window
+        wxScrolledWindow* scrolledWindow = new wxScrolledWindow(dialog, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL);
+        scrolledWindow->SetScrollRate(5, 5);
+        auto scrolledSizer = new wxBoxSizer(wxVERTICAL);
+    
+        for (auto& t : transactions)
         {
-            wxBoxSizer *transactionSizer = new wxBoxSizer(wxHORIZONTAL);
+
+            wxPanel* rowPanel = new wxPanel(scrolledWindow, wxID_ANY);
+            wxBoxSizer* transactionSizer = new wxBoxSizer(wxHORIZONTAL);
+            rowPanel->SetSizer(transactionSizer);
 
             bool isOutgoing = (t->getFromAccount() && t->getFromAccount()->getID() == model->getID());
             wxBitmap transactionIcon = isOutgoing ? _icon.get(wxART_CALL_MADE) : _icon.get(wxART_CALL_RECEIVED);
 
+            // Soft colors
+            wxColour softRed(255, 230, 230);
+            wxColour softGreen(230, 255, 230);
+            rowPanel->SetBackgroundColour(isOutgoing ? softRed : softGreen);
+
             wxBitmap forwardIcon = _icon.get(wxART_ARROW_FORWARD);
             wxBitmap rupeeIcon = _icon.get(wxART_CURRENCY_RUPEE);
             wxBitmap categoryIcon = _icon.get(wxART_CATEGORY);
-
+    
             std::string fromAccount = t->getFromAccount() ? t->getFromAccount()->getName() : "External";
             std::string toAccount = t->getToAccount() ? t->getToAccount()->getName() : "External";
             std::string category = t->getCategory() ? t->getCategory()->getName() : "None";
             std::string amount = Formatter::Amount(t->getAmount());
             std::string date = t->getDate().FormatISODate().ToStdString();
-
-            wxStaticBitmap *transactionBitmap = new wxStaticBitmap(dialog, wxID_ANY, transactionIcon);
-            wxStaticText *fromText = new wxStaticText(dialog, wxID_ANY, fromAccount);
-            wxStaticBitmap *forwardBitmap = new wxStaticBitmap(dialog, wxID_ANY, forwardIcon);
-            wxStaticText *toText = new wxStaticText(dialog, wxID_ANY, toAccount);
-            wxStaticBitmap *rupeeBitmap = new wxStaticBitmap(dialog, wxID_ANY, rupeeIcon);
-            wxStaticText *amountText = new wxStaticText(dialog, wxID_ANY, amount);
-            wxStaticBitmap *categoryBitmap = new wxStaticBitmap(dialog, wxID_ANY, categoryIcon);
-            wxStaticText *categoryText = new wxStaticText(dialog, wxID_ANY, category);
-            wxStaticText *dateText = new wxStaticText(dialog, wxID_ANY, date);
-
+    
+            wxStaticBitmap* transactionBitmap = new wxStaticBitmap(rowPanel, wxID_ANY, transactionIcon);
+            wxStaticText* fromText = new wxStaticText(rowPanel, wxID_ANY, fromAccount);
+            wxStaticBitmap* forwardBitmap = new wxStaticBitmap(rowPanel, wxID_ANY, forwardIcon);
+            wxStaticText* toText = new wxStaticText(rowPanel, wxID_ANY, toAccount);
+            wxStaticBitmap* rupeeBitmap = new wxStaticBitmap(rowPanel, wxID_ANY, rupeeIcon);
+            wxStaticText* amountText = new wxStaticText(rowPanel, wxID_ANY, amount);
+            wxStaticBitmap* categoryBitmap = new wxStaticBitmap(rowPanel, wxID_ANY, categoryIcon);
+            wxStaticText* categoryText = new wxStaticText(rowPanel, wxID_ANY, category);
+            wxStaticText* dateText = new wxStaticText(rowPanel, wxID_ANY, date);
+    
+            // Add controls to sizer
             transactionSizer->Add(transactionBitmap, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
-
-            transactionSizer->Add(dateText, 0, wxALIGN_CENTER_VERTICAL);
-
+            transactionSizer->Add(dateText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
             transactionSizer->Add(categoryBitmap, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
             transactionSizer->Add(categoryText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
-
             transactionSizer->Add(fromText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
             transactionSizer->Add(forwardBitmap, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
             transactionSizer->Add(toText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
             transactionSizer->Add(rupeeBitmap, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
             transactionSizer->Add(amountText, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 10);
 
-            sizer->Add(transactionSizer, 0, wxEXPAND | wxALL, 5);
+            // Add panel to scrolled sizer
+            scrolledSizer->Add(rowPanel, 0, wxEXPAND | wxALL, 5);
         }
-
-        dialog->SetSizerAndFit(sizer);
-        dialog->Layout();
+    
+        scrolledWindow->SetSizer(scrolledSizer);
+        scrolledSizer->FitInside(scrolledWindow);
+        scrolledWindow->Layout();
+        
+        mainSizer->Add(scrolledWindow, 1, wxEXPAND | wxALL, 10);
+        dialog->SetSizer(mainSizer);
+        dialog->SetMinSize(wxSize(500, 600)); // Predefined size
+        dialog->SetSize(wxSize(500, 600));    // Optional: actually applies it too
+        
         dialog->Centre();
         dialog->ShowModal();
     }
+    
 
     void onHiddenValues(wxCommandEvent &event){
         _show_hidden_values = !_show_hidden_values;

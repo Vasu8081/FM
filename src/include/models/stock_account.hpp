@@ -116,6 +116,7 @@ public:
 
     std::unordered_map<std::string, wxColour> overrideFormColors() const override
     {
+        return {};
         if(!_product.contains("data")){
             return {
                 {"Current PnL", wxColour(219, 68, 55)},
