@@ -1,0 +1,7 @@
+C:/Users/vasud/Documents/FM/build/CMakeFiles/FinanceManager.dir
+C:/Users/vasud/Documents/FM/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/vasud/Documents/FM/build/CMakeFiles/ZERO_CHECK.dir
+C:/Users/vasud/Documents/FM/build/src/icons/CMakeFiles/icons.dir
+C:/Users/vasud/Documents/FM/build/src/cloud_storage/CMakeFiles/cloud_storage.dir
+C:/Users/vasud/Documents/FM/build/src/models/CMakeFiles/models.dir
+C:/Users/vasud/Documents/FM/build/src/ui/CMakeFiles/ui.dir
