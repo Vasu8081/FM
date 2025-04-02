@@ -2,25 +2,25 @@ cmake_minimum_required(VERSION 3.10)
 project(FinanceManager)
 
 set(CMAKE_CXX_STANDARD 20)
+cmake_policy(SET CMP0074 NEW)
+add_compile_options(/utf-8 /bigobj)
 
-# Find wxWidgets
+
+
 find_package(wxWidgets REQUIRED COMPONENTS core base aui)
 find_package(ZLIB REQUIRED)
 find_package(CURL REQUIRED)
 find_package(cpr REQUIRED)
-if (NOT wxWidgets_FOUND)
-    message(FATAL_ERROR "wxWidgets not found. Please install wxWidgets and try again.")
-endif()
+
 
 include(${wxWidgets_USE_FILE})
-
 include_directories(
     ${CMAKE_SOURCE_DIR}/libraries/json/include
+    ${CMAKE_SOURCE_DIR}/libraries/asio/include
+    ${CMAKE_SOURCE_DIR}/libraries/crow/include
     ${wxWidgets_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/src/include
     ${CMAKE_SOURCE_DIR}/libraries/cpr/include
-    ${CMAKE_SOURCE_DIR}/libraries/asio/asio/include
-    ${CMAKE_SOURCE_DIR}/libraries/Crow/include
 )
 
 add_subdirectory(src)

@@ -277,8 +277,10 @@ bool onedrive::isLocalFileNewer(const std::string &localFile, const std::string 
 
     auto lastModified = fs::last_write_time(localFile);
     wxDateTime localTime;
+    auto sysTime = std::chrono::clock_cast<std::chrono::system_clock>(lastModified);
     localTime.Set((time_t)std::chrono::duration_cast<std::chrono::seconds>(
-        std::chrono::file_clock::to_sys(lastModified).time_since_epoch()).count());
+        sysTime.time_since_epoch()).count());
+    
 
     wxDateTime serverTime;
     serverTime.ParseISOCombined(serverTimestamp, 'T');
