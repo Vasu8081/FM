@@ -214,6 +214,8 @@ bool onedrive::downloadFile(const std::string &oneDrivePath, const std::string &
 {
     std::string url = "https://graph.microsoft.com/v1.0/me/drive/root:/" + oneDrivePath + ":/content";
 
+    std::filesystem::create_directories(std::filesystem::path(localPath).parent_path());
+
     FILE *file = fopen(localPath.c_str(), "wb");
     if (!file)
     {
@@ -363,7 +365,7 @@ void onedrive::syncFiles()
     
     for (const auto &file : files)
     {
-        std::string localPath = _config.getAppDataPath().ToStdString()+"/" + file;
+        std::string localPath = _config.getUserFolderPath().ToStdString()+"/" + file;
         std::string serverPath = "FinanceManager/" + file;
         
         std::string serverTimestamp = getServerTimestamp(serverPath);
