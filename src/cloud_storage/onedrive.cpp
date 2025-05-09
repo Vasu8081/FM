@@ -216,7 +216,12 @@ bool onedrive::downloadFile(const std::string &oneDrivePath, const std::string &
 
     std::filesystem::create_directories(std::filesystem::path(localPath).parent_path());
 
-    FILE *file = fopen(localPath.c_str(), "wb");
+    FILE *file = nullptr;
+    if (fopen_s(&file, localPath.c_str(), "wb") != 0 || !file)
+    {
+        std::cerr << "Error: Could not open file for writing: " << localPath << std::endl;
+        return false;
+    }
     if (!file)
     {
         std::cerr << "Error: Could not open file for writing: " << localPath << std::endl;
