@@ -282,7 +282,7 @@ bool onedrive::isLocalFileNewer(const std::string &localFile, const std::string 
     auto sysTime = std::chrono::clock_cast<std::chrono::system_clock>(lastModified);
     localTime.Set((time_t)std::chrono::duration_cast<std::chrono::seconds>(
         sysTime.time_since_epoch()).count());
-    
+
 
     wxDateTime serverTime;
     serverTime.ParseISOCombined(serverTimestamp, 'T');
@@ -310,11 +310,11 @@ std::string onedrive::getServerTimestamp(const std::string &serverPath)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
     CURLcode res = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-    curl_slist_free_all(headers);
     long http_code = 0;
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
-
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+    
     if (res != CURLE_OK)
         return "";
 
