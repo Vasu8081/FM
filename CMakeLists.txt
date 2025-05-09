@@ -12,14 +12,6 @@ add_compile_options(/utf-8 /bigobj)
 
 find_package(wxWidgets REQUIRED COMPONENTS core base aui)
 find_package(ZLIB REQUIRED)
-
-# set(CURL_USE_LIBIDN2 OFF CACHE BOOL "" FORCE)
-# set(CURL_USE_LIBSSH2 OFF CACHE BOOL "" FORCE)
-# set(CURL_USE_LIBPSL OFF CACHE BOOL "" FORCE)
-# set(USE_NGHTTP2 OFF CACHE BOOL "" FORCE)
-
-# add_subdirectory(libraries/curl)
-
 find_package(Sodium REQUIRED)
 
 
@@ -40,6 +32,7 @@ include_directories(
     ${SODIUM_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/src/include
     ${CMAKE_SOURCE_DIR}/libraries/cpr/include
+    ${CMAKE_BINARY_DIR}/libraries/cpr/cpr_generated_includes
 )
 
 add_subdirectory(src)
