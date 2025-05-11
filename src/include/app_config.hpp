@@ -176,72 +176,84 @@ private:
             std::cerr << "Error parsing JSON: " << e.what() << std::endl;
         }
     
-        wxDialog dialog(nullptr, wxID_ANY, "Login Dialog", wxDefaultPosition, wxSize(300, 200));
-        
-        wxTextCtrl *username_input = new wxTextCtrl(&dialog, wxID_ANY, "", wxDefaultPosition, wxSize(200, 25));
-        wxTextCtrl *password_input = new wxTextCtrl(&dialog, wxID_ANY, "", wxDefaultPosition, wxSize(200, 25), wxTE_PASSWORD);
-        
-        wxButton *login_button = new wxButton(&dialog, wxID_OK, "Login", wxDefaultPosition, wxSize(100, 25));
-        wxButton *cancel_button = new wxButton(&dialog, wxID_CANCEL, "Cancel", wxDefaultPosition, wxSize(100, 25));
-        wxButton *register_button = new wxButton(&dialog, wxID_ANY, "Register", wxDefaultPosition, wxSize(100, 25)); // ✅ Fixed Pointer Issue
-    
-        register_button->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event) {
-            std::string username = username_input->GetValue().ToStdString();
-            std::string password = password_input->GetValue().ToStdString();
-            
-            auto user_config_ptr = std::make_shared<user_config>(username);
-            if (user_config_ptr->createUser(username, password)) // Only update if creation succeeds
-            {
-                _current_user_config = user_config_ptr; // ✅ Use shared_ptr instead of copying
-                _user_configs[username] = user_config_ptr;
-                save();
-                dialog.EndModal(wxID_OK);
-            }
-            else
-            {
-                wxMessageBox("User registration failed", "Error", wxOK | wxICON_ERROR, &dialog);
-            }
-        });
-    
-        login_button->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event) {
-            std::string username = username_input->GetValue().ToStdString();
-            std::string password = password_input->GetValue().ToStdString();
-            
+        wxDialog dialog(nullptr, wxID_ANY, "Login", wxDefaultPosition, wxSize(320, 200), wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER);
+
+        // Main vertical sizer
+        wxBoxSizer* mainSizer = new wxBoxSizer(wxVERTICAL);
+
+        // Username field
+        wxBoxSizer* userSizer = new wxBoxSizer(wxHORIZONTAL);
+        wxStaticText* userLabel = new wxStaticText(&dialog, wxID_ANY, "Username:", wxDefaultPosition, wxSize(70, -1));
+        wxTextCtrl* userInput = new wxTextCtrl(&dialog, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1));
+        userSizer->Add(userLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+        userSizer->Add(userInput, 1, wxALL | wxEXPAND, 5);
+        mainSizer->Add(userSizer, 0, wxEXPAND);
+
+        // Password field
+        wxBoxSizer* passSizer = new wxBoxSizer(wxHORIZONTAL);
+        wxStaticText* passLabel = new wxStaticText(&dialog, wxID_ANY, "Password:", wxDefaultPosition, wxSize(70, -1));
+        wxTextCtrl* passInput = new wxTextCtrl(&dialog, wxID_ANY, "", wxDefaultPosition, wxSize(200, -1), wxTE_PASSWORD);
+        passSizer->Add(passLabel, 0, wxALL | wxALIGN_CENTER_VERTICAL, 5);
+        passSizer->Add(passInput, 1, wxALL | wxEXPAND, 5);
+        mainSizer->Add(passSizer, 0, wxEXPAND);
+
+        // Buttons
+        wxBoxSizer* buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+        wxButton* loginBtn = new wxButton(&dialog, wxID_ANY, "Login");
+        wxButton* cancelBtn = new wxButton(&dialog, wxID_CANCEL, "Cancel");
+        wxButton* registerBtn = new wxButton(&dialog, wxID_ANY, "Register");
+        buttonSizer->AddStretchSpacer(1);
+        buttonSizer->Add(loginBtn, 0, wxALL, 5);
+        buttonSizer->Add(cancelBtn, 0, wxALL, 5);
+        buttonSizer->Add(registerBtn, 0, wxALL, 5);
+        buttonSizer->AddStretchSpacer(1);
+        mainSizer->Add(buttonSizer, 0, wxEXPAND | wxTOP | wxBOTTOM, 10);
+
+        dialog.SetSizerAndFit(mainSizer);
+        dialog.CentreOnScreen();
+        userInput->SetFocus();
+
+        // Event bindings
+        loginBtn->Bind(wxEVT_BUTTON, [&](wxCommandEvent&) {
+            std::string username = userInput->GetValue().ToStdString();
+            std::string password = passInput->GetValue().ToStdString();
+
             auto it = _user_configs.find(username);
-            if (it != _user_configs.end())
-            {
-                if (it->second->verifyLogin(password)) // ✅ Fixed missing parameter
-                {
-                    _current_user_config = it->second; // ✅ Use shared_ptr assignment
+            if (it != _user_configs.end()) {
+                if (it->second->verifyLogin(password)) {
+                    _current_user_config = it->second;
                     save();
                     dialog.EndModal(wxID_OK);
-                }
-                else
-                {
+                } else {
                     wxMessageBox("Invalid password", "Error", wxOK | wxICON_ERROR, &dialog);
                 }
-            }
-            else
-            {
+            } else {
                 wxMessageBox("User not found", "Error", wxOK | wxICON_ERROR, &dialog);
             }
         });
-    
-        cancel_button->Bind(wxEVT_BUTTON, [&](wxCommandEvent &event) {
+
+        registerBtn->Bind(wxEVT_BUTTON, [&](wxCommandEvent&) {
+            std::string username = userInput->GetValue().ToStdString();
+            std::string password = passInput->GetValue().ToStdString();
+
+            auto user_config_ptr = std::make_shared<user_config>(username);
+            if (user_config_ptr->createUser(username, password)) {
+                _current_user_config = user_config_ptr;
+                _user_configs[username] = user_config_ptr;
+                save();
+                dialog.EndModal(wxID_OK);
+            } else {
+                wxMessageBox("User registration failed", "Error", wxOK | wxICON_ERROR, &dialog);
+            }
+        });
+
+        cancelBtn->Bind(wxEVT_BUTTON, [&](wxCommandEvent&) {
             dialog.EndModal(wxID_CANCEL);
         });
-    
-        wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-        sizer->Add(username_input, 0, wxALL | wxEXPAND, 5);
-        sizer->Add(password_input, 0, wxALL | wxEXPAND, 5);
-        sizer->Add(login_button, 0, wxALL | wxALIGN_CENTER, 5);
-        sizer->Add(cancel_button, 0, wxALL | wxALIGN_CENTER, 5);
-        sizer->Add(register_button, 0, wxALL | wxALIGN_CENTER, 5);
-    
-        dialog.SetSizer(sizer);
-        dialog.Layout();
-        dialog.Centre(wxBOTH);
+
+        // Show the dialog modally
         dialog.ShowModal();
+
     }
     
     // Private constructor ensures only one instance
