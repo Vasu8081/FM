@@ -126,16 +126,16 @@ public:
     }
 
 private:
-    double _pre_emi; // how much we paid before the EMI started
-    double _loan_amount; // tells total how much loan we took
-    double _roi; // rate of interest
-    double _tenure; // how many months we have to pay
+    double _pre_emi = 0; // how much we paid before the EMI started
+    double _loan_amount = 0; // tells total how much loan we took
+    double _roi = 0; // rate of interest
+    double _tenure = 0; // how many months we have to pay
     wxDateTime _start_date; // when we took the loan
     wxDateTime _emi_cal_date; // when we have to calculate the EMI
     wxDateTime _emi_date; // when we have to pay the EMI
-    double _emi; // how much we have to pay every month
-    double _principal_left; // how much principal is left
-    double _interest_paid; // how much interest we have paid
+    double _emi = 0; // how much we have to pay every month
+    double _principal_left = 0; // how much principal is left
+    double _interest_paid = 0; // how much interest we have paid
 };
 
 #endif // LOAN_ACCOUNT_HPP
